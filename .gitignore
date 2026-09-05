@@ -1,0 +1,20 @@
+# Maven
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Angular / Node (futur module frontend)
+node_modules/
+dist/
+.angular/
+
+# OS
+.DS_Store
+Thumbs.db
