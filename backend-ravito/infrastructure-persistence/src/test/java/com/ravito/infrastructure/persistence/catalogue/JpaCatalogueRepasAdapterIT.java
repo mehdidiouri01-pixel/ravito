@@ -71,15 +71,22 @@ class JpaCatalogueRepasAdapterIT {
 
     @Test
     void ne_retrouve_que_les_repas_du_type_et_du_style_demandes() {
-        repasJpaRepository.save(uneEntite(TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.GOURMAND, NiveauCuisine.DEBUTANT));
+        // Le catalogue seme par Flyway contient deja des repas HEALTHY/GOURMAND
+        // (voir V2/V3) : on ne peut pas supposer un total exact, seulement que
+        // notre fixture apparait bien, et qu'un GOURMAND ou un DEJEUNER n'apparait
+        // jamais dans une recherche PETIT_DEJEUNER/HEALTHY.
+        RepasEntity gourmand = repasJpaRepository.save(
+                uneEntite(TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.GOURMAND, NiveauCuisine.DEBUTANT));
         RepasEntity attendue = repasJpaRepository.save(
                 uneEntite(TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.HEALTHY, NiveauCuisine.DEBUTANT));
-        repasJpaRepository.save(uneEntite(TypeRepas.DEJEUNER, StyleAlimentaire.HEALTHY, NiveauCuisine.DEBUTANT));
+        RepasEntity dejeuner = repasJpaRepository.save(
+                uneEntite(TypeRepas.DEJEUNER, StyleAlimentaire.HEALTHY, NiveauCuisine.DEBUTANT));
 
         List<Repas> resultat = adapter.rechercherParTypeEtStyle(TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.HEALTHY);
 
+        assertThat(resultat).extracting(Repas::id).contains(new RepasId(attendue.getId()));
         assertThat(resultat).extracting(Repas::id)
-                .containsExactly(new RepasId(attendue.getId()));
+                .doesNotContain(new RepasId(gourmand.getId()), new RepasId(dejeuner.getId()));
     }
 
     private static RepasEntity uneEntite(TypeRepas type, StyleAlimentaire style, NiveauCuisine niveauRequis) {

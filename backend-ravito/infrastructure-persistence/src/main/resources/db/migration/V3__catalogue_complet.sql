@@ -1,0 +1,422 @@
+-- Complete le catalogue a 15 petits-dejeuners + 15 dejeuners minimum pour
+-- chacun des 3 styles (V2 n'avait que 5+5 en NORMAL/DEBUTANT). Repartition
+-- volontaire par style/type : 10 DEBUTANT + 5 CONFIRME — largement au-dessus
+-- du minimum de 5 pour un profil DEBUTANT (regle hierarchique, voir
+-- NiveauCuisine.estAuMoinsAussiConfirmeQue), et de quoi donner plus de choix
+-- a un profil CONFIRME.
+
+-- =====================================================================
+-- NORMAL : 10 petits-dejeuners + 10 dejeuners de plus (5+5 deja en V2)
+-- =====================================================================
+
+INSERT INTO repas (id, nom, type, style, niveau_requis) VALUES
+    ('11111111-1111-1111-1111-111111111106', 'Croissant beurre', 'PETIT_DEJEUNER', 'NORMAL', 'DEBUTANT'),
+    ('11111111-1111-1111-1111-111111111107', 'Pain perdu', 'PETIT_DEJEUNER', 'NORMAL', 'DEBUTANT'),
+    ('11111111-1111-1111-1111-111111111108', 'Crepes au sucre', 'PETIT_DEJEUNER', 'NORMAL', 'DEBUTANT'),
+    ('11111111-1111-1111-1111-111111111109', 'Tartines de fromage', 'PETIT_DEJEUNER', 'NORMAL', 'DEBUTANT'),
+    ('11111111-1111-1111-1111-111111111110', 'Biscottes confiture', 'PETIT_DEJEUNER', 'NORMAL', 'DEBUTANT'),
+    ('11111111-1111-1111-1111-111111111111', 'Chocolat chaud et tartines', 'PETIT_DEJEUNER', 'NORMAL', 'CONFIRME'),
+    ('11111111-1111-1111-1111-111111111112', 'Gaufres sucre', 'PETIT_DEJEUNER', 'NORMAL', 'CONFIRME'),
+    ('11111111-1111-1111-1111-111111111113', 'Brioche beurre', 'PETIT_DEJEUNER', 'NORMAL', 'CONFIRME'),
+    ('11111111-1111-1111-1111-111111111114', 'Muesli classique', 'PETIT_DEJEUNER', 'NORMAL', 'CONFIRME'),
+    ('11111111-1111-1111-1111-111111111115', 'The et tartines de miel', 'PETIT_DEJEUNER', 'NORMAL', 'CONFIRME');
+
+INSERT INTO repas (id, nom, type, style, niveau_requis) VALUES
+    ('11111111-1111-1111-1111-111111111206', 'Pizza jambon', 'DEJEUNER', 'NORMAL', 'DEBUTANT'),
+    ('11111111-1111-1111-1111-111111111207', 'Croque-monsieur', 'DEJEUNER', 'NORMAL', 'DEBUTANT'),
+    ('11111111-1111-1111-1111-111111111208', 'Burger maison', 'DEJEUNER', 'NORMAL', 'DEBUTANT'),
+    ('11111111-1111-1111-1111-111111111209', 'Sandwich jambon beurre', 'DEJEUNER', 'NORMAL', 'DEBUTANT'),
+    ('11111111-1111-1111-1111-111111111210', 'Omelette et salade', 'DEJEUNER', 'NORMAL', 'DEBUTANT'),
+    ('11111111-1111-1111-1111-111111111211', 'Quiche lorraine', 'DEJEUNER', 'NORMAL', 'CONFIRME'),
+    ('11111111-1111-1111-1111-111111111212', 'Gratin de pates', 'DEJEUNER', 'NORMAL', 'CONFIRME'),
+    ('11111111-1111-1111-1111-111111111213', 'Poulet roti et pommes de terre', 'DEJEUNER', 'NORMAL', 'CONFIRME'),
+    ('11111111-1111-1111-1111-111111111214', 'Couscous au poulet', 'DEJEUNER', 'NORMAL', 'CONFIRME'),
+    ('11111111-1111-1111-1111-111111111215', 'Hachis parmentier', 'DEJEUNER', 'NORMAL', 'CONFIRME');
+
+INSERT INTO repas_ingredient (repas_id, ingredient_nom, rayon, quantite_valeur, unite) VALUES
+    ('11111111-1111-1111-1111-111111111106', 'croissant', 'BOULANGERIE', 1, 'UNITE'),
+    ('11111111-1111-1111-1111-111111111106', 'beurre', 'CREMERIE', 10, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111107', 'pain', 'BOULANGERIE', 80, 'GRAMME'),
+    ('11111111-1111-1111-1111-111111111107', 'oeufs', 'CREMERIE', 1, 'UNITE'),
+
+    ('11111111-1111-1111-1111-111111111108', 'crepe', 'BOULANGERIE', 2, 'UNITE'),
+    ('11111111-1111-1111-1111-111111111108', 'sucre', 'EPICERIE', 15, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111109', 'pain', 'BOULANGERIE', 70, 'GRAMME'),
+    ('11111111-1111-1111-1111-111111111109', 'fromage rape', 'CREMERIE', 30, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111110', 'biscotte', 'BOULANGERIE', 4, 'UNITE'),
+    ('11111111-1111-1111-1111-111111111110', 'confiture', 'EPICERIE', 30, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111111', 'chocolat en poudre', 'EPICERIE', 20, 'GRAMME'),
+    ('11111111-1111-1111-1111-111111111111', 'pain', 'BOULANGERIE', 60, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111112', 'gaufre', 'BOULANGERIE', 2, 'UNITE'),
+    ('11111111-1111-1111-1111-111111111112', 'sucre', 'EPICERIE', 10, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111113', 'brioche', 'BOULANGERIE', 60, 'GRAMME'),
+    ('11111111-1111-1111-1111-111111111113', 'beurre', 'CREMERIE', 15, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111114', 'cereales', 'EPICERIE', 60, 'GRAMME'),
+    ('11111111-1111-1111-1111-111111111114', 'lait', 'CREMERIE', 200, 'MILLILITRE'),
+
+    ('11111111-1111-1111-1111-111111111115', 'pain', 'BOULANGERIE', 60, 'GRAMME'),
+    ('11111111-1111-1111-1111-111111111115', 'miel', 'EPICERIE', 20, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111206', 'pate a pizza', 'EPICERIE', 1, 'UNITE'),
+    ('11111111-1111-1111-1111-111111111206', 'jambon', 'BOUCHERIE', 3, 'UNITE'),
+
+    ('11111111-1111-1111-1111-111111111207', 'pain de mie', 'BOULANGERIE', 100, 'GRAMME'),
+    ('11111111-1111-1111-1111-111111111207', 'fromage rape', 'CREMERIE', 40, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111208', 'steak hache', 'BOUCHERIE', 150, 'GRAMME'),
+    ('11111111-1111-1111-1111-111111111208', 'pain de mie', 'BOULANGERIE', 80, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111209', 'pain', 'BOULANGERIE', 80, 'GRAMME'),
+    ('11111111-1111-1111-1111-111111111209', 'jambon', 'BOUCHERIE', 2, 'UNITE'),
+
+    ('11111111-1111-1111-1111-111111111210', 'oeufs', 'CREMERIE', 3, 'UNITE'),
+    ('11111111-1111-1111-1111-111111111210', 'salade', 'FRUITS_LEGUMES', 80, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111211', 'oeufs', 'CREMERIE', 3, 'UNITE'),
+    ('11111111-1111-1111-1111-111111111211', 'lardons', 'BOUCHERIE', 100, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111212', 'pates', 'EPICERIE', 150, 'GRAMME'),
+    ('11111111-1111-1111-1111-111111111212', 'creme fraiche', 'CREMERIE', 100, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111213', 'poulet', 'BOUCHERIE', 200, 'GRAMME'),
+    ('11111111-1111-1111-1111-111111111213', 'pommes de terre', 'FRUITS_LEGUMES', 250, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111214', 'semoule', 'EPICERIE', 150, 'GRAMME'),
+    ('11111111-1111-1111-1111-111111111214', 'poulet', 'BOUCHERIE', 150, 'GRAMME'),
+
+    ('11111111-1111-1111-1111-111111111215', 'steak hache', 'BOUCHERIE', 150, 'GRAMME'),
+    ('11111111-1111-1111-1111-111111111215', 'pommes de terre', 'FRUITS_LEGUMES', 200, 'GRAMME');
+
+-- =====================================================================
+-- HEALTHY : 15 petits-dejeuners + 15 dejeuners
+-- =====================================================================
+
+INSERT INTO repas (id, nom, type, style, niveau_requis) VALUES
+    ('22222222-2222-2222-2222-222222222101', 'Porridge flocons d''avoine et miel', 'PETIT_DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222102', 'Smoothie bowl fruits rouges', 'PETIT_DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222103', 'Pain complet avocat', 'PETIT_DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222104', 'Fromage blanc et fruits rouges', 'PETIT_DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222105', 'Oeufs poches epinards', 'PETIT_DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222106', 'Chia pudding', 'PETIT_DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222107', 'Yaourt grec au miel', 'PETIT_DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222108', 'Smoothie vert banane epinards', 'PETIT_DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222109', 'Tartine houmous concombre', 'PETIT_DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222110', 'Muesli au lait d''amande', 'PETIT_DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222111', 'The et fruits secs', 'PETIT_DEJEUNER', 'HEALTHY', 'CONFIRME'),
+    ('22222222-2222-2222-2222-222222222112', 'Pain complet au miel', 'PETIT_DEJEUNER', 'HEALTHY', 'CONFIRME'),
+    ('22222222-2222-2222-2222-222222222113', 'Salade de fruits', 'PETIT_DEJEUNER', 'HEALTHY', 'CONFIRME'),
+    ('22222222-2222-2222-2222-222222222114', 'Porridge de quinoa', 'PETIT_DEJEUNER', 'HEALTHY', 'CONFIRME'),
+    ('22222222-2222-2222-2222-222222222115', 'Tartine avocat oeuf', 'PETIT_DEJEUNER', 'HEALTHY', 'CONFIRME');
+
+INSERT INTO repas (id, nom, type, style, niveau_requis) VALUES
+    ('22222222-2222-2222-2222-222222222201', 'Salade de quinoa au poulet', 'DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222202', 'Bowl saumon avocat', 'DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222203', 'Poelee de crevettes et brocolis', 'DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222204', 'Soupe de lentilles', 'DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222205', 'Salade de pois chiches', 'DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222206', 'Saumon vapeur brocolis', 'DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222207', 'Riz complet aux legumes', 'DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222208', 'Salade cesar allegee', 'DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222209', 'Taboule de quinoa', 'DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222210', 'Salade concombre thon', 'DEJEUNER', 'HEALTHY', 'DEBUTANT'),
+    ('22222222-2222-2222-2222-222222222211', 'Curry de pois chiches et patate douce', 'DEJEUNER', 'HEALTHY', 'CONFIRME'),
+    ('22222222-2222-2222-2222-222222222212', 'Salade de thon et haricots verts', 'DEJEUNER', 'HEALTHY', 'CONFIRME'),
+    ('22222222-2222-2222-2222-222222222213', 'Wok de crevettes et brocolis', 'DEJEUNER', 'HEALTHY', 'CONFIRME'),
+    ('22222222-2222-2222-2222-222222222214', 'Soupe miso epinards', 'DEJEUNER', 'HEALTHY', 'CONFIRME'),
+    ('22222222-2222-2222-2222-222222222215', 'Poulet grille et patate douce', 'DEJEUNER', 'HEALTHY', 'CONFIRME');
+
+INSERT INTO repas_ingredient (repas_id, ingredient_nom, rayon, quantite_valeur, unite) VALUES
+    ('22222222-2222-2222-2222-222222222101', 'flocons d''avoine', 'EPICERIE', 50, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222101', 'miel', 'EPICERIE', 15, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222102', 'fruits rouges', 'FRUITS_LEGUMES', 100, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222102', 'lait d''amande', 'CREMERIE', 150, 'MILLILITRE'),
+
+    ('22222222-2222-2222-2222-222222222103', 'pain complet', 'BOULANGERIE', 60, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222103', 'avocat', 'FRUITS_LEGUMES', 1, 'UNITE'),
+
+    ('22222222-2222-2222-2222-222222222104', 'fromage blanc', 'CREMERIE', 150, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222104', 'fruits rouges', 'FRUITS_LEGUMES', 50, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222105', 'oeufs', 'CREMERIE', 2, 'UNITE'),
+    ('22222222-2222-2222-2222-222222222105', 'epinards', 'FRUITS_LEGUMES', 80, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222106', 'graines de chia', 'EPICERIE', 30, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222106', 'lait d''amande', 'CREMERIE', 200, 'MILLILITRE'),
+
+    ('22222222-2222-2222-2222-222222222107', 'yaourt', 'CREMERIE', 1, 'UNITE'),
+    ('22222222-2222-2222-2222-222222222107', 'miel', 'EPICERIE', 20, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222108', 'banane', 'FRUITS_LEGUMES', 1, 'UNITE'),
+    ('22222222-2222-2222-2222-222222222108', 'epinards', 'FRUITS_LEGUMES', 50, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222109', 'pain complet', 'BOULANGERIE', 60, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222109', 'houmous', 'EPICERIE', 40, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222110', 'cereales', 'EPICERIE', 50, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222110', 'lait d''amande', 'CREMERIE', 150, 'MILLILITRE'),
+
+    ('22222222-2222-2222-2222-222222222111', 'the', 'EPICERIE', 2, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222111', 'fruits secs', 'FRUITS_LEGUMES', 30, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222112', 'pain complet', 'BOULANGERIE', 60, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222112', 'miel', 'EPICERIE', 20, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222113', 'banane', 'FRUITS_LEGUMES', 1, 'UNITE'),
+    ('22222222-2222-2222-2222-222222222113', 'fruits rouges', 'FRUITS_LEGUMES', 80, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222114', 'quinoa', 'EPICERIE', 50, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222114', 'lait d''amande', 'CREMERIE', 150, 'MILLILITRE'),
+
+    ('22222222-2222-2222-2222-222222222115', 'avocat', 'FRUITS_LEGUMES', 1, 'UNITE'),
+    ('22222222-2222-2222-2222-222222222115', 'oeufs', 'CREMERIE', 1, 'UNITE'),
+
+    ('22222222-2222-2222-2222-222222222201', 'quinoa', 'EPICERIE', 100, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222201', 'poulet', 'BOUCHERIE', 150, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222202', 'saumon', 'POISSONNERIE', 120, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222202', 'avocat', 'FRUITS_LEGUMES', 1, 'UNITE'),
+
+    ('22222222-2222-2222-2222-222222222203', 'crevettes', 'POISSONNERIE', 120, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222203', 'brocolis', 'FRUITS_LEGUMES', 150, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222204', 'lentilles', 'EPICERIE', 150, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222204', 'tomate', 'FRUITS_LEGUMES', 100, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222205', 'pois chiches', 'EPICERIE', 150, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222205', 'tomate', 'FRUITS_LEGUMES', 100, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222206', 'saumon', 'POISSONNERIE', 130, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222206', 'brocolis', 'FRUITS_LEGUMES', 150, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222207', 'riz', 'EPICERIE', 150, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222207', 'brocolis', 'FRUITS_LEGUMES', 100, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222208', 'salade', 'FRUITS_LEGUMES', 100, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222208', 'poulet', 'BOUCHERIE', 120, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222209', 'quinoa', 'EPICERIE', 100, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222209', 'tomate', 'FRUITS_LEGUMES', 80, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222210', 'concombre', 'FRUITS_LEGUMES', 100, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222210', 'thon', 'EPICERIE', 1, 'UNITE'),
+
+    ('22222222-2222-2222-2222-222222222211', 'pois chiches', 'EPICERIE', 150, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222211', 'patate douce', 'FRUITS_LEGUMES', 150, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222212', 'thon', 'EPICERIE', 1, 'UNITE'),
+    ('22222222-2222-2222-2222-222222222212', 'haricots verts', 'FRUITS_LEGUMES', 150, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222213', 'crevettes', 'POISSONNERIE', 130, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222213', 'brocolis', 'FRUITS_LEGUMES', 120, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222214', 'miso', 'EPICERIE', 20, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222214', 'epinards', 'FRUITS_LEGUMES', 60, 'GRAMME'),
+
+    ('22222222-2222-2222-2222-222222222215', 'poulet', 'BOUCHERIE', 150, 'GRAMME'),
+    ('22222222-2222-2222-2222-222222222215', 'patate douce', 'FRUITS_LEGUMES', 150, 'GRAMME');
+
+-- =====================================================================
+-- GOURMAND : 15 petits-dejeuners + 15 dejeuners
+-- =====================================================================
+
+INSERT INTO repas (id, nom, type, style, niveau_requis) VALUES
+    ('33333333-3333-3333-3333-333333333101', 'Pancakes sirop d''erable', 'PETIT_DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333102', 'Chocolatine', 'PETIT_DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333103', 'Pain dore caramel beurre sale', 'PETIT_DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333104', 'Brioche aux pralines', 'PETIT_DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333105', 'Chocolat chaud chantilly', 'PETIT_DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333106', 'Tarte fine aux pommes', 'PETIT_DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333107', 'Viennoiseries assorties', 'PETIT_DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333108', 'Gaufres liegeoises chocolat', 'PETIT_DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333109', 'Oeufs benedicte', 'PETIT_DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333110', 'Brunch complet', 'PETIT_DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333111', 'Crepes suzette', 'PETIT_DEJEUNER', 'GOURMAND', 'CONFIRME'),
+    ('33333333-3333-3333-3333-333333333112', 'Pain perdu caramel', 'PETIT_DEJEUNER', 'GOURMAND', 'CONFIRME'),
+    ('33333333-3333-3333-3333-333333333113', 'Brioche feuilletee', 'PETIT_DEJEUNER', 'GOURMAND', 'CONFIRME'),
+    ('33333333-3333-3333-3333-333333333114', 'Kouign amann', 'PETIT_DEJEUNER', 'GOURMAND', 'CONFIRME'),
+    ('33333333-3333-3333-3333-333333333115', 'Chausson aux pommes', 'PETIT_DEJEUNER', 'GOURMAND', 'CONFIRME');
+
+INSERT INTO repas (id, nom, type, style, niveau_requis) VALUES
+    ('33333333-3333-3333-3333-333333333201', 'Boeuf bourguignon', 'DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333202', 'Magret de canard aux champignons', 'DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333203', 'Risotto aux champignons', 'DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333204', 'Gratin dauphinois et cote de boeuf', 'DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333205', 'Blanquette de veau', 'DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333206', 'Confit de canard et pommes de terre', 'DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333207', 'Tartiflette', 'DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333208', 'Choucroute garnie', 'DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333209', 'Paella', 'DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333210', 'Lasagnes maison', 'DEJEUNER', 'GOURMAND', 'DEBUTANT'),
+    ('33333333-3333-3333-3333-333333333211', 'Raclette', 'DEJEUNER', 'GOURMAND', 'CONFIRME'),
+    ('33333333-3333-3333-3333-333333333212', 'Fondue savoyarde', 'DEJEUNER', 'GOURMAND', 'CONFIRME'),
+    ('33333333-3333-3333-3333-333333333213', 'Filet mignon sauce champignons', 'DEJEUNER', 'GOURMAND', 'CONFIRME'),
+    ('33333333-3333-3333-3333-333333333214', 'Saint-Jacques poelees', 'DEJEUNER', 'GOURMAND', 'CONFIRME'),
+    ('33333333-3333-3333-3333-333333333215', 'Canard a l''orange', 'DEJEUNER', 'GOURMAND', 'CONFIRME');
+
+INSERT INTO repas_ingredient (repas_id, ingredient_nom, rayon, quantite_valeur, unite) VALUES
+    ('33333333-3333-3333-3333-333333333101', 'crepe', 'BOULANGERIE', 3, 'UNITE'),
+    ('33333333-3333-3333-3333-333333333101', 'sirop d''erable', 'EPICERIE', 40, 'MILLILITRE'),
+
+    ('33333333-3333-3333-3333-333333333102', 'pain au chocolat', 'BOULANGERIE', 1, 'UNITE'),
+    ('33333333-3333-3333-3333-333333333102', 'chocolat en poudre', 'EPICERIE', 10, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333103', 'pain', 'BOULANGERIE', 80, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333103', 'caramel beurre sale', 'EPICERIE', 30, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333104', 'brioche', 'BOULANGERIE', 70, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333104', 'pralines roses', 'EPICERIE', 20, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333105', 'chocolat en poudre', 'EPICERIE', 20, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333105', 'chantilly', 'CREMERIE', 30, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333106', 'pate feuilletee', 'EPICERIE', 1, 'UNITE'),
+    ('33333333-3333-3333-3333-333333333106', 'pommes', 'FRUITS_LEGUMES', 2, 'UNITE'),
+
+    ('33333333-3333-3333-3333-333333333107', 'croissant', 'BOULANGERIE', 1, 'UNITE'),
+    ('33333333-3333-3333-3333-333333333107', 'pain au chocolat', 'BOULANGERIE', 1, 'UNITE'),
+
+    ('33333333-3333-3333-3333-333333333108', 'gaufre', 'BOULANGERIE', 2, 'UNITE'),
+    ('33333333-3333-3333-3333-333333333108', 'chocolat en poudre', 'EPICERIE', 20, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333109', 'oeufs', 'CREMERIE', 2, 'UNITE'),
+    ('33333333-3333-3333-3333-333333333109', 'pain de mie', 'BOULANGERIE', 60, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333110', 'oeufs', 'CREMERIE', 2, 'UNITE'),
+    ('33333333-3333-3333-3333-333333333110', 'saumon', 'POISSONNERIE', 80, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333111', 'crepe', 'BOULANGERIE', 3, 'UNITE'),
+    ('33333333-3333-3333-3333-333333333111', 'jus d''orange', 'BOISSONS', 100, 'MILLILITRE'),
+
+    ('33333333-3333-3333-3333-333333333112', 'pain', 'BOULANGERIE', 80, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333112', 'caramel beurre sale', 'EPICERIE', 25, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333113', 'brioche', 'BOULANGERIE', 70, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333113', 'beurre', 'CREMERIE', 15, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333114', 'pate feuilletee', 'EPICERIE', 1, 'UNITE'),
+    ('33333333-3333-3333-3333-333333333114', 'sucre', 'EPICERIE', 20, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333115', 'pate feuilletee', 'EPICERIE', 1, 'UNITE'),
+    ('33333333-3333-3333-3333-333333333115', 'pommes', 'FRUITS_LEGUMES', 1, 'UNITE'),
+
+    ('33333333-3333-3333-3333-333333333201', 'boeuf', 'BOUCHERIE', 200, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333201', 'vin rouge', 'EPICERIE', 150, 'MILLILITRE'),
+
+    ('33333333-3333-3333-3333-333333333202', 'magret de canard', 'BOUCHERIE', 180, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333202', 'champignons', 'FRUITS_LEGUMES', 100, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333203', 'riz arborio', 'EPICERIE', 150, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333203', 'champignons', 'FRUITS_LEGUMES', 120, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333204', 'boeuf', 'BOUCHERIE', 200, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333204', 'pommes de terre', 'FRUITS_LEGUMES', 250, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333205', 'veau', 'BOUCHERIE', 200, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333205', 'creme fraiche', 'CREMERIE', 100, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333206', 'cuisse de canard confite', 'BOUCHERIE', 1, 'UNITE'),
+    ('33333333-3333-3333-3333-333333333206', 'pommes de terre', 'FRUITS_LEGUMES', 200, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333207', 'reblochon', 'CREMERIE', 150, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333207', 'pommes de terre', 'FRUITS_LEGUMES', 300, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333208', 'choucroute', 'FRUITS_LEGUMES', 250, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333208', 'saucisse fumee', 'BOUCHERIE', 150, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333209', 'riz', 'EPICERIE', 150, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333209', 'crevettes', 'POISSONNERIE', 150, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333210', 'pates', 'EPICERIE', 150, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333210', 'boeuf', 'BOUCHERIE', 150, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333211', 'fromage a raclette', 'CREMERIE', 200, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333211', 'pommes de terre', 'FRUITS_LEGUMES', 250, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333212', 'fromage a raclette', 'CREMERIE', 200, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333212', 'pain', 'BOULANGERIE', 100, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333213', 'filet mignon', 'BOUCHERIE', 180, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333213', 'champignons', 'FRUITS_LEGUMES', 100, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333214', 'saint-jacques', 'POISSONNERIE', 150, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333214', 'beurre', 'CREMERIE', 20, 'GRAMME'),
+
+    ('33333333-3333-3333-3333-333333333215', 'magret de canard', 'BOUCHERIE', 180, 'GRAMME'),
+    ('33333333-3333-3333-3333-333333333215', 'jus d''orange', 'BOISSONS', 100, 'MILLILITRE');
+
+-- =====================================================================
+-- Prix moyens des nouveaux ingredients (deja presents en V2 : pain, beurre,
+-- confiture, cereales, lait, yaourt, banane, oeufs, pain au chocolat,
+-- jus d'orange, pates, thon, tomate, riz, poulet, salade, jambon,
+-- steak hache, frites surgelees, soupe — pas reinseres ici).
+-- =====================================================================
+
+INSERT INTO prix_moyen_ingredient (ingredient_nom, unite, prix_unitaire) VALUES
+    -- NORMAL
+    ('croissant', 'UNITE', 0.9000),
+    ('sucre', 'GRAMME', 0.0015),
+    ('crepe', 'UNITE', 0.4000),
+    ('fromage rape', 'GRAMME', 0.0130),
+    ('biscotte', 'UNITE', 0.1000),
+    ('chocolat en poudre', 'GRAMME', 0.0180),
+    ('gaufre', 'UNITE', 0.7000),
+    ('brioche', 'GRAMME', 0.0110),
+    ('miel', 'GRAMME', 0.0150),
+    ('pate a pizza', 'UNITE', 1.2000),
+    ('pain de mie', 'GRAMME', 0.0075),
+    ('lardons', 'GRAMME', 0.0150),
+    ('creme fraiche', 'GRAMME', 0.0090),
+    ('pommes de terre', 'GRAMME', 0.0020),
+    ('semoule', 'GRAMME', 0.0035),
+
+    -- HEALTHY
+    ('flocons d''avoine', 'GRAMME', 0.0060),
+    ('lait d''amande', 'MILLILITRE', 0.0022),
+    ('fruits rouges', 'GRAMME', 0.0180),
+    ('fromage blanc', 'GRAMME', 0.0060),
+    ('avocat', 'UNITE', 0.9000),
+    ('pain complet', 'GRAMME', 0.0090),
+    ('epinards', 'GRAMME', 0.0060),
+    ('graines de chia', 'GRAMME', 0.0400),
+    ('quinoa', 'GRAMME', 0.0090),
+    ('saumon', 'GRAMME', 0.0250),
+    ('brocolis', 'GRAMME', 0.0035),
+    ('lentilles', 'GRAMME', 0.0045),
+    ('pois chiches', 'GRAMME', 0.0040),
+    ('haricots verts', 'GRAMME', 0.0040),
+    ('crevettes', 'GRAMME', 0.0220),
+    ('miso', 'GRAMME', 0.0350),
+    ('patate douce', 'GRAMME', 0.0035),
+    ('concombre', 'GRAMME', 0.0025),
+    ('houmous', 'GRAMME', 0.0120),
+    ('the', 'GRAMME', 0.0500),
+    ('fruits secs', 'GRAMME', 0.0140),
+
+    -- GOURMAND
+    ('pate feuilletee', 'UNITE', 1.5000),
+    ('caramel beurre sale', 'GRAMME', 0.0160),
+    ('chantilly', 'GRAMME', 0.0140),
+    ('pralines roses', 'GRAMME', 0.0180),
+    ('sirop d''erable', 'MILLILITRE', 0.0250),
+    ('pommes', 'UNITE', 0.4500),
+    ('boeuf', 'GRAMME', 0.0180),
+    ('vin rouge', 'MILLILITRE', 0.0055),
+    ('magret de canard', 'GRAMME', 0.0280),
+    ('champignons', 'GRAMME', 0.0180),
+    ('riz arborio', 'GRAMME', 0.0055),
+    ('veau', 'GRAMME', 0.0210),
+    ('cuisse de canard confite', 'UNITE', 3.5000),
+    ('reblochon', 'GRAMME', 0.0220),
+    ('saucisse fumee', 'GRAMME', 0.0110),
+    ('choucroute', 'GRAMME', 0.0060),
+    ('fromage a raclette', 'GRAMME', 0.0180),
+    ('filet mignon', 'GRAMME', 0.0230),
+    ('saint-jacques', 'GRAMME', 0.0450);

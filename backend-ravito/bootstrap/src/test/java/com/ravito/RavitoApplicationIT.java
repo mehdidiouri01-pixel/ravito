@@ -56,8 +56,10 @@ class RavitoApplicationIT {
 
         assertThat(propositionReponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode proposition = objectMapper.readTree(propositionReponse.getBody());
-        assertThat(proposition.get("petitsDejeuners")).hasSize(5);
-        assertThat(proposition.get("dejeuners")).hasSize(5);
+        // Au moins 5 (l'invariant du domaine) : la taille exacte depend du
+        // contenu du catalogue seme par Flyway (V2/V3), pas de ce test.
+        assertThat(proposition.get("petitsDejeuners").size()).isGreaterThanOrEqualTo(5);
+        assertThat(proposition.get("dejeuners").size()).isGreaterThanOrEqualTo(5);
 
         // 2. Composition d'un plan de semaine avec le premier petit-dejeuner et
         // le premier dejeuner proposes, repetes sur les 5 jours (suffisant pour

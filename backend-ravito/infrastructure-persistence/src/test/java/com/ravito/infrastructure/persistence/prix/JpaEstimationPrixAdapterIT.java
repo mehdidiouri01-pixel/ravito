@@ -30,6 +30,14 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * {@link JpaEstimationPrixAdapter} (somme des prix moyens ponderee par le
  * coefficient de l'enseigne, lu depuis {@code application.yml} de test via
  * {@link CoefficientEnseigneProperties}).
+ *
+ * <p>Les noms d'ingredients utilises ici sont volontairement des noms de
+ * test explicites ("ingredient-test-..."), jamais des noms d'ingredients
+ * plausibles du catalogue reel (seme par Flyway, voir V2/V3) : ce test
+ * insere ses propres lignes dans {@code prix_moyen_ingredient}, qui a une
+ * contrainte d'unicite sur (nom, unite) — un nom realiste choisi ici
+ * finirait tot ou tard par entrer en collision avec un ingredient ajoute
+ * au catalogue.
  */
 @SpringBootTest(classes = TestApplication.class)
 @Testcontainers
@@ -48,13 +56,13 @@ class JpaEstimationPrixAdapterIT {
 
     @Test
     void additionne_les_prix_moyens_et_applique_le_coefficient_de_l_enseigne() {
-        prixMoyenRepository.save(new PrixMoyenIngredientEntity("quinoa", UniteMesure.GRAMME, BigDecimal.valueOf(0.0030)));
-        prixMoyenRepository.save(new PrixMoyenIngredientEntity("lait d'amande", UniteMesure.MILLILITRE, BigDecimal.valueOf(0.0011)));
+        prixMoyenRepository.save(new PrixMoyenIngredientEntity("ingredient-test-un", UniteMesure.GRAMME, BigDecimal.valueOf(0.0030)));
+        prixMoyenRepository.save(new PrixMoyenIngredientEntity("ingredient-test-deux", UniteMesure.MILLILITRE, BigDecimal.valueOf(0.0011)));
 
         ListeCourses listeCourses = new ListeCourses(List.of(
-                new LigneListeCourses(new Ingredient("quinoa", RayonMagasin.EPICERIE),
+                new LigneListeCourses(new Ingredient("ingredient-test-un", RayonMagasin.EPICERIE),
                         new Quantite(BigDecimal.valueOf(300), UniteMesure.GRAMME)),
-                new LigneListeCourses(new Ingredient("lait d'amande", RayonMagasin.CREMERIE),
+                new LigneListeCourses(new Ingredient("ingredient-test-deux", RayonMagasin.CREMERIE),
                         new Quantite(BigDecimal.valueOf(500), UniteMesure.MILLILITRE))));
 
         // sous-total attendu : 300*0.0030 + 500*0.0011 = 0.90 + 0.55 = 1.45
@@ -67,7 +75,7 @@ class JpaEstimationPrixAdapterIT {
     @Test
     void leve_une_exception_si_un_ingredient_n_a_pas_de_prix_moyen_connu() {
         ListeCourses listeCourses = new ListeCourses(List.of(
-                new LigneListeCourses(new Ingredient("truffe blanche", RayonMagasin.EPICERIE),
+                new LigneListeCourses(new Ingredient("ingredient-test-inconnu", RayonMagasin.EPICERIE),
                         new Quantite(BigDecimal.TEN, UniteMesure.GRAMME))));
 
         assertThatExceptionOfType(EstimationImpossibleException.class)
