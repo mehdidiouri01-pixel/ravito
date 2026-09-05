@@ -81,5 +81,5 @@ mvn verify             # + tests d'intégration Testcontainers (Docker requis)
 - [x] Persistance JPA/PostgreSQL, migrations Flyway
 - [x] API REST
 - [x] Module Spring Boot exécutable, hexagone câblé de bout en bout
-- [ ] Catalogue complet (15 repas minimum par type et par style)
+- [x] Catalogue complet (15 repas minimum par type et par style)
 - [ ] Frontend Angular
