@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: ravito
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/ravito}
+    username: ${DB_USER:ravito}
+    password: ${DB_PASSWORD:ravito}
+
+  jpa:
+    hibernate:
+      # le schema est cree par Flyway (module infrastructure-persistence),
+      # pas par Hibernate : "validate" fait echouer le demarrage si le
+      # mapping JPA et les migrations divergent, plutot que de laisser
+      # Hibernate "corriger" silencieusement le schema en production.
+      ddl-auto: validate
+    open-in-view: false
+
+server:
+  port: ${SERVER_PORT:8080}
+
+ravito:
+  prix:
+    coefficients:
+      CARREFOUR: 1.00
+      LECLERC: 0.95
+      LIDL: 0.85
+      AUCHAN: 0.98

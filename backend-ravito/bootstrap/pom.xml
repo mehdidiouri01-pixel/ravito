@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.ravito</groupId>
+        <artifactId>ravito-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>ravito-bootstrap</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Ravito :: Bootstrap</name>
+    <description>
+        Composition root de l'application : le seul module Spring Boot
+        executable. Cable les use cases de ravito-application sur les ports
+        de sortie de ravito-infrastructure-persistence (application n'a
+        aucune annotation framework, voir UseCaseConfiguration), et regroupe
+        via component scan les adapters de ravito-infrastructure-web et
+        ravito-infrastructure-persistence.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ravito</groupId>
+            <artifactId>ravito-application</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ravito</groupId>
+            <artifactId>ravito-infrastructure-persistence</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ravito</groupId>
+            <artifactId>ravito-infrastructure-web</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.jupiter</groupId>
+                    <artifactId>junit-jupiter</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.ravito.RavitoApplication</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <!-- Repackage apres nos tests d'integration (Failsafe, phases
+                             integration-test/verify), pas avant : le fait de remplacer
+                             le jar par l'archive Spring Boot (BOOT-INF/...) juste avant
+                             de lancer @SpringBootTest perturbe la resolution des
+                             annotations de spring-test dans cet environnement. -->
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
