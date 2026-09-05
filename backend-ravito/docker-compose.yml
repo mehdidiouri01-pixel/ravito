@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ravito-postgres
+    environment:
+      POSTGRES_DB: ravito
+      POSTGRES_USER: ravito
+      POSTGRES_PASSWORD: ravito
+    ports:
+      - "5432:5432"
+    volumes:
+      - ravito-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ravito -d ravito"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  ravito-postgres-data:

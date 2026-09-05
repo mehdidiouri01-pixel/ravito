@@ -15,6 +15,7 @@
     <modules>
         <module>domain</module>
         <module>application</module>
+        <module>infrastructure-persistence</module>
     </modules>
 
     <properties>
@@ -24,6 +25,8 @@
         <junit-jupiter.version>5.10.2</junit-jupiter.version>
         <assertj.version>3.26.3</assertj.version>
         <mockito.version>5.11.0</mockito.version>
+        <spring-boot.version>3.3.5</spring-boot.version>
+        <testcontainers.version>1.21.4</testcontainers.version>
 
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
@@ -31,6 +34,9 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Importee avant spring-boot-dependencies : notre version de JUnit prime
+                 sur celle que Spring Boot gererait sinon (premiere declaration gagnante
+                 en cas de conflit sur le meme GA, voir la doc Maven BOM). -->
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
@@ -56,6 +62,29 @@
                 <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
+            <!-- Importee avant spring-boot-dependencies, pour la meme raison que
+                 junit-bom : Spring Boot 3.3.5 gere Testcontainers 1.19.8, dont le
+                 client Docker (docker-java) ne sait pas discuter avec les versions
+                 recentes de Docker Desktop (erreur HTTP 400 sur le named pipe). On
+                 prend une version plus recente explicitement. -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Gere les versions de Spring Data JPA, Hibernate, driver PostgreSQL,
+                 Flyway, etc. pour tous les modules qui en ont besoin, sans faire de
+                 ravito-parent un heritier de spring-boot-starter-parent (on garde
+                 notre propre POM racine). -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -71,6 +100,23 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
+                </plugin>
+                <!-- Failsafe (pas Surefire) execute les tests d'integration : convention
+                     de nommage *IT.java, phases integration-test/verify. Ca separe les
+                     tests unitaires rapides (mvn test) des tests Testcontainers, plus
+                     lents (mvn verify) car ils demarrent un vrai conteneur Docker. -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

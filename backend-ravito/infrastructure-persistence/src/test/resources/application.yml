@@ -1,0 +1,16 @@
+spring:
+  jpa:
+    hibernate:
+      # le schema est cree par Flyway, pas par Hibernate : "validate" fait
+      # tout de meme echouer les tests si le mapping JPA et les migrations
+      # divergent, plutot que de laisser Hibernate "corriger" silencieusement.
+      ddl-auto: validate
+    open-in-view: false
+
+ravito:
+  prix:
+    coefficients:
+      CARREFOUR: 1.00
+      LECLERC: 0.95
+      LIDL: 0.85
+      AUCHAN: 0.98
