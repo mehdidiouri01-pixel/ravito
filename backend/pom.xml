@@ -4,12 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.mealweek</groupId>
-    <artifactId>mealweek-parent</artifactId>
+    <groupId>com.ravito</groupId>
+    <artifactId>ravito-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>MealWeek</name>
+    <name>Ravito</name>
     <description>Planification de repas hebdomadaire et generation de liste de courses</description>
 
     <modules>

@@ -5,15 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.mealweek</groupId>
-        <artifactId>mealweek-parent</artifactId>
+        <groupId>com.ravito</groupId>
+        <artifactId>ravito-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>mealweek-domain</artifactId>
+    <artifactId>ravito-domain</artifactId>
     <packaging>jar</packaging>
 
-    <name>MealWeek :: Domain</name>
+    <name>Ravito :: Domain</name>
     <description>
         Modele metier pur : agregats, value objects, ports d'entree et de sortie.
         Aucune dependance a un framework (pas de Spring, pas de JPA) : ce module doit
