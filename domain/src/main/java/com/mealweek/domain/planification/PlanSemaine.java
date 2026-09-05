@@ -1,6 +1,7 @@
 package com.mealweek.domain.planification;
 
 import com.mealweek.domain.catalogue.Repas;
+import com.mealweek.domain.courses.ListeCourses;
 import com.mealweek.domain.profil.ProfilUtilisateur;
 
 import java.util.EnumSet;
@@ -63,5 +64,15 @@ public record PlanSemaine(ProfilUtilisateur profil, List<Jour> jours) {
         return jours.stream()
                 .flatMap(jour -> Stream.of(jour.petitDejeuner(), jour.dejeuner()))
                 .toList();
+    }
+
+    /**
+     * @return la liste de courses consolidee a partir des ingredients des
+     * 10 repas du plan (voir {@link ListeCourses#consolider}).
+     */
+    public ListeCourses genererListeCourses() {
+        return ListeCourses.consolider(tousLesRepas().stream()
+                .flatMap(repas -> repas.ingredients().stream())
+                .toList());
     }
 }

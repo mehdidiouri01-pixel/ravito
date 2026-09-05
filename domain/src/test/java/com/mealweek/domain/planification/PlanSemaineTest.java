@@ -3,6 +3,7 @@ package com.mealweek.domain.planification;
 import com.mealweek.domain.catalogue.Repas;
 import com.mealweek.domain.catalogue.RepasTestFactory;
 import com.mealweek.domain.catalogue.TypeRepas;
+import com.mealweek.domain.courses.ListeCourses;
 import com.mealweek.domain.profil.Enseigne;
 import com.mealweek.domain.profil.NiveauCuisine;
 import com.mealweek.domain.profil.ProfilUtilisateur;
@@ -53,6 +54,18 @@ class PlanSemaineTest {
 
         assertThatExceptionOfType(RepasIncompatibleException.class)
                 .isThrownBy(() -> new PlanSemaine(PROFIL, jours));
+    }
+
+    @Test
+    void genere_la_liste_de_courses_en_consolidant_les_dix_repas() {
+        // RepasTestFactory donne a chaque repas le meme ingredient (1 unite) :
+        // les 10 repas du plan doivent se consolider en une seule ligne de 10.
+        PlanSemaine plan = new PlanSemaine(PROFIL, cinqJoursValides());
+
+        ListeCourses listeCourses = plan.genererListeCourses();
+
+        assertThat(listeCourses.lignes()).hasSize(1);
+        assertThat(listeCourses.lignes().get(0).quantiteTotale().valeur()).isEqualByComparingTo("10");
     }
 
     @Test
