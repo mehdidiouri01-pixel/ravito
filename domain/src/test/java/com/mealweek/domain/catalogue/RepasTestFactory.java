@@ -14,17 +14,21 @@ import java.util.List;
 /**
  * Fabrique de {@link Repas} valides pour les tests, avec un unique
  * ingredient sans importance pour le cas teste.
+ *
+ * <p>Publique pour etre reutilisee par les tests d'autres packages (ex:
+ * {@code planification}) qui ont besoin de construire des repas valides
+ * sans repeter le detail de leurs ingredients.
  */
-final class RepasTestFactory {
+public final class RepasTestFactory {
 
     private RepasTestFactory() {
     }
 
-    static Repas unRepas(TypeRepas type, StyleAlimentaire style, NiveauCuisine niveauRequis) {
+    public static Repas unRepas(TypeRepas type, StyleAlimentaire style, NiveauCuisine niveauRequis) {
         return unRepas("repas de test", type, style, niveauRequis);
     }
 
-    static Repas unRepas(String nom, TypeRepas type, StyleAlimentaire style, NiveauCuisine niveauRequis) {
+    public static Repas unRepas(String nom, TypeRepas type, StyleAlimentaire style, NiveauCuisine niveauRequis) {
         IngredientQuantite ingredient = new IngredientQuantite(
                 new Ingredient("ingredient de test", RayonMagasin.EPICERIE),
                 new Quantite(BigDecimal.ONE, UniteMesure.UNITE));
