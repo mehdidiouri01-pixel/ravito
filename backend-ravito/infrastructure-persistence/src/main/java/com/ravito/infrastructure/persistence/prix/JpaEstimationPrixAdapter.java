@@ -2,6 +2,7 @@ package com.ravito.infrastructure.persistence.prix;
 
 import com.ravito.domain.courses.LigneListeCourses;
 import com.ravito.domain.courses.ListeCourses;
+import com.ravito.domain.prix.EstimationImpossibleException;
 import com.ravito.domain.prix.EstimationPrixPort;
 import com.ravito.domain.prix.Prix;
 import com.ravito.domain.profil.Enseigne;
@@ -38,7 +39,9 @@ class JpaEstimationPrixAdapter implements EstimationPrixPort {
     private Prix prixDeLaLigne(LigneListeCourses ligne) {
         PrixMoyenIngredientEntity prixMoyen = repository
                 .findByIngredientNomAndUnite(ligne.ingredient().nom(), ligne.quantiteTotale().unite())
-                .orElseThrow(() -> new PrixIngredientInconnuException(ligne.ingredient(), ligne.quantiteTotale().unite()));
+                .orElseThrow(() -> new EstimationImpossibleException(
+                        "Aucun prix moyen connu pour l'ingredient \"" + ligne.ingredient().nom()
+                                + "\" en " + ligne.quantiteTotale().unite()));
 
         return new Prix(prixMoyen.getPrixUnitaire().multiply(ligne.quantiteTotale().valeur()));
     }

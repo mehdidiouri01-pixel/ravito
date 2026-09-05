@@ -6,6 +6,7 @@ import com.ravito.domain.courses.ListeCourses;
 import com.ravito.domain.courses.Quantite;
 import com.ravito.domain.courses.RayonMagasin;
 import com.ravito.domain.courses.UniteMesure;
+import com.ravito.domain.prix.EstimationImpossibleException;
 import com.ravito.domain.prix.Prix;
 import com.ravito.domain.profil.Enseigne;
 import com.ravito.infrastructure.persistence.TestApplication;
@@ -69,7 +70,7 @@ class JpaEstimationPrixAdapterIT {
                 new LigneListeCourses(new Ingredient("truffe blanche", RayonMagasin.EPICERIE),
                         new Quantite(BigDecimal.TEN, UniteMesure.GRAMME))));
 
-        assertThatExceptionOfType(PrixIngredientInconnuException.class)
+        assertThatExceptionOfType(EstimationImpossibleException.class)
                 .isThrownBy(() -> adapter.estimerCout(listeCourses, Enseigne.CARREFOUR));
     }
 }

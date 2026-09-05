@@ -12,6 +12,9 @@ import com.ravito.domain.profil.Enseigne;
  * l'adapter, pas du domaine. Une version ulterieure pourra brancher l'API
  * Open Prices d'Open Food Facts derriere ce meme port, sans changer cette
  * interface ni son appelant.
+ *
+ * @throws EstimationImpossibleException si l'implementation ne peut pas
+ * chiffrer une ligne de la liste de courses (ex : prix moyen manquant en v1)
  */
 public interface EstimationPrixPort {
 
