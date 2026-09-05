@@ -16,6 +16,7 @@
         <module>domain</module>
         <module>application</module>
         <module>infrastructure-persistence</module>
+        <module>infrastructure-web</module>
     </modules>
 
     <properties>
