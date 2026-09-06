@@ -4,6 +4,7 @@ import com.ravito.domain.catalogue.Repas;
 import com.ravito.domain.courses.ListeCourses;
 import com.ravito.domain.profil.ProfilUtilisateur;
 
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -21,13 +22,24 @@ import java.util.stream.Stream;
  *     (meme regle que {@link Repas#estCompatibleAvec}, revalidee ici en
  *     defense en profondeur — voir {@link RepasIncompatibleException}).</li>
  * </ul>
+ *
+ * <p>{@link #jours()} est aussi toujours trie en ordre calendaire
+ * (lundi -> vendredi), quel que soit l'ordre fourni au constructeur : ce
+ * n'est pas cosmetique, c'est un invariant a part entiere. La source
+ * habituelle de cette liste est une {@code Map<JourSemaine, ChoixJour>}
+ * desserialisee depuis une requete JSON — selon son type concret cote
+ * appelant (une simple {@code HashMap} par exemple), son ordre d'iteration
+ * n'a aucune raison de suivre le calendrier. Le domaine ne peut pas compter
+ * sur ses appelants pour ca, donc il l'impose lui-meme.
  */
 public record PlanSemaine(ProfilUtilisateur profil, List<Jour> jours) {
 
     public PlanSemaine {
         Objects.requireNonNull(profil, "profil");
         Objects.requireNonNull(jours, "jours");
-        jours = List.copyOf(jours);
+        jours = jours.stream()
+                .sorted(Comparator.comparing(jour -> jour.jourSemaine().ordinal()))
+                .toList();
         exigerExactementLesCinqJours(jours);
         for (Jour jour : jours) {
             exigerCompatible(jour.petitDejeuner(), profil);

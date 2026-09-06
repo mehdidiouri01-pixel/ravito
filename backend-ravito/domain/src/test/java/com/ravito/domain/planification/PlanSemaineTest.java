@@ -69,6 +69,26 @@ class PlanSemaineTest {
     }
 
     @Test
+    void trie_toujours_les_jours_en_ordre_calendaire_quel_que_soit_l_ordre_fourni() {
+        // Ordre delibrement quelconque en entree (ex : celui d'une HashMap
+        // desserialisee depuis du JSON, qui ne suit pas le calendrier) :
+        // le domaine doit le corriger lui-meme, pas en faire porter la
+        // responsabilite a l'appelant.
+        List<Jour> joursEnDesordre = List.of(
+                jourValide(JourSemaine.JEUDI),
+                jourValide(JourSemaine.LUNDI),
+                jourValide(JourSemaine.VENDREDI),
+                jourValide(JourSemaine.MERCREDI),
+                jourValide(JourSemaine.MARDI));
+
+        PlanSemaine plan = new PlanSemaine(PROFIL, joursEnDesordre);
+
+        assertThat(plan.jours()).extracting(Jour::jourSemaine)
+                .containsExactly(JourSemaine.LUNDI, JourSemaine.MARDI, JourSemaine.MERCREDI,
+                        JourSemaine.JEUDI, JourSemaine.VENDREDI);
+    }
+
+    @Test
     void la_liste_de_jours_est_immuable() {
         PlanSemaine plan = new PlanSemaine(PROFIL, cinqJoursValides());
 
