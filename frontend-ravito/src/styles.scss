@@ -1,0 +1,60 @@
+:root {
+  --couleur-fond: #f7f6f2;
+  --couleur-surface: #ffffff;
+  --couleur-texte: #1f2421;
+  --couleur-texte-att: #6b7268;
+  --couleur-bordure: #e0ddd4;
+  --couleur-accent: #2f6b4f;
+  --couleur-accent-att: #e8f3ec;
+  --couleur-erreur-fond: #fbe9e7;
+  --couleur-erreur-texte: #9c3b2f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--couleur-fond);
+  color: var(--couleur-texte);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 0.6rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--couleur-accent);
+  color: white;
+  transition: opacity 0.15s;
+}
+
+button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+button:disabled {
+  background: var(--couleur-bordure);
+  color: var(--couleur-texte-att);
+  cursor: not-allowed;
+}
+
+button.recommencer {
+  background: transparent;
+  color: var(--couleur-accent);
+  border: 1px solid var(--couleur-accent);
+}
