@@ -6,7 +6,7 @@ import type { Enseigne, NiveauCuisine, ProfilRequest, StyleAlimentaire } from '.
   selector: 'app-profil-form',
   template: `
     <form class="profil-form" (submit)="valider($event)">
-      <h2>1. Votre profil</h2>
+      <h2>1. Vos préférences</h2>
 
       <label>
         Enseigne

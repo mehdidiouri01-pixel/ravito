@@ -10,11 +10,21 @@ export const ENSEIGNES: { valeur: Enseigne; libelle: string }[] = [
   { valeur: 'AUCHAN', libelle: 'Auchan' },
 ];
 
+/**
+ * Le style NORMAL est affiche "Équilibré" cote frontend uniquement : le nom
+ * technique (base de donnees, enum Java, JSON) ne change pas, seul le
+ * libelle utilisateur est renomme — plus parlant que "Normal" a cote de
+ * "Healthy" et "Gourmand".
+ */
 export const STYLES_ALIMENTAIRES: { valeur: StyleAlimentaire; libelle: string }[] = [
   { valeur: 'HEALTHY', libelle: 'Healthy' },
-  { valeur: 'NORMAL', libelle: 'Normal' },
+  { valeur: 'NORMAL', libelle: 'Équilibré' },
   { valeur: 'GOURMAND', libelle: 'Gourmand' },
 ];
+
+export const LIBELLES_STYLE: Record<StyleAlimentaire, string> = Object.fromEntries(
+  STYLES_ALIMENTAIRES.map((option) => [option.valeur, option.libelle]),
+) as Record<StyleAlimentaire, string>;
 
 export const NIVEAUX_CUISINE: { valeur: NiveauCuisine; libelle: string }[] = [
   { valeur: 'DEBUTANT', libelle: 'Débutant' },

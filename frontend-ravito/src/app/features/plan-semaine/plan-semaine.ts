@@ -1,6 +1,6 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, input, signal } from '@angular/core';
-import { LIBELLES_JOUR, LIBELLES_RAYON, LIBELLES_UNITE } from '../../core/reference-data';
+import { LIBELLES_JOUR, LIBELLES_RAYON, LIBELLES_STYLE, LIBELLES_UNITE } from '../../core/reference-data';
 import type { PlanSemaineResponse, RayonMagasin, RepasResponse } from '../../core/models';
 
 @Component({
@@ -61,8 +61,7 @@ import type { PlanSemaineResponse, RayonMagasin, RepasResponse } from '../../cor
           <button type="button" class="fermer" (click)="fermerRecette()" aria-label="Fermer la recette">✕</button>
           <h3>{{ repas.nom }}</h3>
           <p class="modale-meta">
-            {{ repas.style === 'HEALTHY' ? 'Healthy' : repas.style === 'GOURMAND' ? 'Gourmand' : 'Normal' }}
-            · {{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }}
+            {{ libellesStyle[repas.style] }} · {{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }}
           </p>
           <h4>Ingrédients</h4>
           <ul>
@@ -197,6 +196,7 @@ export class PlanSemaineComponent {
   protected readonly libellesJour = LIBELLES_JOUR;
   protected readonly libellesRayon = LIBELLES_RAYON;
   protected readonly libellesUnite = LIBELLES_UNITE;
+  protected readonly libellesStyle = LIBELLES_STYLE;
 
   protected readonly repasAffiche = signal<RepasResponse | null>(null);
 
