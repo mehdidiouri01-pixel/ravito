@@ -2,7 +2,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { PdfExportService } from '../core/pdf-export.service';
 import { RavitoApiService } from '../core/ravito-api.service';
-import { JOURS } from '../core/reference-data';
 import type {
   ChoixJourRequest,
   ComposerPlanSemaineRequest,
@@ -12,7 +11,7 @@ import type {
   RepasProposesResponse,
 } from '../core/models';
 import { ProfilFormComponent } from '../features/profil-form/profil-form';
-import { SelectionRepasComponent, type SelectionRepas } from '../features/selection-repas/selection-repas';
+import { SelectionRepasComponent } from '../features/selection-repas/selection-repas';
 import { PlanSemaineComponent } from '../features/plan-semaine/plan-semaine';
 
 type Etape = 'PROFIL' | 'SELECTION' | 'RESULTAT';
@@ -133,19 +132,11 @@ export class PlanificateurComponent {
     });
   }
 
-  protected surSelectionValidee(selection: SelectionRepas): void {
+  protected surSelectionValidee(choix: Record<JourSemaine, ChoixJourRequest>): void {
     const profil = this.profil();
     if (!profil) {
       return;
     }
-
-    const choix = {} as Record<JourSemaine, ChoixJourRequest>;
-    JOURS.forEach((jour, index) => {
-      choix[jour] = {
-        petitDejeunerId: selection.petitsDejeuners[index].id,
-        dejeunerId: selection.dejeuners[index].id,
-      };
-    });
 
     const requete: ComposerPlanSemaineRequest = { profil, choix };
 
