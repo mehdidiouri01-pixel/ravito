@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
+import { PdfExportService } from '../core/pdf-export.service';
 import { RavitoApiService } from '../core/ravito-api.service';
 import { JOURS } from '../core/reference-data';
 import type {
@@ -51,7 +52,10 @@ type Etape = 'PROFIL' | 'SELECTION' | 'RESULTAT';
         @case ('RESULTAT') {
           @if (plan(); as valeurPlan) {
             <app-plan-semaine [plan]="valeurPlan" />
-            <button type="button" class="recommencer" (click)="recommencer()">Recommencer</button>
+            <div class="actions-resultat">
+              <button type="button" (click)="exporterPdf()">Exporter en PDF</button>
+              <button type="button" class="recommencer" (click)="recommencer()">Recommencer</button>
+            </div>
           }
         }
       }
@@ -91,7 +95,9 @@ type Etape = 'PROFIL' | 'SELECTION' | 'RESULTAT';
         color: var(--couleur-texte-att);
       }
 
-      .recommencer {
+      .actions-resultat {
+        display: flex;
+        gap: 1rem;
         margin-top: 2rem;
       }
     `,
@@ -99,6 +105,7 @@ type Etape = 'PROFIL' | 'SELECTION' | 'RESULTAT';
 })
 export class PlanificateurComponent {
   private readonly api = inject(RavitoApiService);
+  private readonly pdfExportService = inject(PdfExportService);
 
   protected readonly etape = signal<Etape>('PROFIL');
   protected readonly chargement = signal(false);
@@ -156,6 +163,13 @@ export class PlanificateurComponent {
         this.chargement.set(false);
       },
     });
+  }
+
+  protected exporterPdf(): void {
+    const plan = this.plan();
+    if (plan) {
+      this.pdfExportService.exporterPlan(plan);
+    }
   }
 
   protected recommencer(): void {
