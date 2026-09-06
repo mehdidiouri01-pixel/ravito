@@ -49,9 +49,17 @@ Voir la Javadoc des classes de `domain` pour le détail des invariants
 métier (`PlanSemaine`, `RepasProposes`, etc.) et le raisonnement derrière
 chaque choix d'architecture.
 
+Le frontend ([frontend-ravito/](frontend-ravito)) est une application
+Angular 20 standalone (composants + signals, sans NgModule) : un unique
+conteneur (`PlanificateurComponent`) orchestre le parcours en 3 étapes
+(profil → sélection de 5+5 repas → plan de la semaine) et détient tout
+l'état ; les composants enfants sont purement passifs (`input`/`output`).
+
 ## Lancer le projet en local
 
-Prérequis : JDK 21, Docker Desktop.
+Prérequis : JDK 21, Docker Desktop, Node.js.
+
+**Backend**
 
 ```bash
 cd backend-ravito
@@ -67,11 +75,28 @@ curl -X POST http://localhost:8080/api/repas/propositions \
   -d '{"enseigne":"CARREFOUR","style":"NORMAL","niveau":"DEBUTANT"}'
 ```
 
+**Frontend**
+
+```bash
+cd frontend-ravito
+npm install
+npm start
+```
+
+L'application est servie sur `http://localhost:4200` (le backend doit
+tourner sur le port 8080 : `proxy.conf.json` y redirige les appels `/api`).
+
 ## Tests
 
 ```bash
-mvn test              # tests unitaires (rapides, pas de Docker requis)
-mvn verify             # + tests d'intégration Testcontainers (Docker requis)
+# Backend
+cd backend-ravito
+mvn test               # tests unitaires (rapides, pas de Docker requis)
+mvn verify              # + tests d'intégration Testcontainers (Docker requis)
+
+# Frontend
+cd frontend-ravito
+npm test
 ```
 
 ## État du projet
@@ -82,4 +107,4 @@ mvn verify             # + tests d'intégration Testcontainers (Docker requis)
 - [x] API REST
 - [x] Module Spring Boot exécutable, hexagone câblé de bout en bout
 - [x] Catalogue complet (15 repas minimum par type et par style)
-- [ ] Frontend Angular
+- [x] Frontend Angular (parcours complet, vérifié de bout en bout)
