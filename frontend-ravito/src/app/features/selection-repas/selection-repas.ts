@@ -1,6 +1,7 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 import { JOURS, LIBELLES_JOUR } from '../../core/reference-data';
-import type { ChoixJourRequest, JourSemaine, RepasProposesResponse } from '../../core/models';
+import type { ChoixJourRequest, JourSemaine, RepasProposesResponse, RepasResponse } from '../../core/models';
+import { RecetteModaleComponent } from '../../ui/recette-modale/recette-modale';
 
 interface ChoixJourPartiel {
   petitDejeunerId: string;
@@ -18,6 +19,7 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '' };
  */
 @Component({
   selector: 'app-selection-repas',
+  imports: [RecetteModaleComponent],
   template: `
     <section class="selection">
       <h2>2. Choisissez vos repas</h2>
@@ -33,26 +35,46 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '' };
 
             <label>
               Petit-déjeuner
-              <select (change)="choisirPetitDejeuner(jour, $any($event.target).value)">
-                <option value="" [selected]="choix()[jour].petitDejeunerId === ''">— Choisir —</option>
-                @for (repas of proposition().petitsDejeuners; track repas.id) {
-                  <option [value]="repas.id" [selected]="repas.id === choix()[jour].petitDejeunerId">
-                    {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
-                  </option>
-                }
-              </select>
+              <div class="select-avec-recette">
+                <select (change)="choisirPetitDejeuner(jour, $any($event.target).value)">
+                  <option value="" [selected]="choix()[jour].petitDejeunerId === ''">— Choisir —</option>
+                  @for (repas of proposition().petitsDejeuners; track repas.id) {
+                    <option [value]="repas.id" [selected]="repas.id === choix()[jour].petitDejeunerId">
+                      {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
+                    </option>
+                  }
+                </select>
+                <button
+                  type="button"
+                  class="voir-recette"
+                  [disabled]="choix()[jour].petitDejeunerId === ''"
+                  (click)="afficherRecette(jour, 'petitDejeunerId', proposition().petitsDejeuners)"
+                >
+                  Recette
+                </button>
+              </div>
             </label>
 
             <label>
               Déjeuner
-              <select (change)="choisirDejeuner(jour, $any($event.target).value)">
-                <option value="" [selected]="choix()[jour].dejeunerId === ''">— Choisir —</option>
-                @for (repas of proposition().dejeuners; track repas.id) {
-                  <option [value]="repas.id" [selected]="repas.id === choix()[jour].dejeunerId">
-                    {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
-                  </option>
-                }
-              </select>
+              <div class="select-avec-recette">
+                <select (change)="choisirDejeuner(jour, $any($event.target).value)">
+                  <option value="" [selected]="choix()[jour].dejeunerId === ''">— Choisir —</option>
+                  @for (repas of proposition().dejeuners; track repas.id) {
+                    <option [value]="repas.id" [selected]="repas.id === choix()[jour].dejeunerId">
+                      {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
+                    </option>
+                  }
+                </select>
+                <button
+                  type="button"
+                  class="voir-recette"
+                  [disabled]="choix()[jour].dejeunerId === ''"
+                  (click)="afficherRecette(jour, 'dejeunerId', proposition().dejeuners)"
+                >
+                  Recette
+                </button>
+              </div>
             </label>
           </article>
         }
@@ -62,6 +84,8 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '' };
         Composer mon plan de la semaine
       </button>
     </section>
+
+    <app-recette-modale [repas]="repasAffiche()" (fermer)="fermerRecette()" />
   `,
   styles: [
     `
@@ -106,13 +130,29 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '' };
         color: var(--couleur-texte-att);
       }
 
-      .jour-ligne select {
+      .select-avec-recette {
+        display: flex;
+        gap: 0.4rem;
+      }
+
+      .select-avec-recette select {
+        flex: 1;
+        min-width: 0;
         font: inherit;
         padding: 0.5rem 0.6rem;
         border-radius: 0.5rem;
         border: 1px solid var(--couleur-bordure);
         background: var(--couleur-fond);
         color: var(--couleur-texte);
+      }
+
+      .voir-recette {
+        flex-shrink: 0;
+        background: transparent;
+        color: var(--couleur-accent);
+        border: 1px solid var(--couleur-accent);
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
       }
 
       @media (max-width: 40rem) {
@@ -138,6 +178,8 @@ export class SelectionRepasComponent {
     Object.fromEntries(JOURS.map((jour) => [jour, { ...CHOIX_VIDE }])) as Record<JourSemaine, ChoixJourPartiel>,
   );
 
+  protected readonly repasAffiche = signal<RepasResponse | null>(null);
+
   protected readonly joursComplets = computed(
     () => this.jours.filter((jour) => this.estComplet(this.choix()[jour])).length,
   );
@@ -150,6 +192,23 @@ export class SelectionRepasComponent {
 
   protected choisirDejeuner(jour: JourSemaine, repasId: string): void {
     this.choix.update((actuel) => ({ ...actuel, [jour]: { ...actuel[jour], dejeunerId: repasId } }));
+  }
+
+  /**
+   * Affiche la recette du repas actuellement choisi dans la case (jour,
+   * type). Rien a afficher si la case est encore vide — le bouton est de
+   * toute facon desactive dans ce cas (voir le template).
+   */
+  protected afficherRecette(jour: JourSemaine, cle: keyof ChoixJourPartiel, catalogue: RepasResponse[]): void {
+    const id = this.choix()[jour][cle];
+    const repas = catalogue.find((r) => r.id === id);
+    if (repas) {
+      this.repasAffiche.set(repas);
+    }
+  }
+
+  protected fermerRecette(): void {
+    this.repasAffiche.set(null);
   }
 
   protected valider(): void {

@@ -74,6 +74,25 @@ describe('SelectionRepasComponent', () => {
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('1/5');
   });
 
+  function boutonsRecette(): HTMLButtonElement[] {
+    return Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.voir-recette'));
+  }
+
+  it('desactive le bouton Recette tant qu\'aucun repas n\'est choisi pour cette case', () => {
+    expect(boutonsRecette()[0].disabled).toBeTrue(); // lundi petit-dejeuner
+  });
+
+  it('affiche la recette du repas choisi, pas celle d\'un autre jour', () => {
+    const [lundiPetitDej] = selects();
+    choisir(lundiPetitDej, 'pd-1'); // "Tartines"
+
+    boutonsRecette()[0].click();
+    fixture.detectChanges();
+
+    const modale = (fixture.nativeElement as HTMLElement).querySelector('.modale');
+    expect(modale?.textContent).toContain('Tartines');
+  });
+
   it('emet la selection complete, jour par jour, une fois les 5 jours remplis', () => {
     let emis: Record<JourSemaine, ChoixJourRequest> | undefined;
     fixture.componentInstance.selectionValidee.subscribe((valeur) => (emis = valeur));
