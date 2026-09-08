@@ -31,6 +31,11 @@ export const NIVEAUX_CUISINE: { valeur: NiveauCuisine; libelle: string }[] = [
   { valeur: 'CONFIRME', libelle: 'Confirmé' },
 ];
 
+/** Bornes du foyer, miroir de NombreDePersonnes (domaine). */
+export const NOMBRE_DE_PERSONNES_MIN = 1;
+export const NOMBRE_DE_PERSONNES_MAX = 12;
+export const NOMBRE_DE_PERSONNES_DEFAUT = 2;
+
 export const LIBELLES_JOUR: Record<JourSemaine, string> = {
   LUNDI: 'Lundi',
   MARDI: 'Mardi',

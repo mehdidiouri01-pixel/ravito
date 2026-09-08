@@ -40,6 +40,6 @@ describe('PdfExportService', () => {
     // On ne verifie pas le contenu binaire du PDF (peu de valeur, beaucoup
     // de fragilite) — seulement que la mise en forme (jours + tableau de
     // la liste de courses + total) ne plante pas sur un plan reel.
-    expect(() => service.exporterPlan(UN_PLAN)).not.toThrow();
+    expect(() => service.exporterPlan(UN_PLAN, 4)).not.toThrow();
   });
 });

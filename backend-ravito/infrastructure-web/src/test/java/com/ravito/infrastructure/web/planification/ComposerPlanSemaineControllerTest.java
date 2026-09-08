@@ -18,6 +18,7 @@ import com.ravito.domain.prix.EstimerCoutUseCase;
 import com.ravito.domain.prix.Prix;
 import com.ravito.domain.profil.Enseigne;
 import com.ravito.domain.profil.NiveauCuisine;
+import com.ravito.domain.profil.NombreDePersonnes;
 import com.ravito.domain.profil.ProfilUtilisateur;
 import com.ravito.domain.profil.StyleAlimentaire;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ComposerPlanSemaineControllerTest {
 
     private static final ProfilUtilisateur PROFIL =
-            new ProfilUtilisateur(Enseigne.CARREFOUR, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT);
+            new ProfilUtilisateur(Enseigne.CARREFOUR, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT, NombreDePersonnes.une());
 
     @Autowired
     private MockMvc mockMvc;
@@ -96,7 +97,7 @@ class ComposerPlanSemaineControllerTest {
     private static String uneRequeteValide() {
         UUID unId = UUID.randomUUID();
         String choixJour = "{\"petitDejeunerId\":\"" + unId + "\",\"dejeunerId\":\"" + unId + "\"}";
-        return "{\"profil\":{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\"},"
+        return "{\"profil\":{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\",\"nombreDePersonnes\":2},"
                 + "\"choix\":{"
                 + "\"LUNDI\":" + choixJour + ","
                 + "\"MARDI\":" + choixJour + ","

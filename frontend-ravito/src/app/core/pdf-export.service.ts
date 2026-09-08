@@ -12,13 +12,17 @@ import type { PlanSemaineResponse, RayonMagasin } from './models';
  */
 @Injectable({ providedIn: 'root' })
 export class PdfExportService {
-  exporterPlan(plan: PlanSemaineResponse): void {
+  exporterPlan(plan: PlanSemaineResponse, nombreDePersonnes: number): void {
     const doc = new jsPDF();
     let y = 18;
 
     doc.setFontSize(18);
     doc.text('Ravito — Plan de la semaine', 14, y);
-    y += 10;
+    y += 7;
+
+    doc.setFontSize(10);
+    doc.text(`Quantités et coût calculés pour ${nombreDePersonnes} personne(s)`, 14, y);
+    y += 8;
 
     doc.setFontSize(11);
     plan.jours.forEach((jour) => {

@@ -50,7 +50,7 @@ type Etape = 'PROFIL' | 'SELECTION' | 'RESULTAT';
         }
         @case ('RESULTAT') {
           @if (plan(); as valeurPlan) {
-            <app-plan-semaine [plan]="valeurPlan" />
+            <app-plan-semaine [plan]="valeurPlan" [nombreDePersonnes]="nombreDePersonnes()" />
             <div class="actions-resultat">
               <button type="button" (click)="exporterPdf()">Exporter en PDF</button>
               <button type="button" class="recommencer" (click)="recommencer()">Recommencer</button>
@@ -156,10 +156,15 @@ export class PlanificateurComponent {
     });
   }
 
+  /** Le plan affiché est toujours issu d'un profil validé — 1 en repli défensif. */
+  protected nombreDePersonnes(): number {
+    return this.profil()?.nombreDePersonnes ?? 1;
+  }
+
   protected exporterPdf(): void {
     const plan = this.plan();
     if (plan) {
-      this.pdfExportService.exporterPlan(plan);
+      this.pdfExportService.exporterPlan(plan, this.nombreDePersonnes());
     }
   }
 

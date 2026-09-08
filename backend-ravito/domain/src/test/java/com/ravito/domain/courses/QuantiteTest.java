@@ -29,6 +29,31 @@ class QuantiteTest {
     }
 
     @Test
+    void multiplie_par_un_facteur_en_conservant_l_unite() {
+        Quantite cent = new Quantite(BigDecimal.valueOf(100), UniteMesure.GRAMME);
+
+        Quantite pourQuatre = cent.multiplierPar(4);
+
+        assertThat(pourQuatre.valeur()).isEqualByComparingTo("400");
+        assertThat(pourQuatre.unite()).isEqualTo(UniteMesure.GRAMME);
+    }
+
+    @Test
+    void multiplier_par_un_laisse_la_quantite_inchangee() {
+        Quantite cent = new Quantite(BigDecimal.valueOf(100), UniteMesure.GRAMME);
+
+        assertThat(cent.multiplierPar(1).valeur()).isEqualByComparingTo("100");
+    }
+
+    @Test
+    void refuse_un_facteur_nul_ou_negatif() {
+        Quantite cent = new Quantite(BigDecimal.valueOf(100), UniteMesure.GRAMME);
+
+        assertThatIllegalArgumentException().isThrownBy(() -> cent.multiplierPar(0));
+        assertThatIllegalArgumentException().isThrownBy(() -> cent.multiplierPar(-2));
+    }
+
+    @Test
     void refuse_d_additionner_deux_unites_differentes() {
         Quantite grammes = new Quantite(BigDecimal.valueOf(200), UniteMesure.GRAMME);
         Quantite millilitres = new Quantite(BigDecimal.valueOf(200), UniteMesure.MILLILITRE);

@@ -38,6 +38,7 @@ describe('PlanSemaineComponent', () => {
 
     fixture = TestBed.createComponent(PlanSemaineComponent);
     fixture.componentRef.setInput('plan', UN_PLAN);
+    fixture.componentRef.setInput('nombreDePersonnes', 2);
     fixture.detectChanges();
   });
 

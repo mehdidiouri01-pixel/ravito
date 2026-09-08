@@ -34,6 +34,8 @@ export interface ProfilRequest {
   enseigne: Enseigne;
   style: StyleAlimentaire;
   niveau: NiveauCuisine;
+  /** Nombre de personnes du foyer : le backend multiplie les quantités en conséquence. */
+  nombreDePersonnes: number;
 }
 
 export interface IngredientQuantiteResponse {

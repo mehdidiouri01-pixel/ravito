@@ -20,6 +20,21 @@ public record Quantite(BigDecimal valeur, UniteMesure unite) {
     }
 
     /**
+     * Multiplie la quantite par un facteur entier — typiquement le nombre de
+     * personnes du foyer, les quantites du catalogue etant exprimees pour une
+     * portion (voir {@code PlanSemaine.genererListeCourses}).
+     *
+     * @throws IllegalArgumentException si le facteur n'est pas strictement positif,
+     * ce qui produirait une quantite nulle ou negative
+     */
+    public Quantite multiplierPar(int facteur) {
+        if (facteur <= 0) {
+            throw new IllegalArgumentException("Le facteur doit etre strictement positif : " + facteur);
+        }
+        return new Quantite(this.valeur.multiply(BigDecimal.valueOf(facteur)), this.unite);
+    }
+
+    /**
      * @throws IllegalArgumentException si {@code autre} n'a pas la meme unite que celle-ci
      */
     public Quantite plus(Quantite autre) {

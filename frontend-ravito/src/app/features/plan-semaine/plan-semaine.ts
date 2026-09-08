@@ -10,6 +10,7 @@ import { RecetteModaleComponent } from '../../ui/recette-modale/recette-modale';
   template: `
     <section class="resultat">
       <h2>3. Votre plan de la semaine</h2>
+      <p class="pour-personnes">Quantités et coût calculés pour {{ nombreDePersonnes() }} personne(s).</p>
 
       <div class="jours">
         @for (jour of plan().jours; track jour.jour) {
@@ -60,6 +61,11 @@ import { RecetteModaleComponent } from '../../ui/recette-modale/recette-modale';
   `,
   styles: [
     `
+      .pour-personnes {
+        color: var(--couleur-texte-att);
+        margin-top: -0.5rem;
+      }
+
       .jours {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
@@ -132,6 +138,7 @@ import { RecetteModaleComponent } from '../../ui/recette-modale/recette-modale';
 })
 export class PlanSemaineComponent {
   readonly plan = input.required<PlanSemaineResponse>();
+  readonly nombreDePersonnes = input.required<number>();
 
   protected readonly libellesJour = LIBELLES_JOUR;
   protected readonly libellesRayon = LIBELLES_RAYON;

@@ -1,6 +1,7 @@
 package com.ravito.domain.planification;
 
 import com.ravito.domain.catalogue.Repas;
+import com.ravito.domain.courses.IngredientQuantite;
 import com.ravito.domain.courses.ListeCourses;
 import com.ravito.domain.profil.ProfilUtilisateur;
 
@@ -81,10 +82,26 @@ public record PlanSemaine(ProfilUtilisateur profil, List<Jour> jours) {
     /**
      * @return la liste de courses consolidee a partir des ingredients des
      * 10 repas du plan (voir {@link ListeCourses#consolider}).
+     *
+     * <p>Les quantites du catalogue sont exprimees <b>pour une portion</b> :
+     * elles sont donc multipliees par le nombre de personnes du foyer avant
+     * consolidation. C'est une regle metier, elle vit ici et pas dans un
+     * controleur ou dans le frontend — le cout estime suit automatiquement,
+     * puisque {@code EstimationPrixPort} recoit une liste deja mise a
+     * l'echelle.
+     *
+     * <p>Limite assumee : la multiplication est lineaire pour tous les
+     * ingredients, y compris ceux qui ne passent pas vraiment a l'echelle
+     * (une pincee de sel pour 6 personnes reste une pincee). Distinguer ces
+     * ingredients demanderait de le modeliser dans le catalogue.
      */
     public ListeCourses genererListeCourses() {
+        int facteur = profil.nombreDePersonnes().valeur();
         return ListeCourses.consolider(tousLesRepas().stream()
                 .flatMap(repas -> repas.ingredients().stream())
+                .map(ingredient -> new IngredientQuantite(
+                        ingredient.ingredient(),
+                        ingredient.quantite().multiplierPar(facteur)))
                 .toList());
     }
 }

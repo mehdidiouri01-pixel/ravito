@@ -6,6 +6,7 @@ import com.ravito.domain.catalogue.TypeRepas;
 import com.ravito.domain.courses.ListeCourses;
 import com.ravito.domain.profil.Enseigne;
 import com.ravito.domain.profil.NiveauCuisine;
+import com.ravito.domain.profil.NombreDePersonnes;
 import com.ravito.domain.profil.ProfilUtilisateur;
 import com.ravito.domain.profil.StyleAlimentaire;
 import org.junit.jupiter.api.Test;
@@ -18,8 +19,12 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class PlanSemaineTest {
 
-    private static final ProfilUtilisateur PROFIL =
-            new ProfilUtilisateur(Enseigne.CARREFOUR, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT);
+    private static final ProfilUtilisateur PROFIL = profilPour(NombreDePersonnes.une());
+
+    private static ProfilUtilisateur profilPour(NombreDePersonnes nombreDePersonnes) {
+        return new ProfilUtilisateur(
+                Enseigne.CARREFOUR, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT, nombreDePersonnes);
+    }
 
     @Test
     void construit_un_plan_valide_avec_les_cinq_jours() {
@@ -86,6 +91,18 @@ class PlanSemaineTest {
         assertThat(plan.jours()).extracting(Jour::jourSemaine)
                 .containsExactly(JourSemaine.LUNDI, JourSemaine.MARDI, JourSemaine.MERCREDI,
                         JourSemaine.JEUDI, JourSemaine.VENDREDI);
+    }
+
+    @Test
+    void multiplie_les_quantites_par_le_nombre_de_personnes_du_foyer() {
+        // RepasTestFactory donne a chaque repas 1 unite du meme ingredient :
+        // 10 repas x 1 unite x 4 personnes = 40.
+        PlanSemaine plan = new PlanSemaine(profilPour(new NombreDePersonnes(4)), cinqJoursValides());
+
+        ListeCourses listeCourses = plan.genererListeCourses();
+
+        assertThat(listeCourses.lignes()).hasSize(1);
+        assertThat(listeCourses.lignes().get(0).quantiteTotale().valeur()).isEqualByComparingTo("40");
     }
 
     @Test

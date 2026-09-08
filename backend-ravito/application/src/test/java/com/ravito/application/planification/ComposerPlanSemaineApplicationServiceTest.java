@@ -16,6 +16,7 @@ import com.ravito.domain.planification.PlanSemaine;
 import com.ravito.domain.planification.RepasIncompatibleException;
 import com.ravito.domain.profil.Enseigne;
 import com.ravito.domain.profil.NiveauCuisine;
+import com.ravito.domain.profil.NombreDePersonnes;
 import com.ravito.domain.profil.ProfilUtilisateur;
 import com.ravito.domain.profil.StyleAlimentaire;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ import static org.mockito.Mockito.when;
 class ComposerPlanSemaineApplicationServiceTest {
 
     private static final ProfilUtilisateur PROFIL =
-            new ProfilUtilisateur(Enseigne.CARREFOUR, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT);
+            new ProfilUtilisateur(Enseigne.CARREFOUR, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT, NombreDePersonnes.une());
 
     @Mock
     private CatalogueRepasPort catalogueRepasPort;

@@ -13,6 +13,7 @@ import com.ravito.domain.courses.RayonMagasin;
 import com.ravito.domain.courses.UniteMesure;
 import com.ravito.domain.profil.Enseigne;
 import com.ravito.domain.profil.NiveauCuisine;
+import com.ravito.domain.profil.NombreDePersonnes;
 import com.ravito.domain.profil.ProfilUtilisateur;
 import com.ravito.domain.profil.StyleAlimentaire;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +36,7 @@ import static org.mockito.Mockito.when;
 class ProposerRepasApplicationServiceTest {
 
     private static final ProfilUtilisateur PROFIL =
-            new ProfilUtilisateur(Enseigne.CARREFOUR, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT);
+            new ProfilUtilisateur(Enseigne.CARREFOUR, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT, NombreDePersonnes.une());
 
     @Mock
     private CatalogueRepasPort catalogueRepasPort;

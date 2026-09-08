@@ -49,7 +49,7 @@ class RavitoApplicationIT {
     void propose_compose_un_plan_et_estime_son_cout_de_bout_en_bout() throws Exception {
         // 1. Proposition de repas pour le profil de demo (NORMAL/DEBUTANT)
         String requeteProfil = """
-                {"enseigne":"CARREFOUR","style":"NORMAL","niveau":"DEBUTANT"}
+                {"enseigne":"CARREFOUR","style":"NORMAL","niveau":"DEBUTANT","nombreDePersonnes":2}
                 """;
         ResponseEntity<String> propositionReponse = restTemplate.postForEntity(
                 "/api/repas/propositions", entiteJson(requeteProfil), String.class);

@@ -48,7 +48,7 @@ class ProposerRepasControllerTest {
 
         mockMvc.perform(post("/api/repas/propositions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\"}"))
+                        .content("{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\",\"nombreDePersonnes\":2}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.petitsDejeuners", hasSize(5)))
                 .andExpect(jsonPath("$.dejeuners", hasSize(5)));
@@ -63,13 +63,26 @@ class ProposerRepasControllerTest {
     }
 
     @Test
+    void renvoie_400_si_le_nombre_de_personnes_est_hors_bornes() throws Exception {
+        mockMvc.perform(post("/api/repas/propositions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\",\"nombreDePersonnes\":0}"))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/api/repas/propositions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\",\"nombreDePersonnes\":99}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void renvoie_409_si_le_catalogue_est_insuffisant() throws Exception {
         when(proposerRepasUseCase.proposer(any()))
                 .thenThrow(new CatalogueInsuffisantException(TypeRepas.DEJEUNER, 2, 5));
 
         mockMvc.perform(post("/api/repas/propositions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\"}"))
+                        .content("{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\",\"nombreDePersonnes\":2}"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").exists());
     }
