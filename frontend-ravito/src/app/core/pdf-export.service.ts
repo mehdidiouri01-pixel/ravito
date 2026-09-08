@@ -33,6 +33,8 @@ export class PdfExportService {
       doc.text(`Petit-déjeuner : ${jour.petitDejeuner.nom}`, 20, y);
       y += 6;
       doc.text(`Déjeuner : ${jour.dejeuner.nom}`, 20, y);
+      y += 6;
+      doc.text(`Dîner : ${jour.diner.nom}`, 20, y);
       y += 8;
     });
 

@@ -47,7 +47,8 @@ public class ComposerPlanSemaineApplicationService implements ComposerPlanSemain
     private Jour versJour(JourSemaine jourSemaine, ChoixJour choixJour) {
         Repas petitDejeuner = parId(choixJour.petitDejeunerId());
         Repas dejeuner = parId(choixJour.dejeunerId());
-        return new Jour(jourSemaine, petitDejeuner, dejeuner);
+        Repas diner = parId(choixJour.dinerId());
+        return new Jour(jourSemaine, petitDejeuner, dejeuner, diner);
     }
 
     private Repas parId(RepasId id) {

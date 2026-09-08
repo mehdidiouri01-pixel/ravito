@@ -31,7 +31,7 @@ class PlanSemaineTest {
         PlanSemaine plan = new PlanSemaine(PROFIL, cinqJoursValides());
 
         assertThat(plan.jours()).hasSize(5);
-        assertThat(plan.tousLesRepas()).hasSize(10);
+        assertThat(plan.tousLesRepas()).hasSize(15);
     }
 
     @Test
@@ -55,22 +55,22 @@ class PlanSemaineTest {
     void refuse_un_repas_incompatible_avec_le_profil() {
         List<Jour> jours = new ArrayList<>(cinqJoursValides());
         Repas dejeunerGourmand = RepasTestFactory.unRepas(TypeRepas.DEJEUNER, StyleAlimentaire.GOURMAND, NiveauCuisine.DEBUTANT);
-        jours.set(0, new Jour(JourSemaine.LUNDI, jours.get(0).petitDejeuner(), dejeunerGourmand));
+        jours.set(0, new Jour(JourSemaine.LUNDI, jours.get(0).petitDejeuner(), dejeunerGourmand, jours.get(0).diner()));
 
         assertThatExceptionOfType(RepasIncompatibleException.class)
                 .isThrownBy(() -> new PlanSemaine(PROFIL, jours));
     }
 
     @Test
-    void genere_la_liste_de_courses_en_consolidant_les_dix_repas() {
+    void genere_la_liste_de_courses_en_consolidant_les_quinze_repas() {
         // RepasTestFactory donne a chaque repas le meme ingredient (1 unite) :
-        // les 10 repas du plan doivent se consolider en une seule ligne de 10.
+        // les 15 repas du plan doivent se consolider en une seule ligne de 15.
         PlanSemaine plan = new PlanSemaine(PROFIL, cinqJoursValides());
 
         ListeCourses listeCourses = plan.genererListeCourses();
 
         assertThat(listeCourses.lignes()).hasSize(1);
-        assertThat(listeCourses.lignes().get(0).quantiteTotale().valeur()).isEqualByComparingTo("10");
+        assertThat(listeCourses.lignes().get(0).quantiteTotale().valeur()).isEqualByComparingTo("15");
     }
 
     @Test
@@ -96,13 +96,13 @@ class PlanSemaineTest {
     @Test
     void multiplie_les_quantites_par_le_nombre_de_personnes_du_foyer() {
         // RepasTestFactory donne a chaque repas 1 unite du meme ingredient :
-        // 10 repas x 1 unite x 4 personnes = 40.
+        // 15 repas x 1 unite x 4 personnes = 60.
         PlanSemaine plan = new PlanSemaine(profilPour(new NombreDePersonnes(4)), cinqJoursValides());
 
         ListeCourses listeCourses = plan.genererListeCourses();
 
         assertThat(listeCourses.lignes()).hasSize(1);
-        assertThat(listeCourses.lignes().get(0).quantiteTotale().valeur()).isEqualByComparingTo("40");
+        assertThat(listeCourses.lignes().get(0).quantiteTotale().valeur()).isEqualByComparingTo("60");
     }
 
     @Test
@@ -122,6 +122,7 @@ class PlanSemaineTest {
     private static Jour jourValide(JourSemaine jourSemaine) {
         Repas petitDejeuner = RepasTestFactory.unRepas(TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT);
         Repas dejeuner = RepasTestFactory.unRepas(TypeRepas.DEJEUNER, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT);
-        return new Jour(jourSemaine, petitDejeuner, dejeuner);
+        Repas diner = RepasTestFactory.unRepas(TypeRepas.DINER, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT);
+        return new Jour(jourSemaine, petitDejeuner, dejeuner, diner);
     }
 }

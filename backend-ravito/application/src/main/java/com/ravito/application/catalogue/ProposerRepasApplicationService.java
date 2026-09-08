@@ -34,8 +34,9 @@ public class ProposerRepasApplicationService implements ProposerRepasUseCase {
 
         List<Repas> petitsDejeuners = repasCompatibles(TypeRepas.PETIT_DEJEUNER, profil);
         List<Repas> dejeuners = repasCompatibles(TypeRepas.DEJEUNER, profil);
+        List<Repas> diners = repasCompatibles(TypeRepas.DINER, profil);
 
-        return new RepasProposes(petitsDejeuners, dejeuners);
+        return new RepasProposes(petitsDejeuners, dejeuners, diners);
     }
 
     private List<Repas> repasCompatibles(TypeRepas type, ProfilUtilisateur profil) {

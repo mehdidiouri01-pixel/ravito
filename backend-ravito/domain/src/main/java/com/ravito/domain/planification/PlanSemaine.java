@@ -45,6 +45,7 @@ public record PlanSemaine(ProfilUtilisateur profil, List<Jour> jours) {
         for (Jour jour : jours) {
             exigerCompatible(jour.petitDejeuner(), profil);
             exigerCompatible(jour.dejeuner(), profil);
+            exigerCompatible(jour.diner(), profil);
         }
     }
 
@@ -69,13 +70,13 @@ public record PlanSemaine(ProfilUtilisateur profil, List<Jour> jours) {
     }
 
     /**
-     * @return les 10 repas du plan (5 petits-dejeuners + 5 dejeuners), dans
-     * l'ordre des jours. Base de la future generation de la liste de
-     * courses (package {@code courses}).
+     * @return les 15 repas du plan (5 petits-dejeuners + 5 dejeuners +
+     * 5 diners), dans l'ordre des jours. Base de la generation de la liste
+     * de courses (package {@code courses}).
      */
     public List<Repas> tousLesRepas() {
         return jours.stream()
-                .flatMap(jour -> Stream.of(jour.petitDejeuner(), jour.dejeuner()))
+                .flatMap(jour -> Stream.of(jour.petitDejeuner(), jour.dejeuner(), jour.diner()))
                 .toList();
     }
 

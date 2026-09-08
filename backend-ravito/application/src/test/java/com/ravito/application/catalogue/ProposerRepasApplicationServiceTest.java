@@ -29,6 +29,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,6 +47,9 @@ class ProposerRepasApplicationServiceTest {
     @BeforeEach
     void setUp() {
         service = new ProposerRepasApplicationService(catalogueRepasPort);
+        // stub par defaut, permissif : chaque test ne surcharge que ce qui l'interesse.
+        lenient().when(catalogueRepasPort.rechercherParTypeEtStyle(TypeRepas.DINER, StyleAlimentaire.NORMAL))
+                .thenReturn(cinqRepas(TypeRepas.DINER, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT));
     }
 
     @Test
@@ -59,6 +63,7 @@ class ProposerRepasApplicationServiceTest {
 
         verify(catalogueRepasPort).rechercherParTypeEtStyle(TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.NORMAL);
         verify(catalogueRepasPort).rechercherParTypeEtStyle(TypeRepas.DEJEUNER, StyleAlimentaire.NORMAL);
+        verify(catalogueRepasPort).rechercherParTypeEtStyle(TypeRepas.DINER, StyleAlimentaire.NORMAL);
     }
 
     @Test
@@ -92,6 +97,23 @@ class ProposerRepasApplicationServiceTest {
                 .thenReturn(quatreRepas);
         when(catalogueRepasPort.rechercherParTypeEtStyle(TypeRepas.DEJEUNER, StyleAlimentaire.NORMAL))
                 .thenReturn(cinqRepas(TypeRepas.DEJEUNER, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT));
+
+        assertThatExceptionOfType(CatalogueInsuffisantException.class)
+                .isThrownBy(() -> service.proposer(PROFIL));
+    }
+
+    @Test
+    void propage_l_exception_si_moins_de_cinq_diners_compatibles() {
+        List<Repas> quatreDiners = IntStream.range(0, 4)
+                .mapToObj(i -> unRepas(TypeRepas.DINER, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT))
+                .toList();
+
+        when(catalogueRepasPort.rechercherParTypeEtStyle(TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.NORMAL))
+                .thenReturn(cinqRepas(TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT));
+        when(catalogueRepasPort.rechercherParTypeEtStyle(TypeRepas.DEJEUNER, StyleAlimentaire.NORMAL))
+                .thenReturn(cinqRepas(TypeRepas.DEJEUNER, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT));
+        when(catalogueRepasPort.rechercherParTypeEtStyle(TypeRepas.DINER, StyleAlimentaire.NORMAL))
+                .thenReturn(quatreDiners);
 
         assertThatExceptionOfType(CatalogueInsuffisantException.class)
                 .isThrownBy(() -> service.proposer(PROFIL));

@@ -28,8 +28,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * tout l'hexagone tourne assemble d'un bout a l'autre.
  *
  * <p>S'appuie sur les donnees de demo semees par Flyway
- * (V2__donnees_demo.sql, module infrastructure-persistence) : 5
- * petits-dejeuners + 5 dejeuners, style NORMAL, niveau DEBUTANT.
+ * (V2__donnees_demo.sql et suivantes, module infrastructure-persistence) :
+ * au moins 5 petits-dejeuners + 5 dejeuners + 5 diners, style NORMAL,
+ * niveau DEBUTANT.
  */
 @SpringBootTest(classes = RavitoApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -60,16 +61,18 @@ class RavitoApplicationIT {
         // contenu du catalogue seme par Flyway (V2/V3), pas de ce test.
         assertThat(proposition.get("petitsDejeuners").size()).isGreaterThanOrEqualTo(5);
         assertThat(proposition.get("dejeuners").size()).isGreaterThanOrEqualTo(5);
+        assertThat(proposition.get("diners").size()).isGreaterThanOrEqualTo(5);
 
-        // 2. Composition d'un plan de semaine avec le premier petit-dejeuner et
-        // le premier dejeuner proposes, repetes sur les 5 jours (suffisant pour
-        // ce test de plomberie de bout en bout).
+        // 2. Composition d'un plan de semaine avec le premier petit-dejeuner, le
+        // premier dejeuner et le premier diner proposes, repetes sur les 5 jours
+        // (suffisant pour ce test de plomberie de bout en bout).
         UUID petitDejeunerId = UUID.fromString(proposition.get("petitsDejeuners").get(0).get("id").asText());
         UUID dejeunerId = UUID.fromString(proposition.get("dejeuners").get(0).get("id").asText());
+        UUID dinerId = UUID.fromString(proposition.get("diners").get(0).get("id").asText());
 
         String choixJour = """
-                {"petitDejeunerId":"%s","dejeunerId":"%s"}
-                """.formatted(petitDejeunerId, dejeunerId);
+                {"petitDejeunerId":"%s","dejeunerId":"%s","dinerId":"%s"}
+                """.formatted(petitDejeunerId, dejeunerId, dinerId);
         String requetePlan = """
                 {"profil":%s,"choix":{"LUNDI":%s,"MARDI":%s,"MERCREDI":%s,"JEUDI":%s,"VENDREDI":%s}}
                 """.formatted(requeteProfil, choixJour, choixJour, choixJour, choixJour, choixJour);
@@ -80,8 +83,9 @@ class RavitoApplicationIT {
         assertThat(planReponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode plan = objectMapper.readTree(planReponse.getBody());
         assertThat(plan.get("jours")).hasSize(5);
-        // 5 jours x (1 ingredient petit-dej + 1 ingredient dejeuner), consolides :
-        // au moins une ligne de liste de courses, et un prix strictement positif.
+        // 5 jours x (1 ingredient petit-dej + 1 ingredient dejeuner + 1 ingredient
+        // diner), consolides : au moins une ligne de liste de courses, et un prix
+        // strictement positif.
         assertThat(plan.get("listeCourses").get("parRayon")).isNotEmpty();
         assertThat(plan.get("prixEstime").get("montant").decimalValue())
                 .isGreaterThan(java.math.BigDecimal.ZERO);

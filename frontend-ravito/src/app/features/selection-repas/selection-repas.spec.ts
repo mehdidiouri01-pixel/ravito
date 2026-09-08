@@ -16,6 +16,7 @@ function unRepas(id: string, nom: string) {
 const PROPOSITION: RepasProposesResponse = {
   petitsDejeuners: [unRepas('pd-1', 'Tartines'), unRepas('pd-2', 'Céréales')],
   dejeuners: [unRepas('dj-1', 'Pâtes'), unRepas('dj-2', 'Riz')],
+  diners: [unRepas('dn-1', 'Soupe'), unRepas('dn-2', 'Gratin')],
 };
 
 describe('SelectionRepasComponent', () => {
@@ -42,10 +43,10 @@ describe('SelectionRepasComponent', () => {
     fixture.detectChanges();
   }
 
-  it('affiche une ligne par jour, avec 2 listes deroulantes chacune', () => {
+  it('affiche une ligne par jour, avec 3 listes deroulantes chacune', () => {
     const lignes = (fixture.nativeElement as HTMLElement).querySelectorAll('.jour-ligne');
     expect(lignes.length).toBe(5);
-    expect(selects().length).toBe(10);
+    expect(selects().length).toBe(15);
   });
 
   it('desactive la validation tant que les 5 jours ne sont pas complets', () => {
@@ -54,8 +55,8 @@ describe('SelectionRepasComponent', () => {
   });
 
   it('accepte le meme repas pour deux jours differents (doublon autorise)', () => {
-    // selects() : [lundi-petitDej, lundi-dej, mardi-petitDej, mardi-dej, ...]
-    const [lundiPetitDej, , mardiPetitDej] = selects();
+    // selects() : [lundi-petitDej, lundi-dej, lundi-diner, mardi-petitDej, ...]
+    const [lundiPetitDej, , , mardiPetitDej] = selects();
 
     choisir(lundiPetitDej, 'pd-1');
     choisir(mardiPetitDej, 'pd-1'); // meme petit-dejeuner que lundi, sans erreur
@@ -65,11 +66,12 @@ describe('SelectionRepasComponent', () => {
   });
 
   it('permet de ne remplir que certains jours, dans le desordre', () => {
-    // index 6-7 = jeudi (lundi, mardi, mercredi puis jeudi : 3*2 = 6)
-    const [, , , , , , jeudiPetitDej, jeudiDejeuner] = selects();
+    // lundi(0-2), mardi(3-5), mercredi(6-8), jeudi(9-11) : 3*3 = 9
+    const [, , , , , , , , , jeudiPetitDej, jeudiDejeuner, jeudiDiner] = selects();
 
     choisir(jeudiPetitDej, 'pd-1');
     choisir(jeudiDejeuner, 'dj-1');
+    choisir(jeudiDiner, 'dn-1');
 
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('1/5');
   });
@@ -97,16 +99,17 @@ describe('SelectionRepasComponent', () => {
     let emis: Record<JourSemaine, ChoixJourRequest> | undefined;
     fixture.componentInstance.selectionValidee.subscribe((valeur) => (emis = valeur));
 
-    // Remplit chaque jour : colonne paire = petit-dejeuner, colonne impaire = dejeuner.
+    // Remplit chaque jour : colonnes 0=petit-dejeuner, 1=dejeuner, 2=diner.
     const tousLesSelects = selects();
-    for (let i = 0; i < tousLesSelects.length; i += 2) {
+    for (let i = 0; i < tousLesSelects.length; i += 3) {
       choisir(tousLesSelects[i], 'pd-1');
       choisir(tousLesSelects[i + 1], 'dj-1');
+      choisir(tousLesSelects[i + 2], 'dn-1');
     }
 
     (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.valider')?.click();
 
-    expect(emis?.['LUNDI']).toEqual({ petitDejeunerId: 'pd-1', dejeunerId: 'dj-1' });
-    expect(emis?.['VENDREDI']).toEqual({ petitDejeunerId: 'pd-1', dejeunerId: 'dj-1' });
+    expect(emis?.['LUNDI']).toEqual({ petitDejeunerId: 'pd-1', dejeunerId: 'dj-1', dinerId: 'dn-1' });
+    expect(emis?.['VENDREDI']).toEqual({ petitDejeunerId: 'pd-1', dejeunerId: 'dj-1', dinerId: 'dn-1' });
   });
 });

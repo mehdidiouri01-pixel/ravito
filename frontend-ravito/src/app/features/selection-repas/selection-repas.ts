@@ -6,9 +6,10 @@ import { RecetteModaleComponent } from '../../ui/recette-modale/recette-modale';
 interface ChoixJourPartiel {
   petitDejeunerId: string;
   dejeunerId: string;
+  dinerId: string;
 }
 
-const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '' };
+const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dinerId: '' };
 
 /**
  * Une ligne par jour, chacune avec 2 listes deroulantes independantes.
@@ -76,6 +77,28 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '' };
                 </button>
               </div>
             </label>
+
+            <label>
+              Dîner
+              <div class="select-avec-recette">
+                <select (change)="choisirDiner(jour, $any($event.target).value)">
+                  <option value="" [selected]="choix()[jour].dinerId === ''">— Choisir —</option>
+                  @for (repas of proposition().diners; track repas.id) {
+                    <option [value]="repas.id" [selected]="repas.id === choix()[jour].dinerId">
+                      {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
+                    </option>
+                  }
+                </select>
+                <button
+                  type="button"
+                  class="voir-recette"
+                  [disabled]="choix()[jour].dinerId === ''"
+                  (click)="afficherRecette(jour, 'dinerId', proposition().diners)"
+                >
+                  Recette
+                </button>
+              </div>
+            </label>
           </article>
         }
       </div>
@@ -107,7 +130,7 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '' };
 
       .jour-ligne {
         display: grid;
-        grid-template-columns: 6rem 1fr 1fr;
+        grid-template-columns: 6rem 1fr 1fr 1fr;
         align-items: center;
         gap: 1rem;
         padding: 0.85rem 1rem;
@@ -194,6 +217,10 @@ export class SelectionRepasComponent {
     this.choix.update((actuel) => ({ ...actuel, [jour]: { ...actuel[jour], dejeunerId: repasId } }));
   }
 
+  protected choisirDiner(jour: JourSemaine, repasId: string): void {
+    this.choix.update((actuel) => ({ ...actuel, [jour]: { ...actuel[jour], dinerId: repasId } }));
+  }
+
   /**
    * Affiche la recette du repas actuellement choisi dans la case (jour,
    * type). Rien a afficher si la case est encore vide — le bouton est de
@@ -219,6 +246,6 @@ export class SelectionRepasComponent {
   }
 
   private estComplet(choixJour: ChoixJourPartiel): boolean {
-    return choixJour.petitDejeunerId !== '' && choixJour.dejeunerId !== '';
+    return choixJour.petitDejeunerId !== '' && choixJour.dejeunerId !== '' && choixJour.dinerId !== '';
   }
 }

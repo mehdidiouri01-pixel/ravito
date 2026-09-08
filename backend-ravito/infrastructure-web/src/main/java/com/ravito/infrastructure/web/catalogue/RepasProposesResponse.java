@@ -4,11 +4,12 @@ import com.ravito.domain.catalogue.RepasProposes;
 
 import java.util.List;
 
-public record RepasProposesResponse(List<RepasResponse> petitsDejeuners, List<RepasResponse> dejeuners) {
+public record RepasProposesResponse(List<RepasResponse> petitsDejeuners, List<RepasResponse> dejeuners, List<RepasResponse> diners) {
 
     public static RepasProposesResponse depuis(RepasProposes repasProposes) {
         return new RepasProposesResponse(
                 repasProposes.petitsDejeuners().stream().map(RepasResponse::depuis).toList(),
-                repasProposes.dejeuners().stream().map(RepasResponse::depuis).toList());
+                repasProposes.dejeuners().stream().map(RepasResponse::depuis).toList(),
+                repasProposes.diners().stream().map(RepasResponse::depuis).toList());
     }
 }

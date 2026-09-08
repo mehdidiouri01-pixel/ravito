@@ -43,7 +43,7 @@ class ProposerRepasControllerTest {
     @Test
     void renvoie_200_avec_la_proposition_de_repas() throws Exception {
         RepasProposes proposition = new RepasProposes(
-                cinqRepas(TypeRepas.PETIT_DEJEUNER), cinqRepas(TypeRepas.DEJEUNER));
+                cinqRepas(TypeRepas.PETIT_DEJEUNER), cinqRepas(TypeRepas.DEJEUNER), cinqRepas(TypeRepas.DINER));
         when(proposerRepasUseCase.proposer(any())).thenReturn(proposition);
 
         mockMvc.perform(post("/api/repas/propositions")
@@ -51,7 +51,8 @@ class ProposerRepasControllerTest {
                         .content("{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\",\"nombreDePersonnes\":2}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.petitsDejeuners", hasSize(5)))
-                .andExpect(jsonPath("$.dejeuners", hasSize(5)));
+                .andExpect(jsonPath("$.dejeuners", hasSize(5)))
+                .andExpect(jsonPath("$.diners", hasSize(5)));
     }
 
     @Test

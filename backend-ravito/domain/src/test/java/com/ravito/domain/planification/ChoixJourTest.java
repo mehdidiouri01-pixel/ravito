@@ -9,11 +9,16 @@ class ChoixJourTest {
 
     @Test
     void refuse_un_identifiant_de_petit_dejeuner_nul() {
-        assertThatNullPointerException().isThrownBy(() -> new ChoixJour(null, RepasId.nouveau()));
+        assertThatNullPointerException().isThrownBy(() -> new ChoixJour(null, RepasId.nouveau(), RepasId.nouveau()));
     }
 
     @Test
     void refuse_un_identifiant_de_dejeuner_nul() {
-        assertThatNullPointerException().isThrownBy(() -> new ChoixJour(RepasId.nouveau(), null));
+        assertThatNullPointerException().isThrownBy(() -> new ChoixJour(RepasId.nouveau(), null, RepasId.nouveau()));
+    }
+
+    @Test
+    void refuse_un_identifiant_de_diner_nul() {
+        assertThatNullPointerException().isThrownBy(() -> new ChoixJour(RepasId.nouveau(), RepasId.nouveau(), null));
     }
 }

@@ -96,7 +96,7 @@ class ComposerPlanSemaineControllerTest {
      */
     private static String uneRequeteValide() {
         UUID unId = UUID.randomUUID();
-        String choixJour = "{\"petitDejeunerId\":\"" + unId + "\",\"dejeunerId\":\"" + unId + "\"}";
+        String choixJour = "{\"petitDejeunerId\":\"" + unId + "\",\"dejeunerId\":\"" + unId + "\",\"dinerId\":\"" + unId + "\"}";
         return "{\"profil\":{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\",\"nombreDePersonnes\":2},"
                 + "\"choix\":{"
                 + "\"LUNDI\":" + choixJour + ","
@@ -111,7 +111,8 @@ class ComposerPlanSemaineControllerTest {
         List<Jour> jours = List.of(JourSemaine.values()).stream()
                 .map(jourSemaine -> new Jour(jourSemaine,
                         unRepas(TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.NORMAL),
-                        unRepas(TypeRepas.DEJEUNER, StyleAlimentaire.NORMAL)))
+                        unRepas(TypeRepas.DEJEUNER, StyleAlimentaire.NORMAL),
+                        unRepas(TypeRepas.DINER, StyleAlimentaire.NORMAL)))
                 .toList();
         return new PlanSemaine(PROFIL, jours);
     }

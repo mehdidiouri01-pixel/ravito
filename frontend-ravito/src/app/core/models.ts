@@ -8,7 +8,7 @@
 export type Enseigne = 'CARREFOUR' | 'LECLERC' | 'LIDL' | 'AUCHAN';
 export type StyleAlimentaire = 'HEALTHY' | 'NORMAL' | 'GOURMAND';
 export type NiveauCuisine = 'DEBUTANT' | 'CONFIRME';
-export type TypeRepas = 'PETIT_DEJEUNER' | 'DEJEUNER';
+export type TypeRepas = 'PETIT_DEJEUNER' | 'DEJEUNER' | 'DINER';
 export type JourSemaine = 'LUNDI' | 'MARDI' | 'MERCREDI' | 'JEUDI' | 'VENDREDI';
 export type RayonMagasin =
   | 'FRUITS_LEGUMES'
@@ -57,11 +57,13 @@ export interface RepasResponse {
 export interface RepasProposesResponse {
   petitsDejeuners: RepasResponse[];
   dejeuners: RepasResponse[];
+  diners: RepasResponse[];
 }
 
 export interface ChoixJourRequest {
   petitDejeunerId: string;
   dejeunerId: string;
+  dinerId: string;
 }
 
 export interface ComposerPlanSemaineRequest {
@@ -73,6 +75,7 @@ export interface JourResponse {
   jour: JourSemaine;
   petitDejeuner: RepasResponse;
   dejeuner: RepasResponse;
+  diner: RepasResponse;
 }
 
 export interface LigneListeCoursesResponse {

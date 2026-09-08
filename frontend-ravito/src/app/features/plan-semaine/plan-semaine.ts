@@ -34,6 +34,14 @@ import { RecetteModaleComponent } from '../../ui/recette-modale/recette-modale';
               </div>
               <button type="button" class="voir-recette" (click)="afficherRecette(jour.dejeuner)">Recette</button>
             </div>
+
+            <div class="repas-bloc">
+              <div>
+                <span class="etiquette">Dîner</span>
+                <p class="repas-nom">{{ jour.diner.nom }}</p>
+              </div>
+              <button type="button" class="voir-recette" (click)="afficherRecette(jour.diner)">Recette</button>
+            </div>
           </article>
         }
       </div>

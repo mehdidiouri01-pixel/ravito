@@ -58,9 +58,11 @@ class ComposerPlanSemaineApplicationServiceTest {
         for (JourSemaine jour : JourSemaine.values()) {
             Repas petitDejeuner = unRepas(TypeRepas.PETIT_DEJEUNER);
             Repas dejeuner = unRepas(TypeRepas.DEJEUNER);
+            Repas diner = unRepas(TypeRepas.DINER);
             stubParId(petitDejeuner);
             stubParId(dejeuner);
-            choix.put(jour, new ChoixJour(petitDejeuner.id(), dejeuner.id()));
+            stubParId(diner);
+            choix.put(jour, new ChoixJour(petitDejeuner.id(), dejeuner.id(), diner.id()));
         }
 
         PlanSemaine plan = service.composer(PROFIL, choix);
@@ -73,10 +75,12 @@ class ComposerPlanSemaineApplicationServiceTest {
     void leve_repas_introuvable_si_un_identifiant_ne_correspond_a_rien() {
         RepasId idInconnu = RepasId.nouveau();
         Repas dejeuner = unRepas(TypeRepas.DEJEUNER);
+        Repas diner = unRepas(TypeRepas.DINER);
         stubParId(dejeuner);
+        stubParId(diner);
         when(catalogueRepasPort.parId(idInconnu)).thenReturn(Optional.empty());
 
-        Map<JourSemaine, ChoixJour> choix = planComplet(idInconnu, dejeuner.id());
+        Map<JourSemaine, ChoixJour> choix = planComplet(idInconnu, dejeuner.id(), diner.id());
 
         assertThatExceptionOfType(RepasIntrouvableException.class)
                 .isThrownBy(() -> service.composer(PROFIL, choix));
@@ -89,10 +93,12 @@ class ComposerPlanSemaineApplicationServiceTest {
         Repas petitDejeunerIncompatible = new Repas(RepasId.nouveau(), "petit-dejeuner gourmand",
                 TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.GOURMAND, NiveauCuisine.DEBUTANT, uneListeDIngredients());
         Repas dejeuner = unRepas(TypeRepas.DEJEUNER);
+        Repas diner = unRepas(TypeRepas.DINER);
         stubParId(petitDejeunerIncompatible);
         stubParId(dejeuner);
+        stubParId(diner);
 
-        Map<JourSemaine, ChoixJour> choix = planComplet(petitDejeunerIncompatible.id(), dejeuner.id());
+        Map<JourSemaine, ChoixJour> choix = planComplet(petitDejeunerIncompatible.id(), dejeuner.id(), diner.id());
 
         assertThatExceptionOfType(RepasIncompatibleException.class)
                 .isThrownBy(() -> service.composer(PROFIL, choix));
@@ -100,13 +106,14 @@ class ComposerPlanSemaineApplicationServiceTest {
 
     /**
      * Construit un choix complet sur les 5 jours, en reutilisant les memes
-     * identifiants de petit-dejeuner/dejeuner sur chaque jour — suffisant
-     * pour les tests qui ne portent que sur un seul jour particulier.
+     * identifiants de petit-dejeuner/dejeuner/diner sur chaque jour —
+     * suffisant pour les tests qui ne portent que sur un seul jour
+     * particulier.
      */
-    private Map<JourSemaine, ChoixJour> planComplet(RepasId petitDejeunerId, RepasId dejeunerId) {
+    private Map<JourSemaine, ChoixJour> planComplet(RepasId petitDejeunerId, RepasId dejeunerId, RepasId dinerId) {
         Map<JourSemaine, ChoixJour> choix = new EnumMap<>(JourSemaine.class);
         for (JourSemaine jour : JourSemaine.values()) {
-            choix.put(jour, new ChoixJour(petitDejeunerId, dejeunerId));
+            choix.put(jour, new ChoixJour(petitDejeunerId, dejeunerId, dinerId));
         }
         return choix;
     }
