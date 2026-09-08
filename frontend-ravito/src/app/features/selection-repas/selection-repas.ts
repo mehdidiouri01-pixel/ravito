@@ -143,9 +143,10 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dine
       .inspiration {
         margin-top: 1rem;
         padding: 0.85rem 1rem;
-        border-radius: 0.75rem;
+        border-radius: var(--rayon);
         border: 1px dashed var(--couleur-accent);
-        background: var(--couleur-surface);
+        background: var(--couleur-surface-transparente);
+        backdrop-filter: blur(6px);
       }
 
       .inspiration h3 {
@@ -185,9 +186,19 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dine
         align-items: center;
         gap: 1rem;
         padding: 0.85rem 1rem;
-        border-radius: 0.75rem;
+        border-radius: var(--rayon);
         border: 1px solid var(--couleur-bordure);
-        background: var(--couleur-surface);
+        background: var(--couleur-surface-transparente);
+        backdrop-filter: blur(6px);
+        box-shadow: var(--ombre-carte);
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+
+      .jour-ligne:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--ombre-carte-hover);
       }
 
       .jour-ligne h3 {

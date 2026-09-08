@@ -1,0 +1,77 @@
+/* Trois taches de couleur floues, fixes, qui derivent lentement en arriere
+ * plan de toute l'appli — le "mouvement ambiant" demande par l'utilisateur,
+ * volontairement discret (opacite basse, tres flou) pour ne jamais gener la
+ * lecture des formulaires/listes qui passent par-dessus.
+ */
+.fond-anime {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--couleur-fond);
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(65px);
+  opacity: 0.6;
+}
+
+.blob-1 {
+  width: 34rem;
+  height: 34rem;
+  top: -12%;
+  left: -10%;
+  background: rgba(230, 168, 68, 0.5);
+  animation: derive-1 24s ease-in-out infinite;
+}
+
+.blob-2 {
+  width: 26rem;
+  height: 26rem;
+  top: 25%;
+  right: -10%;
+  background: rgba(217, 119, 87, 0.55);
+  animation: derive-2 28s ease-in-out infinite;
+}
+
+.blob-3 {
+  width: 30rem;
+  height: 30rem;
+  bottom: -14%;
+  left: 22%;
+  background: rgba(31, 92, 66, 0.4);
+  animation: derive-3 32s ease-in-out infinite;
+}
+
+@keyframes derive-1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(6%, 8%) scale(1.12);
+  }
+}
+
+@keyframes derive-2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-9%, 6%) scale(0.94);
+  }
+}
+
+@keyframes derive-3 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(5%, -7%) scale(1.08);
+  }
+}

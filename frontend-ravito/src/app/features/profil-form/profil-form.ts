@@ -64,6 +64,12 @@ import type { Enseigne, NiveauCuisine, ProfilRequest, StyleAlimentaire } from '.
         flex-direction: column;
         gap: 1.25rem;
         max-width: 24rem;
+        padding: 1.5rem;
+        border-radius: var(--rayon);
+        border: 1px solid var(--couleur-bordure);
+        background: var(--couleur-surface-transparente);
+        backdrop-filter: blur(6px);
+        box-shadow: var(--ombre-carte);
       }
 
       label {

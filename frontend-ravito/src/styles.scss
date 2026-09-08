@@ -1,13 +1,23 @@
+/* ==========================================================================
+   Palette "Nature moderne" (chaude, editoriale) + mouvement ambiant. Fraunces
+   pour les titres, Inter pour le corps. Le fond anime (blobs, voir app.scss)
+   et le header photo (voir planificateur.ts) completent l'identite visuelle.
+   ========================================================================== */
 :root {
-  --couleur-fond: #f7f6f2;
+  --couleur-fond: #faf7f0;
   --couleur-surface: #ffffff;
-  --couleur-texte: #1f2421;
-  --couleur-texte-att: #6b7268;
-  --couleur-bordure: #e0ddd4;
-  --couleur-accent: #2f6b4f;
-  --couleur-accent-att: #e8f3ec;
+  --couleur-surface-transparente: rgba(255, 255, 255, 0.86);
+  --couleur-texte: #24291f;
+  --couleur-texte-att: #6f7566;
+  --couleur-bordure: #e6e1d3;
+  --couleur-accent: #1f5c42;
+  --couleur-accent-att: #eaf3e7;
+  --couleur-accent-2: #d97757;
   --couleur-erreur-fond: #fbe9e7;
   --couleur-erreur-texte: #9c3b2f;
+  --ombre-carte: 0 1px 2px rgba(36, 41, 31, 0.04), 0 8px 24px rgba(36, 41, 31, 0.07);
+  --ombre-carte-hover: 0 4px 8px rgba(36, 41, 31, 0.05), 0 16px 32px rgba(36, 41, 31, 0.1);
+  --rayon: 1rem;
 }
 
 * {
@@ -18,38 +28,57 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--couleur-fond);
+  min-height: 100%;
+  /* Pas de couleur de fond ici : Chrome peint le fond de <body> comme le
+     "canvas" du document, au-dessus des elements position:fixed en
+     z-index negatif — les blobs animes (app.scss) resteraient invisibles
+     derriere. La couleur de base vit sur .fond-anime a la place (voir
+     AppComponent), un element DOM normal ou l'empilement se comporte
+     comme attendu. */
   color: var(--couleur-texte);
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.55;
 }
 
 h1,
 h2,
 h3,
 h4 {
-  font-weight: 700;
-  line-height: 1.2;
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
 }
 
 button {
   font: inherit;
+  font-weight: 600;
   cursor: pointer;
   border: none;
-  border-radius: 0.6rem;
-  padding: 0.65rem 1.25rem;
+  border-radius: 0.7rem;
+  padding: 0.7rem 1.4rem;
   background: var(--couleur-accent);
   color: white;
-  transition: opacity 0.15s;
+  box-shadow: 0 1px 2px rgba(31, 92, 66, 0.15);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s;
 }
 
 button:hover:not(:disabled) {
-  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(31, 92, 66, 0.25);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 button:disabled {
   background: var(--couleur-bordure);
   color: var(--couleur-texte-att);
+  box-shadow: none;
   cursor: not-allowed;
 }
 
@@ -57,4 +86,25 @@ button.recommencer {
   background: transparent;
   color: var(--couleur-accent);
   border: 1px solid var(--couleur-accent);
+  box-shadow: none;
+}
+
+select:focus-visible,
+input:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--couleur-accent-2);
+  outline-offset: 2px;
+}
+
+/* Respect du choix utilisateur : coupe toutes les animations decoratives
+   (blobs, transitions d'etape, hover lift) pour qui a demande moins de
+   mouvement au niveau systeme — accessibilite, pas cosmetique. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

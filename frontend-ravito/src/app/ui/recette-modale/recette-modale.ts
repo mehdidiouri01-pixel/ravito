@@ -41,22 +41,46 @@ import type { RepasResponse } from '../../core/models';
         position: fixed;
         inset: 0;
         background: rgba(31, 36, 33, 0.5);
+        backdrop-filter: blur(3px);
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 1.5rem;
         z-index: 10;
+        animation: voile-entree 0.2s ease both;
       }
 
       .modale {
         position: relative;
         background: var(--couleur-surface);
-        border-radius: 0.75rem;
+        border-radius: var(--rayon);
         padding: 1.75rem;
         max-width: 26rem;
         width: 100%;
         max-height: 80vh;
         overflow-y: auto;
+        box-shadow: var(--ombre-carte-hover);
+        animation: modale-entree 0.25s ease both;
+      }
+
+      @keyframes voile-entree {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes modale-entree {
+        from {
+          opacity: 0;
+          transform: translateY(0.75rem) scale(0.97);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
       }
 
       .modale h3 {

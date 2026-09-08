@@ -83,9 +83,19 @@ import { RecetteModaleComponent } from '../../ui/recette-modale/recette-modale';
 
       .jour {
         border: 1px solid var(--couleur-bordure);
-        border-radius: 0.75rem;
+        border-radius: var(--rayon);
         padding: 1rem;
-        background: var(--couleur-surface);
+        background: var(--couleur-surface-transparente);
+        backdrop-filter: blur(6px);
+        box-shadow: var(--ombre-carte);
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+
+      .jour:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--ombre-carte-hover);
       }
 
       .jour h3 {

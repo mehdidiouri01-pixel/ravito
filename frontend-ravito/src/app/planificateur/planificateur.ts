@@ -28,9 +28,12 @@ type Etape = 'PROFIL' | 'SELECTION' | 'RESULTAT';
   imports: [ProfilFormComponent, SelectionRepasComponent, PlanSemaineComponent],
   template: `
     <main class="planificateur">
-      <header>
-        <h1>Ravito</h1>
-        <p class="sous-titre">Votre plan de repas de la semaine, en 3 étapes.</p>
+      <header class="hero">
+        <div class="hero-voile"></div>
+        <div class="hero-contenu">
+          <h1>Ravito</h1>
+          <p class="sous-titre">Votre plan de repas de la semaine, en 3 étapes.</p>
+        </div>
       </header>
 
       @if (erreur()) {
@@ -43,24 +46,30 @@ type Etape = 'PROFIL' | 'SELECTION' | 'RESULTAT';
 
       @switch (etape()) {
         @case ('PROFIL') {
-          <app-profil-form (profilChoisi)="surProfilChoisi($event)" />
+          <div class="etape-contenu">
+            <app-profil-form (profilChoisi)="surProfilChoisi($event)" />
+          </div>
         }
         @case ('SELECTION') {
           @if (proposition(); as valeurProposition) {
-            <app-selection-repas
-              [proposition]="valeurProposition"
-              [repasGenere]="repasGenere()"
-              (selectionValidee)="surSelectionValidee($event)"
-              (genererIdee)="surGenererIdee($event)"
-            />
+            <div class="etape-contenu">
+              <app-selection-repas
+                [proposition]="valeurProposition"
+                [repasGenere]="repasGenere()"
+                (selectionValidee)="surSelectionValidee($event)"
+                (genererIdee)="surGenererIdee($event)"
+              />
+            </div>
           }
         }
         @case ('RESULTAT') {
           @if (plan(); as valeurPlan) {
-            <app-plan-semaine [plan]="valeurPlan" [nombreDePersonnes]="nombreDePersonnes()" />
-            <div class="actions-resultat">
-              <button type="button" (click)="exporterPdf()">Exporter en PDF</button>
-              <button type="button" class="recommencer" (click)="recommencer()">Recommencer</button>
+            <div class="etape-contenu">
+              <app-plan-semaine [plan]="valeurPlan" [nombreDePersonnes]="nombreDePersonnes()" />
+              <div class="actions-resultat">
+                <button type="button" (click)="exporterPdf()">Exporter en PDF</button>
+                <button type="button" class="recommencer" (click)="recommencer()">Recommencer</button>
+              </div>
             </div>
           }
         }
@@ -72,21 +81,62 @@ type Etape = 'PROFIL' | 'SELECTION' | 'RESULTAT';
       .planificateur {
         max-width: 64rem;
         margin: 0 auto;
-        padding: 2rem 1.5rem 4rem;
+        padding: 1.5rem 1.5rem 4rem;
       }
 
-      header {
+      .hero {
+        position: relative;
         margin-bottom: 2rem;
+        border-radius: 1.25rem;
+        overflow: hidden;
+        min-height: 12rem;
+        display: flex;
+        align-items: flex-end;
+        background-image: url('https://images.unsplash.com/photo-1579113800032-c38bd7635818?auto=format&fit=crop&w=1600&q=80');
+        background-size: cover;
+        background-position: center;
+        box-shadow: var(--ombre-carte);
+      }
+
+      .hero-voile {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(31, 46, 34, 0.15) 0%, rgba(20, 28, 20, 0.82) 100%);
+      }
+
+      .hero-contenu {
+        position: relative;
+        padding: 2rem 1.75rem 1.5rem;
+        color: white;
       }
 
       h1 {
         margin: 0;
-        font-size: 2rem;
+        font-size: 2.25rem;
+        color: white;
       }
 
       .sous-titre {
-        color: var(--couleur-texte-att);
-        margin: 0.25rem 0 0;
+        color: rgba(255, 255, 255, 0.85);
+        margin: 0.3rem 0 0;
+      }
+
+      /* Chaque changement d'etape recree ce noeud (via @switch) : l'animation
+         se rejoue donc automatiquement a chaque transition, sans dependance
+         au module @angular/animations. */
+      .etape-contenu {
+        animation: etape-entree 0.45s ease both;
+      }
+
+      @keyframes etape-entree {
+        from {
+          opacity: 0;
+          transform: translateY(0.75rem);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       .erreur {
