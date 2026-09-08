@@ -1,7 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
-import type { ComposerPlanSemaineRequest, PlanSemaineResponse, ProfilRequest, RepasProposesResponse } from './models';
+import type {
+  ComposerPlanSemaineRequest,
+  GenererRepasRequest,
+  PlanSemaineResponse,
+  ProfilRequest,
+  RepasProposesResponse,
+  RepasResponse,
+} from './models';
 
 /**
  * Client HTTP vers l'API Ravito. Chemins relatifs ("/api/...") : en
@@ -19,5 +26,9 @@ export class RavitoApiService {
 
   composerPlan(requete: ComposerPlanSemaineRequest): Observable<PlanSemaineResponse> {
     return this.http.post<PlanSemaineResponse>('/api/plans-semaine', requete);
+  }
+
+  genererRepas(requete: GenererRepasRequest): Observable<RepasResponse> {
+    return this.http.post<RepasResponse>('/api/repas/generation', requete);
   }
 }

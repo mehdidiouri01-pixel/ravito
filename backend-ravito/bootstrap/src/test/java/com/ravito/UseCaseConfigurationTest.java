@@ -1,5 +1,6 @@
 package com.ravito;
 
+import com.ravito.application.catalogue.GenererRepasApplicationService;
 import com.ravito.application.catalogue.ProposerRepasApplicationService;
 import com.ravito.application.planification.ComposerPlanSemaineApplicationService;
 import com.ravito.application.prix.EstimerCoutApplicationService;
@@ -41,5 +42,13 @@ class UseCaseConfigurationTest {
 
         assertThat(configuration.estimerCoutUseCase(port))
                 .isInstanceOf(EstimerCoutApplicationService.class);
+    }
+
+    @Test
+    void cable_genererRepasUseCase_sur_le_catalogue() {
+        CatalogueRepasPort port = Mockito.mock(CatalogueRepasPort.class);
+
+        assertThat(configuration.genererRepasUseCase(port))
+                .isInstanceOf(GenererRepasApplicationService.class);
     }
 }

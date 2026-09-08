@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SelectionRepasComponent } from './selection-repas';
-import type { ChoixJourRequest, JourSemaine, RepasProposesResponse } from '../../core/models';
+import type { ChoixJourRequest, JourSemaine, RepasProposesResponse, TypeRepas } from '../../core/models';
 
-function unRepas(id: string, nom: string) {
+function unRepas(id: string, nom: string, type: TypeRepas = 'PETIT_DEJEUNER') {
   return {
     id,
     nom,
-    type: 'PETIT_DEJEUNER' as const,
+    type,
     style: 'NORMAL' as const,
     niveauRequis: 'DEBUTANT' as const,
     ingredients: [],
@@ -111,5 +111,27 @@ describe('SelectionRepasComponent', () => {
 
     expect(emis?.['LUNDI']).toEqual({ petitDejeunerId: 'pd-1', dejeunerId: 'dj-1', dinerId: 'dn-1' });
     expect(emis?.['VENDREDI']).toEqual({ petitDejeunerId: 'pd-1', dejeunerId: 'dj-1', dinerId: 'dn-1' });
+  });
+
+  it('emet le type demande quand on clique sur un bouton "Générer une idée"', () => {
+    let typeDemande: TypeRepas | undefined;
+    fixture.componentInstance.genererIdee.subscribe((type) => (typeDemande = type));
+
+    const boutons = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.inspiration-boutons button'),
+    );
+    expect(boutons.length).toBe(3);
+    boutons[2].click(); // Dîner
+
+    expect(typeDemande).toBe('DINER');
+  });
+
+  it('affiche automatiquement, avec une note, le repas genere recu du conteneur', () => {
+    fixture.componentRef.setInput('repasGenere', unRepas('gen-1', 'Idée surprise', 'DINER'));
+    fixture.detectChanges();
+
+    const modale = (fixture.nativeElement as HTMLElement).querySelector('.modale');
+    expect(modale?.textContent).toContain('Idée surprise');
+    expect(modale?.textContent).toContain('générée');
   });
 });

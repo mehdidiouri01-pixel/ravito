@@ -22,6 +22,9 @@ import type { RepasResponse } from '../../core/models';
           <p class="modale-meta">
             {{ libellesStyle[r.style] }} · {{ r.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }}
           </p>
+          @if (note()) {
+            <p class="modale-note">{{ note() }}</p>
+          }
           <h4>Ingrédients</h4>
           <ul>
             @for (ingredient of r.ingredients; track ingredient.ingredient) {
@@ -65,6 +68,14 @@ import type { RepasResponse } from '../../core/models';
         margin: 0 0 1rem;
       }
 
+      .modale-note {
+        background: var(--couleur-fond);
+        border-radius: 0.5rem;
+        padding: 0.6rem 0.75rem;
+        font-size: 0.85rem;
+        margin: 0 0 1rem;
+      }
+
       .modale ul {
         margin: 0;
         padding-left: 1.1rem;
@@ -83,6 +94,7 @@ import type { RepasResponse } from '../../core/models';
 })
 export class RecetteModaleComponent {
   readonly repas = input<RepasResponse | null>(null);
+  readonly note = input<string | null>(null);
   readonly fermer = output<void>();
 
   protected readonly libellesStyle = LIBELLES_STYLE;

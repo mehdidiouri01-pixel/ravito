@@ -9,6 +9,8 @@ import type {
   PlanSemaineResponse,
   ProfilRequest,
   RepasProposesResponse,
+  RepasResponse,
+  TypeRepas,
 } from '../core/models';
 import { ProfilFormComponent } from '../features/profil-form/profil-form';
 import { SelectionRepasComponent } from '../features/selection-repas/selection-repas';
@@ -45,7 +47,12 @@ type Etape = 'PROFIL' | 'SELECTION' | 'RESULTAT';
         }
         @case ('SELECTION') {
           @if (proposition(); as valeurProposition) {
-            <app-selection-repas [proposition]="valeurProposition" (selectionValidee)="surSelectionValidee($event)" />
+            <app-selection-repas
+              [proposition]="valeurProposition"
+              [repasGenere]="repasGenere()"
+              (selectionValidee)="surSelectionValidee($event)"
+              (genererIdee)="surGenererIdee($event)"
+            />
           }
         }
         @case ('RESULTAT') {
@@ -113,6 +120,7 @@ export class PlanificateurComponent {
   protected readonly profil = signal<ProfilRequest | null>(null);
   protected readonly proposition = signal<RepasProposesResponse | null>(null);
   protected readonly plan = signal<PlanSemaineResponse | null>(null);
+  protected readonly repasGenere = signal<RepasResponse | null>(null);
 
   protected surProfilChoisi(profil: ProfilRequest): void {
     this.profil.set(profil);
@@ -156,6 +164,27 @@ export class PlanificateurComponent {
     });
   }
 
+  protected surGenererIdee(type: TypeRepas): void {
+    const profil = this.profil();
+    if (!profil) {
+      return;
+    }
+
+    this.erreur.set(null);
+    this.chargement.set(true);
+
+    this.api.genererRepas({ profil, type }).subscribe({
+      next: (repas) => {
+        this.repasGenere.set(repas);
+        this.chargement.set(false);
+      },
+      error: (erreur: HttpErrorResponse) => {
+        this.erreur.set(this.messageErreur(erreur));
+        this.chargement.set(false);
+      },
+    });
+  }
+
   /** Le plan affiché est toujours issu d'un profil validé — 1 en repli défensif. */
   protected nombreDePersonnes(): number {
     return this.profil()?.nombreDePersonnes ?? 1;
@@ -173,6 +202,7 @@ export class PlanificateurComponent {
     this.profil.set(null);
     this.proposition.set(null);
     this.plan.set(null);
+    this.repasGenere.set(null);
     this.erreur.set(null);
   }
 

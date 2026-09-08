@@ -1,6 +1,7 @@
 package com.ravito.infrastructure.web;
 
 import com.ravito.domain.catalogue.CatalogueInsuffisantException;
+import com.ravito.domain.catalogue.GenerationRepasImpossibleException;
 import com.ravito.domain.catalogue.RepasIntrouvableException;
 import com.ravito.domain.planification.PlanSemaineInvalideException;
 import com.ravito.domain.planification.RepasIncompatibleException;
@@ -27,6 +28,11 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(CatalogueInsuffisantException.class)
     ResponseEntity<ErrorResponse> catalogueInsuffisant(CatalogueInsuffisantException exception) {
+        return reponse(HttpStatus.CONFLICT, exception);
+    }
+
+    @ExceptionHandler(GenerationRepasImpossibleException.class)
+    ResponseEntity<ErrorResponse> generationImpossible(GenerationRepasImpossibleException exception) {
         return reponse(HttpStatus.CONFLICT, exception);
     }
 

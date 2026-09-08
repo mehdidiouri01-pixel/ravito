@@ -66,6 +66,11 @@ export interface ChoixJourRequest {
   dinerId: string;
 }
 
+export interface GenererRepasRequest {
+  profil: ProfilRequest;
+  type: TypeRepas;
+}
+
 export interface ComposerPlanSemaineRequest {
   profil: ProfilRequest;
   choix: Record<JourSemaine, ChoixJourRequest>;

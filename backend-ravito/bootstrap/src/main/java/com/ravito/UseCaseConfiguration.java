@@ -1,15 +1,19 @@
 package com.ravito;
 
+import com.ravito.application.catalogue.GenererRepasApplicationService;
 import com.ravito.application.catalogue.ProposerRepasApplicationService;
 import com.ravito.application.planification.ComposerPlanSemaineApplicationService;
 import com.ravito.application.prix.EstimerCoutApplicationService;
 import com.ravito.domain.catalogue.CatalogueRepasPort;
+import com.ravito.domain.catalogue.GenererRepasUseCase;
 import com.ravito.domain.catalogue.ProposerRepasUseCase;
 import com.ravito.domain.planification.ComposerPlanSemaineUseCase;
 import com.ravito.domain.prix.EstimationPrixPort;
 import com.ravito.domain.prix.EstimerCoutUseCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Random;
 
 /**
  * Cablage explicite des ports d'entree sur leurs implementations.
@@ -38,5 +42,10 @@ class UseCaseConfiguration {
     @Bean
     EstimerCoutUseCase estimerCoutUseCase(EstimationPrixPort estimationPrixPort) {
         return new EstimerCoutApplicationService(estimationPrixPort);
+    }
+
+    @Bean
+    GenererRepasUseCase genererRepasUseCase(CatalogueRepasPort catalogueRepasPort) {
+        return new GenererRepasApplicationService(catalogueRepasPort, new Random());
     }
 }

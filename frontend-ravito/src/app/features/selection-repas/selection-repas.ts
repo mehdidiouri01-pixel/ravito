@@ -1,7 +1,13 @@
-import { Component, computed, input, output, signal } from '@angular/core';
+import { Component, computed, effect, input, output, signal } from '@angular/core';
 import { JOURS, LIBELLES_JOUR } from '../../core/reference-data';
-import type { ChoixJourRequest, JourSemaine, RepasProposesResponse, RepasResponse } from '../../core/models';
+import type { ChoixJourRequest, JourSemaine, RepasProposesResponse, RepasResponse, TypeRepas } from '../../core/models';
 import { RecetteModaleComponent } from '../../ui/recette-modale/recette-modale';
+
+const TYPES_REPAS: { type: TypeRepas; libelle: string }[] = [
+  { type: 'PETIT_DEJEUNER', libelle: 'Petit-déjeuner' },
+  { type: 'DEJEUNER', libelle: 'Déjeuner' },
+  { type: 'DINER', libelle: 'Dîner' },
+];
 
 interface ChoixJourPartiel {
   petitDejeunerId: string;
@@ -28,6 +34,19 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dine
         Un menu peut être choisi plusieurs fois dans la semaine. Remplissez les jours dans l'ordre qui vous arrange.
       </p>
       <p class="compteur"><strong>{{ joursComplets() }}/5</strong> jours complets</p>
+
+      <section class="inspiration">
+        <h3>Besoin d'inspiration ?</h3>
+        <p class="aide">
+          Génère une idée de repas au hasard, à partir des ingrédients déjà au catalogue — pour l'instant un simple
+          aperçu, pas encore sélectionnable dans votre semaine.
+        </p>
+        <div class="inspiration-boutons">
+          @for (item of typesRepas; track item.type) {
+            <button type="button" (click)="genererIdee.emit(item.type)">✨ {{ item.libelle }}</button>
+          }
+        </div>
+      </section>
 
       <div class="jours">
         @for (jour of jours; track jour) {
@@ -108,7 +127,7 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dine
       </button>
     </section>
 
-    <app-recette-modale [repas]="repasAffiche()" (fermer)="fermerRecette()" />
+    <app-recette-modale [repas]="repasAffiche()" [note]="noteRepasAffiche()" (fermer)="fermerRecette()" />
   `,
   styles: [
     `
@@ -119,6 +138,38 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dine
 
       .compteur {
         font-weight: 600;
+      }
+
+      .inspiration {
+        margin-top: 1rem;
+        padding: 0.85rem 1rem;
+        border-radius: 0.75rem;
+        border: 1px dashed var(--couleur-accent);
+        background: var(--couleur-surface);
+      }
+
+      .inspiration h3 {
+        margin: 0 0 0.25rem;
+        font-size: 1rem;
+      }
+
+      .inspiration .aide {
+        margin: 0 0 0.75rem;
+        font-size: 0.85rem;
+      }
+
+      .inspiration-boutons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .inspiration-boutons button {
+        background: transparent;
+        color: var(--couleur-accent);
+        border: 1px solid var(--couleur-accent);
+        padding: 0.4rem 0.75rem;
+        font-size: 0.85rem;
       }
 
       .jours {
@@ -192,16 +243,37 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dine
 })
 export class SelectionRepasComponent {
   readonly proposition = input.required<RepasProposesResponse>();
+  /** Dernier repas généré par le conteneur (voir PlanificateurComponent), à titre d'aperçu uniquement. */
+  readonly repasGenere = input<RepasResponse | null>(null);
   readonly selectionValidee = output<Record<JourSemaine, ChoixJourRequest>>();
+  readonly genererIdee = output<TypeRepas>();
 
   protected readonly jours = JOURS;
   protected readonly libellesJour = LIBELLES_JOUR;
+  protected readonly typesRepas = TYPES_REPAS;
 
   protected readonly choix = signal<Record<JourSemaine, ChoixJourPartiel>>(
     Object.fromEntries(JOURS.map((jour) => [jour, { ...CHOIX_VIDE }])) as Record<JourSemaine, ChoixJourPartiel>,
   );
 
   protected readonly repasAffiche = signal<RepasResponse | null>(null);
+  protected readonly noteRepasAffiche = signal<string | null>(null);
+
+  constructor() {
+    // Chaque nouvelle idee generee par le conteneur s'affiche automatiquement
+    // dans la pop-up de recette, avec une note qui la distingue d'un repas
+    // reellement choisi (voir la Javadoc de GenererRepasUseCase cote backend :
+    // ephemere, pas encore selectionnable).
+    effect(() => {
+      const genere = this.repasGenere();
+      if (genere) {
+        this.repasAffiche.set(genere);
+        this.noteRepasAffiche.set(
+          "💡 Idée générée aléatoirement à partir du catalogue — pas encore ajoutée à votre semaine.",
+        );
+      }
+    });
+  }
 
   protected readonly joursComplets = computed(
     () => this.jours.filter((jour) => this.estComplet(this.choix()[jour])).length,
@@ -230,12 +302,14 @@ export class SelectionRepasComponent {
     const id = this.choix()[jour][cle];
     const repas = catalogue.find((r) => r.id === id);
     if (repas) {
+      this.noteRepasAffiche.set(null);
       this.repasAffiche.set(repas);
     }
   }
 
   protected fermerRecette(): void {
     this.repasAffiche.set(null);
+    this.noteRepasAffiche.set(null);
   }
 
   protected valider(): void {
