@@ -22,7 +22,7 @@ final class RepasEntityMapper {
                 .map(RepasEntityMapper::versEmbeddable)
                 .toList();
         return new RepasEntity(repas.id().valeur(), repas.nom(), repas.type(), repas.style(),
-                repas.niveauRequis(), ingredients);
+                repas.niveauRequis(), ingredients, repas.etapesPreparation());
     }
 
     static Repas versDomaine(RepasEntity entity) {
@@ -30,7 +30,7 @@ final class RepasEntityMapper {
                 .map(RepasEntityMapper::versIngredientQuantite)
                 .toList();
         return new Repas(new RepasId(entity.getId()), entity.getNom(), entity.getType(), entity.getStyle(),
-                entity.getNiveauRequis(), ingredients);
+                entity.getNiveauRequis(), ingredients, entity.getEtapesPreparation());
     }
 
     private static IngredientQuantiteEmbeddable versEmbeddable(IngredientQuantite ingredientQuantite) {

@@ -33,6 +33,7 @@ public final class RepasTestFactory {
                 new Ingredient("ingredient de test", RayonMagasin.EPICERIE),
                 new Quantite(BigDecimal.ONE, UniteMesure.UNITE));
 
-        return new Repas(RepasId.nouveau(), nom, type, style, niveauRequis, List.of(ingredient));
+        return new Repas(RepasId.nouveau(), nom, type, style, niveauRequis, List.of(ingredient),
+                List.of("Etape de test"));
     }
 }

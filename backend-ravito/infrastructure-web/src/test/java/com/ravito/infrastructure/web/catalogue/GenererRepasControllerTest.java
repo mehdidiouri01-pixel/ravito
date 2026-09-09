@@ -42,7 +42,7 @@ class GenererRepasControllerTest {
         IngredientQuantite ingredient = new IngredientQuantite(
                 new Ingredient("riz", RayonMagasin.EPICERIE), new Quantite(BigDecimal.TEN, UniteMesure.GRAMME));
         Repas genere = new Repas(RepasId.nouveau(), "Riz et poulet maison", TypeRepas.DINER,
-                StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT, List.of(ingredient));
+                StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT, List.of(ingredient), List.of("Etape de test"));
         when(genererRepasUseCase.genererRepas(any(), any())).thenReturn(genere);
 
         mockMvc.perform(post("/api/repas/generation")
@@ -52,7 +52,8 @@ class GenererRepasControllerTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nom").value("Riz et poulet maison"))
-                .andExpect(jsonPath("$.ingredients", org.hamcrest.Matchers.hasSize(1)));
+                .andExpect(jsonPath("$.ingredients", org.hamcrest.Matchers.hasSize(1)))
+                .andExpect(jsonPath("$.etapesPreparation", org.hamcrest.Matchers.hasSize(1)));
     }
 
     @Test

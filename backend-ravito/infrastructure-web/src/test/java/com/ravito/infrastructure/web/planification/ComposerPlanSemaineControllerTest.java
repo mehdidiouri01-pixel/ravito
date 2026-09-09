@@ -152,7 +152,7 @@ class ComposerPlanSemaineControllerTest {
         String choixParId = "{\"id\":\"" + unId + "\"}";
         String dinerGenere = "{\"genere\":{\"nom\":\"Idee generee\",\"type\":\"DINER\",\"style\":\"NORMAL\","
                 + "\"niveauRequis\":\"DEBUTANT\",\"ingredients\":[{\"ingredient\":\"riz\",\"rayon\":\"EPICERIE\","
-                + "\"quantite\":150,\"unite\":\"GRAMME\"}]}}";
+                + "\"quantite\":150,\"unite\":\"GRAMME\"}],\"etapesPreparation\":[\"Etape de test\"]}}";
         String choixJour = "{\"petitDejeuner\":" + choixParId + ",\"dejeuner\":" + choixParId + ",\"diner\":" + dinerGenere + "}";
         return "{\"profil\":{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\",\"nombreDePersonnes\":2},"
                 + "\"choix\":{"
@@ -194,6 +194,7 @@ class ComposerPlanSemaineControllerTest {
         IngredientQuantite ingredient = new IngredientQuantite(
                 new Ingredient("ingredient de test", RayonMagasin.EPICERIE),
                 new Quantite(BigDecimal.ONE, UniteMesure.UNITE));
-        return new Repas(RepasId.nouveau(), "repas de test", type, style, NiveauCuisine.DEBUTANT, List.of(ingredient));
+        return new Repas(RepasId.nouveau(), "repas de test", type, style, NiveauCuisine.DEBUTANT,
+                List.of(ingredient), List.of("Etape de test"));
     }
 }

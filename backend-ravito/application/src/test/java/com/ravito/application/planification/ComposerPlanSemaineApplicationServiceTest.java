@@ -97,7 +97,8 @@ class ComposerPlanSemaineApplicationServiceTest {
         // repas resolu avec succes par le catalogue, mais d'un style different du profil :
         // le service ne revalide rien lui-meme, c'est PlanSemaine qui doit refuser.
         Repas petitDejeunerIncompatible = new Repas(RepasId.nouveau(), "petit-dejeuner gourmand",
-                TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.GOURMAND, NiveauCuisine.DEBUTANT, uneListeDIngredients());
+                TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.GOURMAND, NiveauCuisine.DEBUTANT, uneListeDIngredients(),
+                uneListeDEtapes());
         Repas dejeuner = unRepas(TypeRepas.DEJEUNER);
         Repas diner = unRepas(TypeRepas.DINER);
         stubParId(petitDejeunerIncompatible);
@@ -119,7 +120,7 @@ class ComposerPlanSemaineApplicationServiceTest {
         when(catalogueRepasPort.rechercherParTypeEtStyle(TypeRepas.DINER, StyleAlimentaire.NORMAL))
                 .thenReturn(List.of(unRepas(TypeRepas.DINER)));
         Repas dinerGenere = new Repas(RepasId.nouveau(), "Idee generee", TypeRepas.DINER, StyleAlimentaire.NORMAL,
-                NiveauCuisine.DEBUTANT, uneListeDIngredients());
+                NiveauCuisine.DEBUTANT, uneListeDIngredients(), uneListeDEtapes());
         stubParId(petitDejeuner);
         stubParId(dejeuner);
 
@@ -140,7 +141,8 @@ class ComposerPlanSemaineApplicationServiceTest {
                 .thenReturn(List.of(unRepas(TypeRepas.DINER)));
         Repas dinerGenereTruque = new Repas(RepasId.nouveau(), "Idee suspecte", TypeRepas.DINER,
                 StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT, List.of(new IngredientQuantite(
-                        new Ingredient("caviar", RayonMagasin.EPICERIE), new Quantite(BigDecimal.ONE, UniteMesure.UNITE))));
+                        new Ingredient("caviar", RayonMagasin.EPICERIE), new Quantite(BigDecimal.ONE, UniteMesure.UNITE))),
+                uneListeDEtapes());
         stubParId(petitDejeuner);
         stubParId(dejeuner);
 
@@ -174,12 +176,16 @@ class ComposerPlanSemaineApplicationServiceTest {
 
     private static Repas unRepas(TypeRepas type) {
         return new Repas(RepasId.nouveau(), "repas de test", type, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT,
-                uneListeDIngredients());
+                uneListeDIngredients(), uneListeDEtapes());
     }
 
     private static List<IngredientQuantite> uneListeDIngredients() {
         return List.of(new IngredientQuantite(
                 new Ingredient("ingredient de test", RayonMagasin.EPICERIE),
                 new Quantite(BigDecimal.ONE, UniteMesure.UNITE)));
+    }
+
+    private static List<String> uneListeDEtapes() {
+        return List.of("Etape de test");
     }
 }

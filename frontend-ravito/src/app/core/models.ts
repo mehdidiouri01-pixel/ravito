@@ -52,6 +52,7 @@ export interface RepasResponse {
   style: StyleAlimentaire;
   niveauRequis: NiveauCuisine;
   ingredients: IngredientQuantiteResponse[];
+  etapesPreparation: string[];
 }
 
 export interface RepasProposesResponse {
@@ -79,6 +80,7 @@ export interface RepasGenereRequest {
   style: StyleAlimentaire;
   niveauRequis: NiveauCuisine;
   ingredients: IngredientQuantiteRequest[];
+  etapesPreparation: string[];
 }
 
 /**

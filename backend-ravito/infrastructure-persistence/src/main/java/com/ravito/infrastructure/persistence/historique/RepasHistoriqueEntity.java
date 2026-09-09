@@ -14,6 +14,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 
 import java.util.ArrayList;
@@ -64,12 +65,19 @@ public class RepasHistoriqueEntity {
     @CollectionTable(name = "plan_historique_repas_ingredient", joinColumns = @JoinColumn(name = "repas_id"))
     private List<IngredientQuantiteHistoriqueEmbeddable> ingredients = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "plan_historique_repas_etape", joinColumns = @JoinColumn(name = "repas_id"))
+    @OrderColumn(name = "etape_ordre")
+    @Column(name = "description", nullable = false)
+    private List<String> etapesPreparation = new ArrayList<>();
+
     /** Constructeur exige par JPA — ne pas utiliser directement, voir {@link PlanHistoriqueEntityMapper}. */
     protected RepasHistoriqueEntity() {
     }
 
     RepasHistoriqueEntity(UUID id, JourSemaine jourSemaine, String nom, TypeRepas type, StyleAlimentaire style,
-                           NiveauCuisine niveauRequis, List<IngredientQuantiteHistoriqueEmbeddable> ingredients) {
+                           NiveauCuisine niveauRequis, List<IngredientQuantiteHistoriqueEmbeddable> ingredients,
+                           List<String> etapesPreparation) {
         this.id = id;
         this.jourSemaine = jourSemaine;
         this.nom = nom;
@@ -77,6 +85,7 @@ public class RepasHistoriqueEntity {
         this.style = style;
         this.niveauRequis = niveauRequis;
         this.ingredients = new ArrayList<>(ingredients);
+        this.etapesPreparation = new ArrayList<>(etapesPreparation);
     }
 
     /** Cote proprietaire de la relation, mis a jour par {@link PlanHistoriqueEntity#ajouterRepas}. */
@@ -110,5 +119,9 @@ public class RepasHistoriqueEntity {
 
     public List<IngredientQuantiteHistoriqueEmbeddable> getIngredients() {
         return ingredients;
+    }
+
+    public List<String> getEtapesPreparation() {
+        return etapesPreparation;
     }
 }

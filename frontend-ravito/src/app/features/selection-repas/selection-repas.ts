@@ -411,7 +411,7 @@ export class SelectionRepasComponent {
       return { id: choix.id };
     }
     if (choix.kind === 'genere') {
-      const { nom, type, style, niveauRequis, ingredients } = choix.repas;
+      const { nom, type, style, niveauRequis, ingredients, etapesPreparation } = choix.repas;
       return {
         genere: {
           nom,
@@ -424,6 +424,7 @@ export class SelectionRepasComponent {
             quantite: i.quantite,
             unite: i.unite,
           })),
+          etapesPreparation,
         },
       };
     }

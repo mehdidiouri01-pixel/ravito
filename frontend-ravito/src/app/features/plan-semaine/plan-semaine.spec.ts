@@ -13,6 +13,7 @@ const UN_PLAN: PlanSemaineResponse = {
         style: 'NORMAL',
         niveauRequis: 'DEBUTANT',
         ingredients: [{ ingredient: 'pain', rayon: 'BOULANGERIE', quantite: 100, unite: 'GRAMME' }],
+        etapesPreparation: ['Etape de test'],
       },
       dejeuner: {
         id: 'dj-1',
@@ -21,6 +22,7 @@ const UN_PLAN: PlanSemaineResponse = {
         style: 'NORMAL',
         niveauRequis: 'DEBUTANT',
         ingredients: [{ ingredient: 'pates', rayon: 'EPICERIE', quantite: 150, unite: 'GRAMME' }],
+        etapesPreparation: ['Etape de test'],
       },
       diner: {
         id: 'dn-1',
@@ -29,6 +31,7 @@ const UN_PLAN: PlanSemaineResponse = {
         style: 'NORMAL',
         niveauRequis: 'DEBUTANT',
         ingredients: [{ ingredient: 'soupe', rayon: 'EPICERIE', quantite: 400, unite: 'MILLILITRE' }],
+        etapesPreparation: ['Etape de test'],
       },
     },
   ],

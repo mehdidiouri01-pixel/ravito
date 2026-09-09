@@ -21,7 +21,8 @@ public record RepasResponse(
         TypeRepas type,
         StyleAlimentaire style,
         NiveauCuisine niveauRequis,
-        List<IngredientQuantiteResponse> ingredients) {
+        List<IngredientQuantiteResponse> ingredients,
+        List<String> etapesPreparation) {
 
     public static RepasResponse depuis(Repas repas) {
         return new RepasResponse(
@@ -30,6 +31,7 @@ public record RepasResponse(
                 repas.type(),
                 repas.style(),
                 repas.niveauRequis(),
-                repas.ingredients().stream().map(IngredientQuantiteResponse::depuis).toList());
+                repas.ingredients().stream().map(IngredientQuantiteResponse::depuis).toList(),
+                repas.etapesPreparation());
     }
 }

@@ -93,7 +93,8 @@ class JpaCatalogueRepasAdapterIT {
         Repas repas = new Repas(RepasId.nouveau(), "repas de test", type, style, niveauRequis,
                 List.of(new IngredientQuantite(
                         new Ingredient("ingredient de test", RayonMagasin.EPICERIE),
-                        new Quantite(BigDecimal.ONE, UniteMesure.UNITE))));
+                        new Quantite(BigDecimal.ONE, UniteMesure.UNITE))),
+                List.of("Etape de test"));
         return RepasEntityMapper.versEntite(repas);
     }
 }

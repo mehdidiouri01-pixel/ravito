@@ -33,10 +33,12 @@ public record RepasGenereRequest(
         @NotNull TypeRepas type,
         @NotNull StyleAlimentaire style,
         @NotNull NiveauCuisine niveauRequis,
-        @NotEmpty @Valid List<IngredientQuantiteRequest> ingredients) {
+        @NotEmpty @Valid List<IngredientQuantiteRequest> ingredients,
+        @NotEmpty List<@NotBlank String> etapesPreparation) {
 
     public Repas versDomaine() {
         return new Repas(RepasId.nouveau(), nom, type, style, niveauRequis,
-                ingredients.stream().map(IngredientQuantiteRequest::versDomaine).toList());
+                ingredients.stream().map(IngredientQuantiteRequest::versDomaine).toList(),
+                etapesPreparation);
     }
 }

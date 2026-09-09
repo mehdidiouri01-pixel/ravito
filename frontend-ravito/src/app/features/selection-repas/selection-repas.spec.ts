@@ -10,6 +10,7 @@ function unRepas(id: string, nom: string, type: TypeRepas = 'PETIT_DEJEUNER'): R
     style: 'NORMAL',
     niveauRequis: 'DEBUTANT',
     ingredients: [{ ingredient: 'ingredient de test', rayon: 'EPICERIE', quantite: 1, unite: 'UNITE' }],
+    etapesPreparation: ['Etape de test'],
   };
 }
 
@@ -196,6 +197,7 @@ describe('SelectionRepasComponent', () => {
         style: 'NORMAL',
         niveauRequis: 'DEBUTANT',
         ingredients: [{ ingredient: 'ingredient de test', rayon: 'EPICERIE', quantite: 1, unite: 'UNITE' }],
+        etapesPreparation: ['Etape de test'],
       },
     });
     expect(emis?.['MARDI'].diner).toEqual({ id: 'dn-1' });

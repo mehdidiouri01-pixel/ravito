@@ -11,6 +11,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 
 import java.util.ArrayList;
@@ -59,18 +60,32 @@ public class RepasEntity {
     @CollectionTable(name = "repas_ingredient", joinColumns = @JoinColumn(name = "repas_id"))
     private List<IngredientQuantiteEmbeddable> ingredients = new ArrayList<>();
 
+    /**
+     * {@code @OrderColumn} (pas juste l'ordre naturel d'insertion) : une
+     * etape de preparation n'a de sens que dans l'ordre, contrairement aux
+     * ingredients — Hibernate materialise cet ordre dans une colonne
+     * dediee ({@code etape_ordre}) plutot que de compter sur l'ordre de
+     * retour d'une requete SQL sans ORDER BY, qui n'est pas garanti.
+     */
+    @ElementCollection
+    @CollectionTable(name = "repas_etape", joinColumns = @JoinColumn(name = "repas_id"))
+    @OrderColumn(name = "etape_ordre")
+    @Column(name = "description", nullable = false)
+    private List<String> etapesPreparation = new ArrayList<>();
+
     /** Constructeur exige par JPA — ne pas utiliser directement, voir {@link RepasEntityMapper}. */
     protected RepasEntity() {
     }
 
     RepasEntity(UUID id, String nom, TypeRepas type, StyleAlimentaire style, NiveauCuisine niveauRequis,
-                List<IngredientQuantiteEmbeddable> ingredients) {
+                List<IngredientQuantiteEmbeddable> ingredients, List<String> etapesPreparation) {
         this.id = id;
         this.nom = nom;
         this.type = type;
         this.style = style;
         this.niveauRequis = niveauRequis;
         this.ingredients = new ArrayList<>(ingredients);
+        this.etapesPreparation = new ArrayList<>(etapesPreparation);
     }
 
     public UUID getId() {
@@ -95,5 +110,9 @@ public class RepasEntity {
 
     public List<IngredientQuantiteEmbeddable> getIngredients() {
         return ingredients;
+    }
+
+    public List<String> getEtapesPreparation() {
+        return etapesPreparation;
     }
 }

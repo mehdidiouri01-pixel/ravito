@@ -32,7 +32,17 @@ class RepasTest {
     void refuse_un_repas_sans_ingredient() {
         assertThatIllegalArgumentException().isThrownBy(() -> new Repas(
                 RepasId.nouveau(), "sans ingredient", TypeRepas.DEJEUNER,
-                StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT, List.of()));
+                StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT, List.of(), List.of("Une etape")));
+    }
+
+    @Test
+    void refuse_un_repas_sans_etape_de_preparation() {
+        Ingredient riz = new Ingredient("riz", RayonMagasin.EPICERIE);
+        Quantite quantite = new Quantite(BigDecimal.TEN, UniteMesure.GRAMME);
+
+        assertThatIllegalArgumentException().isThrownBy(() -> new Repas(
+                RepasId.nouveau(), "sans etape", TypeRepas.DEJEUNER, StyleAlimentaire.NORMAL,
+                NiveauCuisine.DEBUTANT, List.of(new IngredientQuantite(riz, quantite)), List.of()));
     }
 
     @Test
@@ -41,10 +51,22 @@ class RepasTest {
         Quantite quantite = new Quantite(BigDecimal.TEN, UniteMesure.GRAMME);
         Repas repas = new Repas(RepasId.nouveau(), "riz nature", TypeRepas.DEJEUNER,
                 StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT,
-                List.of(new IngredientQuantite(riz, quantite)));
+                List.of(new IngredientQuantite(riz, quantite)), List.of("Faire cuire le riz"));
 
         assertThatExceptionOfType(UnsupportedOperationException.class)
                 .isThrownBy(() -> repas.ingredients().add(new IngredientQuantite(riz, quantite)));
+    }
+
+    @Test
+    void la_liste_d_etapes_est_immuable() {
+        Ingredient riz = new Ingredient("riz", RayonMagasin.EPICERIE);
+        Quantite quantite = new Quantite(BigDecimal.TEN, UniteMesure.GRAMME);
+        Repas repas = new Repas(RepasId.nouveau(), "riz nature", TypeRepas.DEJEUNER,
+                StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT,
+                List.of(new IngredientQuantite(riz, quantite)), List.of("Faire cuire le riz"));
+
+        assertThatExceptionOfType(UnsupportedOperationException.class)
+                .isThrownBy(() -> repas.etapesPreparation().add("Etape en trop"));
     }
 
     @Test

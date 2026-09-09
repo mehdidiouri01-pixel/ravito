@@ -31,6 +31,12 @@ import type { RepasResponse } from '../../core/models';
               <li>{{ ingredient.ingredient }} — {{ ingredient.quantite }} {{ libellesUnite[ingredient.unite] }}</li>
             }
           </ul>
+          <h4>Étapes de préparation</h4>
+          <ol>
+            @for (etape of r.etapesPreparation; track $index) {
+              <li>{{ etape }}</li>
+            }
+          </ol>
         </div>
       </div>
     }
@@ -103,6 +109,15 @@ import type { RepasResponse } from '../../core/models';
       .modale ul {
         margin: 0;
         padding-left: 1.1rem;
+      }
+
+      .modale h4 + ol {
+        margin: 0;
+        padding-left: 1.1rem;
+      }
+
+      .modale ol li + li {
+        margin-top: 0.4rem;
       }
 
       .fermer {

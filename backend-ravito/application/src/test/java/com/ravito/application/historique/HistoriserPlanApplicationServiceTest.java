@@ -85,6 +85,7 @@ class HistoriserPlanApplicationServiceTest {
         IngredientQuantite ingredient = new IngredientQuantite(
                 new Ingredient("ingredient de test", RayonMagasin.EPICERIE),
                 new Quantite(BigDecimal.ONE, UniteMesure.UNITE));
-        return new Repas(RepasId.nouveau(), "repas de test", type, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT, List.of(ingredient));
+        return new Repas(RepasId.nouveau(), "repas de test", type, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT,
+                List.of(ingredient), List.of("Etape de test"));
     }
 }

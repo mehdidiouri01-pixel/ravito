@@ -84,7 +84,7 @@ class PoolIngredientsCatalogueTest {
 
     private static Repas unRepas(String nomIngredient, UniteMesure unite) {
         return new Repas(RepasId.nouveau(), "repas de test", TypeRepas.DINER, StyleAlimentaire.NORMAL,
-                NiveauCuisine.DEBUTANT, List.of(ingredient(nomIngredient, unite)));
+                NiveauCuisine.DEBUTANT, List.of(ingredient(nomIngredient, unite)), List.of("Etape de test"));
     }
 
     private static IngredientQuantite ingredient(String nom, UniteMesure unite) {

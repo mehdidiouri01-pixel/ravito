@@ -13,6 +13,7 @@ const UN_PLAN: PlanSemaineResponse = {
         style: 'NORMAL',
         niveauRequis: 'DEBUTANT',
         ingredients: [],
+        etapesPreparation: [],
       },
       dejeuner: {
         id: 'dj-1',
@@ -21,6 +22,7 @@ const UN_PLAN: PlanSemaineResponse = {
         style: 'NORMAL',
         niveauRequis: 'DEBUTANT',
         ingredients: [],
+        etapesPreparation: [],
       },
       diner: {
         id: 'dn-1',
@@ -29,6 +31,7 @@ const UN_PLAN: PlanSemaineResponse = {
         style: 'NORMAL',
         niveauRequis: 'DEBUTANT',
         ingredients: [],
+        etapesPreparation: [],
       },
     },
   ],

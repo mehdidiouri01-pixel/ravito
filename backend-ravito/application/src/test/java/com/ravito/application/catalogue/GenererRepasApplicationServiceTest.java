@@ -65,6 +65,11 @@ class GenererRepasApplicationServiceTest {
         assertThat(genere.ingredients())
                 .extracting(i -> i.ingredient().nom())
                 .allMatch(nom -> List.of("riz", "poulet", "tomate").contains(nom));
+        // les etapes generees citent les deux ingredients tires, quel qu'en soit l'ordre :
+        assertThat(genere.etapesPreparation()).isNotEmpty();
+        assertThat(genere.etapesPreparation().get(0))
+                .contains(genere.ingredients().get(0).ingredient().nom())
+                .contains(genere.ingredients().get(1).ingredient().nom());
     }
 
     @Test
@@ -107,6 +112,6 @@ class GenererRepasApplicationServiceTest {
                 new Ingredient(nomIngredient, RayonMagasin.EPICERIE),
                 new Quantite(BigDecimal.TEN, unite));
         return new Repas(RepasId.nouveau(), "repas de test", TypeRepas.DEJEUNER, StyleAlimentaire.NORMAL,
-                NiveauCuisine.DEBUTANT, List.of(ingredient));
+                NiveauCuisine.DEBUTANT, List.of(ingredient), List.of("Etape de test"));
     }
 }

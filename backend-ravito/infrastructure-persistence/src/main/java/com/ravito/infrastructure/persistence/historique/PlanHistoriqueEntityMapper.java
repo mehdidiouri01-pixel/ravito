@@ -76,7 +76,7 @@ final class PlanHistoriqueEntityMapper {
                         ingredientQuantite.quantite().unite()))
                 .toList();
         return new RepasHistoriqueEntity(UUID.randomUUID(), jourSemaine, repas.nom(), repas.type(), repas.style(),
-                repas.niveauRequis(), ingredients);
+                repas.niveauRequis(), ingredients, repas.etapesPreparation());
     }
 
     /**
@@ -94,6 +94,6 @@ final class PlanHistoriqueEntityMapper {
                         new Quantite(embeddable.getQuantiteValeur(), embeddable.getUnite())))
                 .toList();
         return new Repas(new RepasId(entity.getId()), entity.getNom(), entity.getType(), entity.getStyle(),
-                entity.getNiveauRequis(), ingredients);
+                entity.getNiveauRequis(), ingredients, entity.getEtapesPreparation());
     }
 }

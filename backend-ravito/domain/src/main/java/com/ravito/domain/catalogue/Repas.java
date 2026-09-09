@@ -9,13 +9,19 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Un repas du catalogue (petit-dejeuner ou dejeuner), propose a l'utilisateur
- * s'il est compatible avec son profil (voir {@link #estCompatibleAvec}).
+ * Un repas du catalogue (petit-dejeuner, dejeuner ou diner), propose a
+ * l'utilisateur s'il est compatible avec son profil (voir
+ * {@link #estCompatibleAvec}).
  *
  * <p>La compatibilite de niveau est hierarchique : un repas {@code DEBUTANT}
  * convient a un profil {@code CONFIRME}, mais un repas {@code CONFIRME} ne
  * convient qu'a un profil {@code CONFIRME} (voir
  * {@link NiveauCuisine#estAuMoinsAussiConfirmeQue}).
+ *
+ * <p>{@code etapesPreparation} est une liste ordonnee de lignes de texte
+ * (une par etape) plutot qu'un seul bloc — c'est deja la forme attendue par
+ * l'affichage (une liste numerotee), pas la peine de reparser un texte plus
+ * tard pour la retrouver.
  */
 public record Repas(
         RepasId id,
@@ -23,7 +29,8 @@ public record Repas(
         TypeRepas type,
         StyleAlimentaire style,
         NiveauCuisine niveauRequis,
-        List<IngredientQuantite> ingredients) {
+        List<IngredientQuantite> ingredients,
+        List<String> etapesPreparation) {
 
     public Repas {
         Objects.requireNonNull(id, "id");
@@ -31,13 +38,18 @@ public record Repas(
         Objects.requireNonNull(style, "style");
         Objects.requireNonNull(niveauRequis, "niveauRequis");
         Objects.requireNonNull(ingredients, "ingredients");
+        Objects.requireNonNull(etapesPreparation, "etapesPreparation");
         if (nom == null || nom.isBlank()) {
             throw new IllegalArgumentException("Le nom du repas ne peut pas etre vide");
         }
         if (ingredients.isEmpty()) {
             throw new IllegalArgumentException("Un repas doit comporter au moins un ingredient");
         }
+        if (etapesPreparation.isEmpty()) {
+            throw new IllegalArgumentException("Un repas doit comporter au moins une etape de preparation");
+        }
         ingredients = List.copyOf(ingredients);
+        etapesPreparation = List.copyOf(etapesPreparation);
     }
 
     /**

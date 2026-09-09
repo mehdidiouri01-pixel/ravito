@@ -40,6 +40,17 @@ public class GenererRepasApplicationService implements GenererRepasUseCase {
             "%s et %s comme à la maison",
             "Assiette de %s et %s");
 
+    /**
+     * Etapes generiques, faute de pouvoir deviner une vraie technique de
+     * cuisson pour une combinaison inedite d'ingredients : le premier
+     * gabarit cite les deux ingredients tires (quantite comprise), les
+     * suivants restent volontairement passe-partout.
+     */
+    private static final List<String> GABARITS_ETAPES = List.of(
+            "Préparez %s et %s.",
+            "Faites cuire l'ensemble à feu doux jusqu'à ce que ce soit prêt.",
+            "Assaisonnez selon votre goût et servez chaud.");
+
     private final PoolIngredientsCatalogue poolIngredientsCatalogue;
     private final Random random;
 
@@ -60,8 +71,9 @@ public class GenererRepasApplicationService implements GenererRepasUseCase {
 
         List<IngredientQuantite> tirage = tirer(pool, NOMBRE_INGREDIENTS);
         String nom = nommer(tirage);
+        List<String> etapes = etapesGenerees(tirage);
 
-        return new Repas(RepasId.nouveau(), nom, type, profil.style(), profil.niveau(), tirage);
+        return new Repas(RepasId.nouveau(), nom, type, profil.style(), profil.niveau(), tirage, etapes);
     }
 
     private List<IngredientQuantite> tirer(List<IngredientQuantite> pool, int nombre) {
@@ -75,5 +87,11 @@ public class GenererRepasApplicationService implements GenererRepasUseCase {
         Object[] noms = ingredients.stream().map(i -> i.ingredient().nom()).toArray();
         String nom = gabarit.formatted(noms);
         return Character.toUpperCase(nom.charAt(0)) + nom.substring(1);
+    }
+
+    private List<String> etapesGenerees(List<IngredientQuantite> ingredients) {
+        Object[] noms = ingredients.stream().map(i -> i.ingredient().nom()).toArray();
+        String premiereEtape = GABARITS_ETAPES.get(0).formatted(noms);
+        return List.of(premiereEtape, GABARITS_ETAPES.get(1), GABARITS_ETAPES.get(2));
     }
 }
