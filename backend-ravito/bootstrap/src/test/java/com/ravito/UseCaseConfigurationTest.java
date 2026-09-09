@@ -3,9 +3,12 @@ package com.ravito;
 import com.ravito.application.catalogue.GenererRepasApplicationService;
 import com.ravito.application.catalogue.PoolIngredientsCatalogue;
 import com.ravito.application.catalogue.ProposerRepasApplicationService;
+import com.ravito.application.historique.ConsulterHistoriqueApplicationService;
+import com.ravito.application.historique.HistoriserPlanApplicationService;
 import com.ravito.application.planification.ComposerPlanSemaineApplicationService;
 import com.ravito.application.prix.EstimerCoutApplicationService;
 import com.ravito.domain.catalogue.CatalogueRepasPort;
+import com.ravito.domain.historique.HistoriquePlansPort;
 import com.ravito.domain.prix.EstimationPrixPort;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -59,5 +62,19 @@ class UseCaseConfigurationTest {
         PoolIngredientsCatalogue pool = new PoolIngredientsCatalogue(port);
 
         assertThat(configuration.genererRepasUseCase(pool)).isInstanceOf(GenererRepasApplicationService.class);
+    }
+
+    @Test
+    void cable_historiserPlanUseCase_sur_l_historique() {
+        HistoriquePlansPort port = Mockito.mock(HistoriquePlansPort.class);
+
+        assertThat(configuration.historiserPlanUseCase(port)).isInstanceOf(HistoriserPlanApplicationService.class);
+    }
+
+    @Test
+    void cable_consulterHistoriqueUseCase_sur_l_historique() {
+        HistoriquePlansPort port = Mockito.mock(HistoriquePlansPort.class);
+
+        assertThat(configuration.consulterHistoriqueUseCase(port)).isInstanceOf(ConsulterHistoriqueApplicationService.class);
     }
 }

@@ -9,6 +9,7 @@ import com.ravito.domain.courses.IngredientQuantite;
 import com.ravito.domain.courses.Quantite;
 import com.ravito.domain.courses.RayonMagasin;
 import com.ravito.domain.courses.UniteMesure;
+import com.ravito.domain.historique.HistoriserPlanUseCase;
 import com.ravito.domain.planification.ComposerPlanSemaineUseCase;
 import com.ravito.domain.planification.Jour;
 import com.ravito.domain.planification.JourSemaine;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -53,6 +55,9 @@ class ComposerPlanSemaineControllerTest {
     @MockBean
     private EstimerCoutUseCase estimerCoutUseCase;
 
+    @MockBean
+    private HistoriserPlanUseCase historiserPlanUseCase;
+
     @Test
     void renvoie_200_avec_le_plan_la_liste_de_courses_et_le_prix() throws Exception {
         when(composerPlanSemaineUseCase.composer(any(), any())).thenReturn(unPlanValide());
@@ -64,6 +69,21 @@ class ComposerPlanSemaineControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.jours", org.hamcrest.Matchers.hasSize(5)))
                 .andExpect(jsonPath("$.prixEstime.montant").value(42.50));
+    }
+
+    @Test
+    void historise_le_plan_tout_juste_compose() throws Exception {
+        PlanSemaine plan = unPlanValide();
+        Prix prix = new Prix(BigDecimal.valueOf(42.50));
+        when(composerPlanSemaineUseCase.composer(any(), any())).thenReturn(plan);
+        when(estimerCoutUseCase.estimer(any(), any())).thenReturn(prix);
+
+        mockMvc.perform(post("/api/plans-semaine")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(uneRequeteValide()))
+                .andExpect(status().isOk());
+
+        verify(historiserPlanUseCase).historiser(plan, prix);
     }
 
     @Test

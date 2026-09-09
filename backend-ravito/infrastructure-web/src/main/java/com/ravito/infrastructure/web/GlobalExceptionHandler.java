@@ -3,6 +3,7 @@ package com.ravito.infrastructure.web;
 import com.ravito.domain.catalogue.CatalogueInsuffisantException;
 import com.ravito.domain.catalogue.GenerationRepasImpossibleException;
 import com.ravito.domain.catalogue.RepasIntrouvableException;
+import com.ravito.domain.historique.HistoriquePlanIntrouvableException;
 import com.ravito.domain.planification.PlanSemaineInvalideException;
 import com.ravito.domain.planification.RepasGenereInvalideException;
 import com.ravito.domain.planification.RepasIncompatibleException;
@@ -25,6 +26,11 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(RepasIntrouvableException.class)
     ResponseEntity<ErrorResponse> repasIntrouvable(RepasIntrouvableException exception) {
+        return reponse(HttpStatus.NOT_FOUND, exception);
+    }
+
+    @ExceptionHandler(HistoriquePlanIntrouvableException.class)
+    ResponseEntity<ErrorResponse> historiquePlanIntrouvable(HistoriquePlanIntrouvableException exception) {
         return reponse(HttpStatus.NOT_FOUND, exception);
     }
 
