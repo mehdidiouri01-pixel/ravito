@@ -172,4 +172,23 @@ describe('PlanSemaineComponent', () => {
     expect(nouvelElement.querySelector('.rayon li')?.classList.contains('deja-chez-vous')).toBeTrue();
     expect(nouvelElement.querySelector('.prix')?.textContent).toContain('4.70');
   });
+
+  it('affiche "Non choisi" et desactive Recette pour un creneau non choisi (plan partiel)', () => {
+    const planPartiel: PlanSemaineResponse = {
+      ...UN_PLAN,
+      jours: [{ ...UN_PLAN.jours[0], dejeuner: null, diner: null }],
+    };
+    fixture.componentRef.setInput('plan', planPartiel);
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const noms = element.querySelectorAll('.repas-nom');
+    expect(noms[1].textContent).toContain('Non choisi');
+    expect(noms[2].textContent).toContain('Non choisi');
+
+    const boutonsRecette = element.querySelectorAll<HTMLButtonElement>('.voir-recette');
+    expect(boutonsRecette[0].disabled).toBeFalse(); // petit-dejeuner choisi
+    expect(boutonsRecette[1].disabled).toBeTrue(); // dejeuner non choisi
+    expect(boutonsRecette[2].disabled).toBeTrue(); // diner non choisi
+  });
 });

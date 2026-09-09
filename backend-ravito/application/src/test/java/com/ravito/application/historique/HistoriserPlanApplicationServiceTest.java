@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,7 +77,7 @@ class HistoriserPlanApplicationServiceTest {
 
     private static PlanSemaine unPlanValide() {
         List<Jour> jours = List.of(JourSemaine.values()).stream()
-                .map(jourSemaine -> new Jour(jourSemaine, unRepas(TypeRepas.PETIT_DEJEUNER), unRepas(TypeRepas.DEJEUNER), unRepas(TypeRepas.DINER)))
+                .map(jourSemaine -> new Jour(jourSemaine, Optional.of(unRepas(TypeRepas.PETIT_DEJEUNER)), Optional.of(unRepas(TypeRepas.DEJEUNER)), Optional.of(unRepas(TypeRepas.DINER))))
                 .toList();
         return new PlanSemaine(PROFIL, jours);
     }

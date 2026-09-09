@@ -38,6 +38,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -136,6 +137,23 @@ class ComposerPlanSemaineControllerTest {
     }
 
     @Test
+    void renvoie_200_avec_une_requete_partielle_ou_certains_creneaux_ne_sont_pas_choisis() throws Exception {
+        PlanSemaine plan = unPlanValide();
+        Prix prix = new Prix(BigDecimal.valueOf(42.50));
+        when(composerPlanSemaineUseCase.composer(any(), any())).thenReturn(plan);
+        when(estimerCoutUseCase.estimer(any(), any())).thenReturn(prix);
+        stubberEstimerParLigne();
+        when(historiserPlanUseCase.historiser(any(), any())).thenReturn(unHistorise(plan, prix));
+        when(estimerNutritionUseCase.estimer(any())).thenReturn(new ValeursNutritionnelles(
+                BigDecimal.valueOf(250), BigDecimal.valueOf(12), BigDecimal.valueOf(30), BigDecimal.valueOf(8), BigDecimal.valueOf(4)));
+
+        mockMvc.perform(post("/api/plans-semaine")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(uneRequeteAvecDesCreneauxNonChoisis()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void renvoie_400_si_un_choix_de_repas_ne_fournit_ni_id_ni_genere() throws Exception {
         mockMvc.perform(post("/api/plans-semaine")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -191,6 +209,26 @@ class ComposerPlanSemaineControllerTest {
                 + "}}";
     }
 
+    /**
+     * Lundi n'a ni petit-dejeuner ni diner de choisi (champs absents du
+     * JSON), les autres jours sont complets — verifie que le controleur
+     * n'exige plus les 3 creneaux de chaque jour (voir {@code ChoixJourRequest}).
+     */
+    private static String uneRequeteAvecDesCreneauxNonChoisis() {
+        UUID unId = UUID.randomUUID();
+        String choixRepas = "{\"id\":\"" + unId + "\"}";
+        String choixJourComplet = "{\"petitDejeuner\":" + choixRepas + ",\"dejeuner\":" + choixRepas + ",\"diner\":" + choixRepas + "}";
+        String choixJourPartiel = "{\"dejeuner\":" + choixRepas + "}";
+        return "{\"profil\":{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\",\"nombreDePersonnes\":2},"
+                + "\"choix\":{"
+                + "\"LUNDI\":" + choixJourPartiel + ","
+                + "\"MARDI\":" + choixJourComplet + ","
+                + "\"MERCREDI\":" + choixJourComplet + ","
+                + "\"JEUDI\":" + choixJourComplet + ","
+                + "\"VENDREDI\":" + choixJourComplet
+                + "}}";
+    }
+
     private static String uneRequeteAvecChoixAmbigu() {
         UUID unId = UUID.randomUUID();
         // ni id ni genere fournis pour le petit-dejeuner : requete malformee.
@@ -230,9 +268,9 @@ class ComposerPlanSemaineControllerTest {
     private static PlanSemaine unPlanValide() {
         List<Jour> jours = List.of(JourSemaine.values()).stream()
                 .map(jourSemaine -> new Jour(jourSemaine,
-                        unRepas(TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.NORMAL),
-                        unRepas(TypeRepas.DEJEUNER, StyleAlimentaire.NORMAL),
-                        unRepas(TypeRepas.DINER, StyleAlimentaire.NORMAL)))
+                        Optional.of(unRepas(TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.NORMAL)),
+                        Optional.of(unRepas(TypeRepas.DEJEUNER, StyleAlimentaire.NORMAL)),
+                        Optional.of(unRepas(TypeRepas.DINER, StyleAlimentaire.NORMAL))))
                 .toList();
         return new PlanSemaine(PROFIL, jours);
     }

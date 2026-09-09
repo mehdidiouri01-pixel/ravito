@@ -30,11 +30,11 @@ export class PdfExportService {
       doc.text(LIBELLES_JOUR[jour.jour], 14, y);
       doc.setFont('helvetica', 'normal');
       y += 6;
-      doc.text(`Petit-déjeuner : ${jour.petitDejeuner.nom}`, 20, y);
+      doc.text(`Petit-déjeuner : ${jour.petitDejeuner?.nom ?? 'Non choisi'}`, 20, y);
       y += 6;
-      doc.text(`Déjeuner : ${jour.dejeuner.nom}`, 20, y);
+      doc.text(`Déjeuner : ${jour.dejeuner?.nom ?? 'Non choisi'}`, 20, y);
       y += 6;
-      doc.text(`Dîner : ${jour.diner.nom}`, 20, y);
+      doc.text(`Dîner : ${jour.diner?.nom ?? 'Non choisi'}`, 20, y);
       y += 8;
     });
 

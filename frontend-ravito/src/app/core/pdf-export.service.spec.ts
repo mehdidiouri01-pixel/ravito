@@ -57,4 +57,12 @@ describe('PdfExportService', () => {
     // la liste de courses + total) ne plante pas sur un plan reel.
     expect(() => service.exporterPlan(UN_PLAN, 4)).not.toThrow();
   });
+
+  it('genere un document sans lever d\'exception sur un plan partiel (creneaux non choisis)', () => {
+    const planPartiel: PlanSemaineResponse = {
+      ...UN_PLAN,
+      jours: [{ ...UN_PLAN.jours[0], dejeuner: null, diner: null }],
+    };
+    expect(() => service.exporterPlan(planPartiel, 4)).not.toThrow();
+  });
 });

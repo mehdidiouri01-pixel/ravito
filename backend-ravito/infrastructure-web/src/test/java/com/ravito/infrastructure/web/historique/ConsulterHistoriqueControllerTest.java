@@ -101,7 +101,7 @@ class ConsulterHistoriqueControllerTest {
 
     private static PlanSemaineHistorise unPlanHistorise() {
         List<Jour> jours = List.of(JourSemaine.values()).stream()
-                .map(jourSemaine -> new Jour(jourSemaine, unRepas(TypeRepas.PETIT_DEJEUNER), unRepas(TypeRepas.DEJEUNER), unRepas(TypeRepas.DINER)))
+                .map(jourSemaine -> new Jour(jourSemaine, Optional.of(unRepas(TypeRepas.PETIT_DEJEUNER)), Optional.of(unRepas(TypeRepas.DEJEUNER)), Optional.of(unRepas(TypeRepas.DINER))))
                 .toList();
         PlanSemaine plan = new PlanSemaine(PROFIL, jours);
         return new PlanSemaineHistorise(HistoriquePlanId.nouveau(), Instant.now(), plan, new Prix(BigDecimal.valueOf(51.30)));

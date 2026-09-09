@@ -109,10 +109,15 @@ export interface RepasGenereRequest {
  */
 export type ChoixRepasRequest = { id: string; genere?: undefined } | { id?: undefined; genere: RepasGenereRequest };
 
+/**
+ * Chaque creneau est individuellement optionnel : absent signifie "pas de
+ * repas choisi pour ce creneau ce jour-la" — un plan peut etre compose
+ * meme partiellement rempli (voir SelectionRepasComponent).
+ */
 export interface ChoixJourRequest {
-  petitDejeuner: ChoixRepasRequest;
-  dejeuner: ChoixRepasRequest;
-  diner: ChoixRepasRequest;
+  petitDejeuner?: ChoixRepasRequest;
+  dejeuner?: ChoixRepasRequest;
+  diner?: ChoixRepasRequest;
 }
 
 export interface GenererRepasRequest {
@@ -125,11 +130,12 @@ export interface ComposerPlanSemaineRequest {
   choix: Record<JourSemaine, ChoixJourRequest>;
 }
 
+/** Un creneau vaut `null` quand aucun repas n'a ete choisi pour lui (plan compose partiellement). */
 export interface JourResponse {
   jour: JourSemaine;
-  petitDejeuner: RepasResponse;
-  dejeuner: RepasResponse;
-  diner: RepasResponse;
+  petitDejeuner: RepasResponse | null;
+  dejeuner: RepasResponse | null;
+  diner: RepasResponse | null;
 }
 
 export interface LigneListeCoursesResponse {

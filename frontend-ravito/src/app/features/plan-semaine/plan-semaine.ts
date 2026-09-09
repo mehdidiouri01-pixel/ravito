@@ -22,9 +22,16 @@ const PREFIXE_STOCKAGE = 'ravito.dejaChezVous.';
             <div class="repas-bloc">
               <div>
                 <span class="etiquette">Petit-déjeuner</span>
-                <p class="repas-nom">{{ jour.petitDejeuner.nom }}</p>
+                <p class="repas-nom" [class.non-choisi]="!jour.petitDejeuner">
+                  {{ jour.petitDejeuner?.nom ?? 'Non choisi' }}
+                </p>
               </div>
-              <button type="button" class="voir-recette" (click)="afficherRecette(jour.petitDejeuner)">
+              <button
+                type="button"
+                class="voir-recette"
+                [disabled]="!jour.petitDejeuner"
+                (click)="jour.petitDejeuner && afficherRecette(jour.petitDejeuner)"
+              >
                 Recette
               </button>
             </div>
@@ -32,17 +39,31 @@ const PREFIXE_STOCKAGE = 'ravito.dejaChezVous.';
             <div class="repas-bloc">
               <div>
                 <span class="etiquette">Déjeuner</span>
-                <p class="repas-nom">{{ jour.dejeuner.nom }}</p>
+                <p class="repas-nom" [class.non-choisi]="!jour.dejeuner">{{ jour.dejeuner?.nom ?? 'Non choisi' }}</p>
               </div>
-              <button type="button" class="voir-recette" (click)="afficherRecette(jour.dejeuner)">Recette</button>
+              <button
+                type="button"
+                class="voir-recette"
+                [disabled]="!jour.dejeuner"
+                (click)="jour.dejeuner && afficherRecette(jour.dejeuner)"
+              >
+                Recette
+              </button>
             </div>
 
             <div class="repas-bloc">
               <div>
                 <span class="etiquette">Dîner</span>
-                <p class="repas-nom">{{ jour.diner.nom }}</p>
+                <p class="repas-nom" [class.non-choisi]="!jour.diner">{{ jour.diner?.nom ?? 'Non choisi' }}</p>
               </div>
-              <button type="button" class="voir-recette" (click)="afficherRecette(jour.diner)">Recette</button>
+              <button
+                type="button"
+                class="voir-recette"
+                [disabled]="!jour.diner"
+                (click)="jour.diner && afficherRecette(jour.diner)"
+              >
+                Recette
+              </button>
             </div>
           </article>
         }
@@ -133,6 +154,11 @@ const PREFIXE_STOCKAGE = 'ravito.dejaChezVous.';
       .repas-nom {
         margin: 0.15rem 0 0;
         font-size: 0.9rem;
+      }
+
+      .repas-nom.non-choisi {
+        font-style: italic;
+        color: var(--couleur-texte-att);
       }
 
       .etiquette {

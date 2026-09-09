@@ -17,6 +17,7 @@ import com.ravito.domain.profil.ProfilUtilisateur;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Implementation du port d'entree {@link ComposerPlanSemaineUseCase}.
@@ -55,10 +56,14 @@ public class ComposerPlanSemaineApplicationService implements ComposerPlanSemain
     }
 
     private Jour versJour(JourSemaine jourSemaine, ChoixJour choixJour) {
-        Repas petitDejeuner = resoudre(choixJour.petitDejeuner());
-        Repas dejeuner = resoudre(choixJour.dejeuner());
-        Repas diner = resoudre(choixJour.diner());
+        Optional<Repas> petitDejeuner = resoudre(choixJour.petitDejeuner());
+        Optional<Repas> dejeuner = resoudre(choixJour.dejeuner());
+        Optional<Repas> diner = resoudre(choixJour.diner());
         return new Jour(jourSemaine, petitDejeuner, dejeuner, diner);
+    }
+
+    private Optional<Repas> resoudre(Optional<ChoixRepas> choix) {
+        return choix.map(this::resoudre);
     }
 
     private Repas resoudre(ChoixRepas choix) {

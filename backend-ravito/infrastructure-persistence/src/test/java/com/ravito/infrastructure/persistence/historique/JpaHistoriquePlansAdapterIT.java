@@ -30,6 +30,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,6 +77,36 @@ class JpaHistoriquePlansAdapterIT {
     }
 
     @Test
+    void enregistre_puis_retrouve_un_plan_partiel_avec_des_jours_incomplets_ou_vides() {
+        List<Jour> jours = new ArrayList<>(List.of(JourSemaine.values()).stream()
+                .map(jourSemaine -> new Jour(jourSemaine, Optional.of(unRepas(TypeRepas.PETIT_DEJEUNER)),
+                        Optional.of(unRepas(TypeRepas.DEJEUNER)), Optional.of(unRepas(TypeRepas.DINER))))
+                .toList());
+        // Lundi perd son dejeuner, mardi n'a plus aucun repas choisi :
+        Jour lundi = jours.get(0);
+        jours.set(0, new Jour(lundi.jourSemaine(), lundi.petitDejeuner(), Optional.empty(), lundi.diner()));
+        Jour mardi = jours.get(1);
+        jours.set(1, new Jour(mardi.jourSemaine(), Optional.empty(), Optional.empty(), Optional.empty()));
+        PlanSemaine planPartiel = new PlanSemaine(PROFIL, jours);
+
+        PlanSemaineHistorise enregistre = adapter.enregistrer(planPartiel, new Prix(BigDecimal.valueOf(20.00)));
+        Optional<PlanSemaineHistorise> relu = adapter.parId(enregistre.id());
+
+        assertThat(relu).isPresent();
+        PlanSemaine planRelu = relu.get().plan();
+        assertThat(planRelu.jours()).hasSize(5); // mardi reste present, meme vide
+        assertThat(planRelu.tousLesRepas()).hasSize(11); // 15 - 1 (lundi dejeuner) - 3 (mardi entierement vide)
+
+        Jour lundiRelu = planRelu.jours().stream().filter(j -> j.jourSemaine() == JourSemaine.LUNDI).findFirst().orElseThrow();
+        assertThat(lundiRelu.petitDejeuner()).isPresent();
+        assertThat(lundiRelu.dejeuner()).isEmpty();
+        assertThat(lundiRelu.diner()).isPresent();
+
+        Jour mardiRelu = planRelu.jours().stream().filter(j -> j.jourSemaine() == JourSemaine.MARDI).findFirst().orElseThrow();
+        assertThat(mardiRelu.repasChoisis()).isEmpty();
+    }
+
+    @Test
     void renvoie_vide_si_l_identifiant_est_inconnu() {
         assertThat(adapter.parId(HistoriquePlanId.nouveau())).isEmpty();
     }
@@ -92,7 +123,7 @@ class JpaHistoriquePlansAdapterIT {
 
     private static PlanSemaine unPlanValide() {
         List<Jour> jours = List.of(JourSemaine.values()).stream()
-                .map(jourSemaine -> new Jour(jourSemaine, unRepas(TypeRepas.PETIT_DEJEUNER), unRepas(TypeRepas.DEJEUNER), unRepas(TypeRepas.DINER)))
+                .map(jourSemaine -> new Jour(jourSemaine, Optional.of(unRepas(TypeRepas.PETIT_DEJEUNER)), Optional.of(unRepas(TypeRepas.DEJEUNER)), Optional.of(unRepas(TypeRepas.DINER))))
                 .toList();
         return new PlanSemaine(PROFIL, jours);
     }

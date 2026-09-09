@@ -9,7 +9,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 /**
  * Agregat racine : le plan de repas d'un utilisateur pour sa semaine de
@@ -18,10 +18,14 @@ import java.util.stream.Stream;
  * <p>Invariants verifies a la construction, et donc impossibles a violer
  * une fois l'objet cree :
  * <ul>
- *     <li>exactement les 5 {@link JourSemaine}, chacun une seule fois ;</li>
- *     <li>chaque repas de chaque jour est compatible avec le profil
- *     (meme regle que {@link Repas#estCompatibleAvec}, revalidee ici en
- *     defense en profondeur — voir {@link RepasIncompatibleException}).</li>
+ *     <li>exactement les 5 {@link JourSemaine}, chacun une seule fois —
+ *     chaque {@link Jour} peut cela dit n'avoir aucun repas choisi, voir
+ *     {@link Jour} ;</li>
+ *     <li>au moins un repas choisi au total : un plan entierement vide
+ *     n'a pas de sens (pas de liste de courses a en tirer) ;</li>
+ *     <li>chaque repas choisi, dans chaque jour, est compatible avec le
+ *     profil (meme regle que {@link Repas#estCompatibleAvec}, revalidee
+ *     ici en defense en profondeur — voir {@link RepasIncompatibleException}).</li>
  * </ul>
  *
  * <p>{@link #jours()} est aussi toujours trie en ordre calendaire
@@ -42,6 +46,7 @@ public record PlanSemaine(ProfilUtilisateur profil, List<Jour> jours) {
                 .sorted(Comparator.comparing(jour -> jour.jourSemaine().ordinal()))
                 .toList();
         exigerExactementLesCinqJours(jours);
+        exigerAuMoinsUnRepasChoisi(jours);
         for (Jour jour : jours) {
             exigerCompatible(jour.petitDejeuner(), profil);
             exigerCompatible(jour.dejeuner(), profil);
@@ -63,20 +68,30 @@ public record PlanSemaine(ProfilUtilisateur profil, List<Jour> jours) {
         }
     }
 
-    private static void exigerCompatible(Repas repas, ProfilUtilisateur profil) {
-        if (!repas.estCompatibleAvec(profil)) {
-            throw new RepasIncompatibleException(repas, profil);
+    private static void exigerAuMoinsUnRepasChoisi(List<Jour> jours) {
+        boolean auMoinsUnChoisi = jours.stream().anyMatch(jour -> !jour.repasChoisis().isEmpty());
+        if (!auMoinsUnChoisi) {
+            throw new PlanSemaineInvalideException("Le plan ne contient aucun repas choisi");
         }
     }
 
+    private static void exigerCompatible(Optional<Repas> repas, ProfilUtilisateur profil) {
+        repas.ifPresent(r -> {
+            if (!r.estCompatibleAvec(profil)) {
+                throw new RepasIncompatibleException(r, profil);
+            }
+        });
+    }
+
     /**
-     * @return les 15 repas du plan (5 petits-dejeuners + 5 dejeuners +
-     * 5 diners), dans l'ordre des jours. Base de la generation de la liste
-     * de courses (package {@code courses}).
+     * @return les repas effectivement choisis du plan (jusqu'a 15 : 5
+     * petits-dejeuners + 5 dejeuners + 5 diners, moins ceux qu'un jour n'a
+     * pas — voir {@link Jour}), dans l'ordre des jours. Base de la
+     * generation de la liste de courses (package {@code courses}).
      */
     public List<Repas> tousLesRepas() {
         return jours.stream()
-                .flatMap(jour -> Stream.of(jour.petitDejeuner(), jour.dejeuner(), jour.diner()))
+                .flatMap(jour -> jour.repasChoisis().stream())
                 .toList();
     }
 

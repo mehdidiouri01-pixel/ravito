@@ -108,7 +108,12 @@ interface SlotEnEdition {
                 <label>
                   {{ champ.libelle }}
                   <div class="select-avec-recette">
-                    <button type="button" class="choix-repas-bouton" (click)="ouvrirChoix(jour, champ.cle)">
+                    <button
+                      type="button"
+                      class="choix-repas-bouton"
+                      [class.vibrer]="auMoinsUnChoixFait() && estVide(choix()[jour][champ.cle])"
+                      (click)="ouvrirChoix(jour, champ.cle)"
+                    >
                       {{ libelleChoixCourant(jour, champ.cle) ?? '— Choisir —' }}
                     </button>
                     <button
@@ -127,9 +132,7 @@ interface SlotEnEdition {
         }
       </div>
 
-      <button type="button" class="valider" [disabled]="!selectionComplete()" (click)="valider()">
-        Composer mon plan de la semaine
-      </button>
+      <button type="button" class="valider" (click)="valider()">Composer mon plan de la semaine</button>
     </section>
 
     @if (slotOuvert(); as slot) {
@@ -168,6 +171,33 @@ interface SlotEnEdition {
                 <span class="niveau">{{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }}</span>
               </button>
             }
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (confirmationIncompleteOuverte()) {
+      <div class="choix-fond" (click)="annulerEtRetourner()">
+        <div class="choix-modale" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+          <button type="button" class="fermer" (click)="annulerEtRetourner()" aria-label="Fermer">✕</button>
+          <h3>Votre semaine n'est pas complète</h3>
+          <p class="aide">
+            Il manque encore des choix pour {{ creneauxManquants().length }}
+            {{ creneauxManquants().length > 1 ? 'jours' : 'jour' }}. Vous pouvez composer votre plan quand même : la
+            liste de courses ne portera que sur les repas déjà choisis.
+          </p>
+          <ul class="jours-manquants">
+            @for (ligne of creneauxManquants(); track ligne.jour) {
+              <li>
+                <strong>{{ libellesJour[ligne.jour] }}</strong> — {{ ligne.libellesCreneaux.join(', ') }}
+              </li>
+            }
+          </ul>
+          <div class="confirmation-actions">
+            <button type="button" class="secondaire" (click)="annulerEtRetourner()">Retourner choisir</button>
+            <button type="button" class="valider" (click)="confirmerMalgreIncomplet()">
+              C'est ok, continuer
+            </button>
           </div>
         </div>
       </div>
@@ -305,8 +335,69 @@ interface SlotEnEdition {
         font-size: 0.75rem;
       }
 
+      /* Attire l'oeil sur les cases encore vides, mais seulement une fois
+         que l'utilisateur a commencé à choisir — sinon les 15 cases
+         vibreraient dès l'arrivée sur la page, ce qui serait juste du bruit
+         visuel sans aider personne. Vibration périodique et douce (une
+         courte secousse répétée toutes les quelques secondes), jamais
+         continue, pour rester discrète. */
+      @keyframes vibrer-attente {
+        0%,
+        92%,
+        100% {
+          transform: translateX(0);
+        }
+        93% {
+          transform: translateX(-3px);
+        }
+        94% {
+          transform: translateX(3px);
+        }
+        95% {
+          transform: translateX(-3px);
+        }
+        96% {
+          transform: translateX(3px);
+        }
+        97% {
+          transform: translateX(0);
+        }
+      }
+
+      .choix-repas-bouton.vibrer {
+        animation: vibrer-attente 3.5s ease-in-out infinite;
+        border-color: var(--couleur-accent);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .choix-repas-bouton.vibrer {
+          animation: none;
+        }
+      }
+
       .valider {
         margin-top: 0.5rem;
+      }
+
+      .jours-manquants {
+        margin: 0 0 1.25rem;
+        padding-left: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        font-size: 0.9rem;
+      }
+
+      .confirmation-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+
+      .confirmation-actions .secondaire {
+        background: transparent;
+        color: var(--couleur-texte-att);
+        border: 1px solid var(--couleur-bordure);
       }
 
       .choix-fond {
@@ -440,6 +531,9 @@ export class SelectionRepasComponent {
   /** La case (jour, repas) dont la pop-up de choix par tuiles est actuellement ouverte, ou aucune. */
   protected readonly slotOuvert = signal<SlotEnEdition | null>(null);
 
+  /** La pop-up de confirmation affichée quand on valide une semaine encore incomplète. */
+  protected readonly confirmationIncompleteOuverte = signal(false);
+
   constructor() {
     // Chaque nouvelle idee generee par le conteneur s'affiche automatiquement
     // dans la pop-up de recette a titre d'apercu, et devient choisissable
@@ -460,6 +554,16 @@ export class SelectionRepasComponent {
   );
 
   protected readonly selectionComplete = computed(() => this.joursComplets() === this.jours.length);
+
+  /** Vrai dès qu'au moins un repas a été choisi quelque part dans la semaine — sert à déclencher la vibration des cases encore vides. */
+  protected readonly auMoinsUnChoixFait = computed(() =>
+    this.jours.some((jour) => {
+      const choixJour = this.choix()[jour];
+      return (
+        !this.estVide(choixJour.petitDejeuner) || !this.estVide(choixJour.dejeuner) || !this.estVide(choixJour.diner)
+      );
+    }),
+  );
 
   /** Le repas genere du moment, seulement s'il correspond au type de ce champ (pas de proposition croisee). */
   protected repasGenerePour(type: TypeRepas): RepasResponse | null {
@@ -577,10 +681,32 @@ export class SelectionRepasComponent {
     this.noteRepasAffiche.set(null);
   }
 
+  /**
+   * Valide la selection. Une semaine complete part directement ; une
+   * semaine incomplete ouvre d'abord une confirmation (voir
+   * `confirmerMalgreIncomplet`) plutot que de bloquer silencieusement —
+   * seul un plan totalement vide n'a rien a proposer, mais ce cas est deja
+   * couvert par `creneauxManquants` (tous les jours y apparaissent) et par
+   * le backend qui refuserait de toute facon un plan sans aucun repas.
+   */
   protected valider(): void {
-    if (!this.selectionComplete()) {
+    if (this.selectionComplete()) {
+      this.emettreSelection();
       return;
     }
+    this.confirmationIncompleteOuverte.set(true);
+  }
+
+  protected annulerEtRetourner(): void {
+    this.confirmationIncompleteOuverte.set(false);
+  }
+
+  protected confirmerMalgreIncomplet(): void {
+    this.confirmationIncompleteOuverte.set(false);
+    this.emettreSelection();
+  }
+
+  private emettreSelection(): void {
     const requete = Object.fromEntries(
       this.jours.map((jour) => [jour, this.versChoixJourRequest(this.choix()[jour])]),
     ) as Record<JourSemaine, ChoixJourRequest>;
@@ -595,16 +721,38 @@ export class SelectionRepasComponent {
     );
   }
 
-  private versChoixJourRequest(choixJour: ChoixJourPartiel): ChoixJourRequest {
-    return {
-      petitDejeuner: this.versChoixRepasRequest(choixJour.petitDejeuner),
-      dejeuner: this.versChoixRepasRequest(choixJour.dejeuner),
-      diner: this.versChoixRepasRequest(choixJour.diner),
-    };
+  /** Pour chaque jour ayant au moins une case encore vide, le jour et le libelle des creneaux manquants — sert a la pop-up de confirmation. */
+  protected creneauxManquants(): { jour: JourSemaine; libellesCreneaux: string[] }[] {
+    return this.jours
+      .map((jour) => {
+        const choixJour = this.choix()[jour];
+        const libellesCreneaux = this.champsRepas
+          .filter((champ) => this.estVide(choixJour[champ.cle]))
+          .map((champ) => champ.libelle);
+        return { jour, libellesCreneaux };
+      })
+      .filter((ligne) => ligne.libellesCreneaux.length > 0);
   }
 
-  /** @throws si choix est 'vide' — ne doit jamais arriver ici, selectionComplete() l'a deja garanti avant l'appel. */
-  private versChoixRepasRequest(choix: ChoixRepasPartiel): ChoixRepasRequest {
+  private versChoixJourRequest(choixJour: ChoixJourPartiel): ChoixJourRequest {
+    const requete: ChoixJourRequest = {};
+    const petitDejeuner = this.versChoixRepasRequest(choixJour.petitDejeuner);
+    const dejeuner = this.versChoixRepasRequest(choixJour.dejeuner);
+    const diner = this.versChoixRepasRequest(choixJour.diner);
+    if (petitDejeuner) {
+      requete.petitDejeuner = petitDejeuner;
+    }
+    if (dejeuner) {
+      requete.dejeuner = dejeuner;
+    }
+    if (diner) {
+      requete.diner = diner;
+    }
+    return requete;
+  }
+
+  /** Une case 'vide' n'est simplement pas transmise — voir ChoixJourRequest, qui accepte des creneaux absents pour un plan partiel. */
+  private versChoixRepasRequest(choix: ChoixRepasPartiel): ChoixRepasRequest | undefined {
     if (choix.kind === 'id') {
       return { id: choix.id };
     }
@@ -626,6 +774,6 @@ export class SelectionRepasComponent {
         },
       };
     }
-    throw new Error('Choix de repas incomplet — ne devrait jamais arriver apres selectionComplete()');
+    return undefined;
   }
 }

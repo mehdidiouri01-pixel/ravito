@@ -77,6 +77,23 @@ class ComposerPlanSemaineApplicationServiceTest {
     }
 
     @Test
+    void compose_un_plan_partiel_en_laissant_certains_choix_vides() {
+        Repas petitDejeuner = unRepas(TypeRepas.PETIT_DEJEUNER);
+        stubParId(petitDejeuner);
+        // seul lundi recoit un petit-dejeuner, tout le reste est laisse vide :
+        Map<JourSemaine, ChoixJour> choix = new EnumMap<>(JourSemaine.class);
+        choix.put(JourSemaine.LUNDI, new ChoixJour(parId(petitDejeuner), Optional.empty(), Optional.empty()));
+        for (JourSemaine jour : List.of(JourSemaine.MARDI, JourSemaine.MERCREDI, JourSemaine.JEUDI, JourSemaine.VENDREDI)) {
+            choix.put(jour, new ChoixJour(Optional.empty(), Optional.empty(), Optional.empty()));
+        }
+
+        PlanSemaine plan = service.composer(PROFIL, choix);
+
+        assertThat(plan.jours()).hasSize(5);
+        assertThat(plan.tousLesRepas()).hasSize(1);
+    }
+
+    @Test
     void leve_repas_introuvable_si_un_identifiant_ne_correspond_a_rien() {
         RepasId idInconnu = RepasId.nouveau();
         Repas dejeuner = unRepas(TypeRepas.DEJEUNER);
@@ -86,7 +103,7 @@ class ComposerPlanSemaineApplicationServiceTest {
         when(catalogueRepasPort.parId(idInconnu)).thenReturn(Optional.empty());
 
         Map<JourSemaine, ChoixJour> choix =
-                planComplet(new ChoixRepas.ParId(idInconnu), parId(dejeuner), parId(diner));
+                planComplet(Optional.of(new ChoixRepas.ParId(idInconnu)), parId(dejeuner), parId(diner));
 
         assertThatExceptionOfType(RepasIntrouvableException.class)
                 .isThrownBy(() -> service.composer(PROFIL, choix));
@@ -125,11 +142,11 @@ class ComposerPlanSemaineApplicationServiceTest {
         stubParId(dejeuner);
 
         Map<JourSemaine, ChoixJour> choix =
-                planComplet(parId(petitDejeuner), parId(dejeuner), new ChoixRepas.Genere(dinerGenere));
+                planComplet(parId(petitDejeuner), parId(dejeuner), Optional.of(new ChoixRepas.Genere(dinerGenere)));
 
         PlanSemaine plan = service.composer(PROFIL, choix);
 
-        assertThat(plan.jours()).extracting(jour -> jour.diner().nom()).allMatch(nom -> nom.equals("Idee generee"));
+        assertThat(plan.jours()).extracting(jour -> jour.diner().orElseThrow().nom()).allMatch(nom -> nom.equals("Idee generee"));
     }
 
     @Test
@@ -147,7 +164,7 @@ class ComposerPlanSemaineApplicationServiceTest {
         stubParId(dejeuner);
 
         Map<JourSemaine, ChoixJour> choix =
-                planComplet(parId(petitDejeuner), parId(dejeuner), new ChoixRepas.Genere(dinerGenereTruque));
+                planComplet(parId(petitDejeuner), parId(dejeuner), Optional.of(new ChoixRepas.Genere(dinerGenereTruque)));
 
         assertThatExceptionOfType(RepasGenereInvalideException.class)
                 .isThrownBy(() -> service.composer(PROFIL, choix));
@@ -158,7 +175,8 @@ class ComposerPlanSemaineApplicationServiceTest {
      * choix de petit-dejeuner/dejeuner/diner sur chaque jour — suffisant
      * pour les tests qui ne portent que sur un seul jour particulier.
      */
-    private Map<JourSemaine, ChoixJour> planComplet(ChoixRepas petitDejeuner, ChoixRepas dejeuner, ChoixRepas diner) {
+    private Map<JourSemaine, ChoixJour> planComplet(
+            Optional<ChoixRepas> petitDejeuner, Optional<ChoixRepas> dejeuner, Optional<ChoixRepas> diner) {
         Map<JourSemaine, ChoixJour> choix = new EnumMap<>(JourSemaine.class);
         for (JourSemaine jour : JourSemaine.values()) {
             choix.put(jour, new ChoixJour(petitDejeuner, dejeuner, diner));
@@ -166,8 +184,8 @@ class ComposerPlanSemaineApplicationServiceTest {
         return choix;
     }
 
-    private static ChoixRepas.ParId parId(Repas repas) {
-        return new ChoixRepas.ParId(repas.id());
+    private static Optional<ChoixRepas> parId(Repas repas) {
+        return Optional.of(new ChoixRepas.ParId(repas.id()));
     }
 
     private void stubParId(Repas repas) {

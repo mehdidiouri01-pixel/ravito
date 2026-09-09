@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -55,10 +56,35 @@ class PlanSemaineTest {
     void refuse_un_repas_incompatible_avec_le_profil() {
         List<Jour> jours = new ArrayList<>(cinqJoursValides());
         Repas dejeunerGourmand = RepasTestFactory.unRepas(TypeRepas.DEJEUNER, StyleAlimentaire.GOURMAND, NiveauCuisine.DEBUTANT);
-        jours.set(0, new Jour(JourSemaine.LUNDI, jours.get(0).petitDejeuner(), dejeunerGourmand, jours.get(0).diner()));
+        jours.set(0, new Jour(JourSemaine.LUNDI, jours.get(0).petitDejeuner(), Optional.of(dejeunerGourmand), jours.get(0).diner()));
 
         assertThatExceptionOfType(RepasIncompatibleException.class)
                 .isThrownBy(() -> new PlanSemaine(PROFIL, jours));
+    }
+
+    @Test
+    void accepte_un_plan_avec_des_jours_partiellement_ou_totalement_vides() {
+        List<Jour> jours = new ArrayList<>(cinqJoursValides());
+        // Lundi perd son dejeuner, mardi n'a plus aucun repas choisi :
+        Jour lundi = jours.get(0);
+        jours.set(0, new Jour(lundi.jourSemaine(), lundi.petitDejeuner(), Optional.empty(), lundi.diner()));
+        Jour mardi = jours.get(1);
+        jours.set(1, new Jour(mardi.jourSemaine(), Optional.empty(), Optional.empty(), Optional.empty()));
+
+        PlanSemaine plan = new PlanSemaine(PROFIL, jours);
+
+        assertThat(plan.jours()).hasSize(5); // les 5 jours restent presents, meme mardi qui n'a plus aucun repas
+        assertThat(plan.tousLesRepas()).hasSize(11); // 15 - 1 (lundi : dejeuner manquant) - 3 (mardi : entierement vide)
+    }
+
+    @Test
+    void refuse_un_plan_sans_aucun_repas_choisi() {
+        List<Jour> joursVides = List.of(JourSemaine.values()).stream()
+                .map(jourSemaine -> new Jour(jourSemaine, Optional.<Repas>empty(), Optional.<Repas>empty(), Optional.<Repas>empty()))
+                .toList();
+
+        assertThatExceptionOfType(PlanSemaineInvalideException.class)
+                .isThrownBy(() -> new PlanSemaine(PROFIL, joursVides));
     }
 
     @Test
@@ -123,6 +149,6 @@ class PlanSemaineTest {
         Repas petitDejeuner = RepasTestFactory.unRepas(TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT);
         Repas dejeuner = RepasTestFactory.unRepas(TypeRepas.DEJEUNER, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT);
         Repas diner = RepasTestFactory.unRepas(TypeRepas.DINER, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT);
-        return new Jour(jourSemaine, petitDejeuner, dejeuner, diner);
+        return new Jour(jourSemaine, Optional.of(petitDejeuner), Optional.of(dejeuner), Optional.of(diner));
     }
 }

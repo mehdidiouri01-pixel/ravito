@@ -59,9 +59,66 @@ describe('SelectionRepasComponent', () => {
     expect(boutonsChoix().length).toBe(15);
   });
 
-  it('desactive la validation tant que les 5 jours ne sont pas complets', () => {
+  it('laisse le bouton de validation toujours actif, meme si les 5 jours ne sont pas complets', () => {
     const bouton = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.valider');
-    expect(bouton?.disabled).toBeTrue();
+    expect(bouton?.disabled).toBeFalsy();
+  });
+
+  it('ne fait pas vibrer les cases vides tant qu\'aucun choix n\'a ete fait', () => {
+    expect(boutonsChoix().some((b) => b.classList.contains('vibrer'))).toBeFalse();
+  });
+
+  it('fait vibrer les cases encore vides des le premier choix effectue', () => {
+    choisirParTuile(0, 'Tartines'); // lundi petit-dejeuner
+
+    const boutons = boutonsChoix();
+    expect(boutons[0].classList.contains('vibrer')).toBeFalse(); // deja choisi
+    expect(boutons[1].classList.contains('vibrer')).toBeTrue(); // lundi dejeuner, encore vide
+    expect(boutons[14].classList.contains('vibrer')).toBeTrue(); // vendredi diner, encore vide
+  });
+
+  it('ouvre une confirmation listant les jours/creneaux manquants au clic sur valider si la semaine est incomplete', () => {
+    choisirParTuile(0, 'Tartines'); // lundi petit-dejeuner seulement
+
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.valider')?.click();
+    fixture.detectChanges();
+
+    const texte = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(texte).toContain('Lundi');
+    expect(texte).toContain('Déjeuner');
+    expect(texte).toContain('Dîner');
+    expect(texte).toContain('Mardi');
+  });
+
+  it('ferme la confirmation sans rien emettre au clic sur "Retourner choisir"', () => {
+    let emis = false;
+    fixture.componentInstance.selectionValidee.subscribe(() => (emis = true));
+    choisirParTuile(0, 'Tartines');
+
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.valider')?.click();
+    fixture.detectChanges();
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.confirmation-actions .secondaire')?.click();
+    fixture.detectChanges();
+
+    expect(emis).toBeFalse();
+    expect((fixture.nativeElement as HTMLElement).querySelector('.jours-manquants')).toBeNull();
+  });
+
+  it('emet une selection partielle (creneaux non choisis omis) au clic sur "C\'est ok, continuer"', () => {
+    let emis: Record<JourSemaine, ChoixJourRequest> | undefined;
+    fixture.componentInstance.selectionValidee.subscribe((valeur) => (emis = valeur));
+    choisirParTuile(0, 'Tartines'); // lundi petit-dejeuner seulement
+
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.valider')?.click();
+    fixture.detectChanges();
+    const boutons = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.confirmation-actions button'),
+    );
+    boutons[1].click(); // "C'est ok, continuer"
+    fixture.detectChanges();
+
+    expect(emis?.['LUNDI']).toEqual({ petitDejeuner: { id: 'pd-1' } });
+    expect(emis?.['MARDI']).toEqual({});
   });
 
   it('accepte le meme repas pour deux jours differents (doublon autorise)', () => {

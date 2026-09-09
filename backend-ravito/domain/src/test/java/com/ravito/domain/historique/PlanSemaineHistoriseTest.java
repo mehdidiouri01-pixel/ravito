@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
@@ -57,6 +58,6 @@ class PlanSemaineHistoriseTest {
         Repas petitDejeuner = RepasTestFactory.unRepas(TypeRepas.PETIT_DEJEUNER, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT);
         Repas dejeuner = RepasTestFactory.unRepas(TypeRepas.DEJEUNER, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT);
         Repas diner = RepasTestFactory.unRepas(TypeRepas.DINER, StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT);
-        return new Jour(jourSemaine, petitDejeuner, dejeuner, diner);
+        return new Jour(jourSemaine, Optional.of(petitDejeuner), Optional.of(dejeuner), Optional.of(diner));
     }
 }
