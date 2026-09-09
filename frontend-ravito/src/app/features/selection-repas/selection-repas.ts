@@ -53,71 +53,73 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dine
           <article class="jour-ligne">
             <h3>{{ libellesJour[jour] }}</h3>
 
-            <label>
-              Petit-déjeuner
-              <div class="select-avec-recette">
-                <select (change)="choisirPetitDejeuner(jour, $any($event.target).value)">
-                  <option value="" [selected]="choix()[jour].petitDejeunerId === ''">— Choisir —</option>
-                  @for (repas of proposition().petitsDejeuners; track repas.id) {
-                    <option [value]="repas.id" [selected]="repas.id === choix()[jour].petitDejeunerId">
-                      {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
-                    </option>
-                  }
-                </select>
-                <button
-                  type="button"
-                  class="voir-recette"
-                  [disabled]="choix()[jour].petitDejeunerId === ''"
-                  (click)="afficherRecette(jour, 'petitDejeunerId', proposition().petitsDejeuners)"
-                >
-                  Recette
-                </button>
-              </div>
-            </label>
+            <div class="selecteurs">
+              <label>
+                Petit-déjeuner
+                <div class="select-avec-recette">
+                  <select (change)="choisirPetitDejeuner(jour, $any($event.target).value)">
+                    <option value="" [selected]="choix()[jour].petitDejeunerId === ''">— Choisir —</option>
+                    @for (repas of proposition().petitsDejeuners; track repas.id) {
+                      <option [value]="repas.id" [selected]="repas.id === choix()[jour].petitDejeunerId">
+                        {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
+                      </option>
+                    }
+                  </select>
+                  <button
+                    type="button"
+                    class="voir-recette"
+                    [disabled]="choix()[jour].petitDejeunerId === ''"
+                    (click)="afficherRecette(jour, 'petitDejeunerId', proposition().petitsDejeuners)"
+                  >
+                    Recette
+                  </button>
+                </div>
+              </label>
 
-            <label>
-              Déjeuner
-              <div class="select-avec-recette">
-                <select (change)="choisirDejeuner(jour, $any($event.target).value)">
-                  <option value="" [selected]="choix()[jour].dejeunerId === ''">— Choisir —</option>
-                  @for (repas of proposition().dejeuners; track repas.id) {
-                    <option [value]="repas.id" [selected]="repas.id === choix()[jour].dejeunerId">
-                      {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
-                    </option>
-                  }
-                </select>
-                <button
-                  type="button"
-                  class="voir-recette"
-                  [disabled]="choix()[jour].dejeunerId === ''"
-                  (click)="afficherRecette(jour, 'dejeunerId', proposition().dejeuners)"
-                >
-                  Recette
-                </button>
-              </div>
-            </label>
+              <label>
+                Déjeuner
+                <div class="select-avec-recette">
+                  <select (change)="choisirDejeuner(jour, $any($event.target).value)">
+                    <option value="" [selected]="choix()[jour].dejeunerId === ''">— Choisir —</option>
+                    @for (repas of proposition().dejeuners; track repas.id) {
+                      <option [value]="repas.id" [selected]="repas.id === choix()[jour].dejeunerId">
+                        {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
+                      </option>
+                    }
+                  </select>
+                  <button
+                    type="button"
+                    class="voir-recette"
+                    [disabled]="choix()[jour].dejeunerId === ''"
+                    (click)="afficherRecette(jour, 'dejeunerId', proposition().dejeuners)"
+                  >
+                    Recette
+                  </button>
+                </div>
+              </label>
 
-            <label>
-              Dîner
-              <div class="select-avec-recette">
-                <select (change)="choisirDiner(jour, $any($event.target).value)">
-                  <option value="" [selected]="choix()[jour].dinerId === ''">— Choisir —</option>
-                  @for (repas of proposition().diners; track repas.id) {
-                    <option [value]="repas.id" [selected]="repas.id === choix()[jour].dinerId">
-                      {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
-                    </option>
-                  }
-                </select>
-                <button
-                  type="button"
-                  class="voir-recette"
-                  [disabled]="choix()[jour].dinerId === ''"
-                  (click)="afficherRecette(jour, 'dinerId', proposition().diners)"
-                >
-                  Recette
-                </button>
-              </div>
-            </label>
+              <label>
+                Dîner
+                <div class="select-avec-recette">
+                  <select (change)="choisirDiner(jour, $any($event.target).value)">
+                    <option value="" [selected]="choix()[jour].dinerId === ''">— Choisir —</option>
+                    @for (repas of proposition().diners; track repas.id) {
+                      <option [value]="repas.id" [selected]="repas.id === choix()[jour].dinerId">
+                        {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
+                      </option>
+                    }
+                  </select>
+                  <button
+                    type="button"
+                    class="voir-recette"
+                    [disabled]="choix()[jour].dinerId === ''"
+                    (click)="afficherRecette(jour, 'dinerId', proposition().diners)"
+                  >
+                    Recette
+                  </button>
+                </div>
+              </label>
+            </div>
           </article>
         }
       </div>
@@ -181,10 +183,6 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dine
       }
 
       .jour-ligne {
-        display: grid;
-        grid-template-columns: 6rem 1fr 1fr 1fr;
-        align-items: center;
-        gap: 1rem;
         padding: 0.85rem 1rem;
         border-radius: var(--rayon);
         border: 1px solid var(--couleur-bordure);
@@ -202,8 +200,19 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dine
       }
 
       .jour-ligne h3 {
-        margin: 0;
+        margin: 0 0 0.6rem;
         font-size: 1rem;
+      }
+
+      /* flex-wrap plutot qu'une grille a colonnes fixes : chaque selecteur a
+         une largeur minimale confortable (13rem) et retombe naturellement a
+         la ligne quand la place manque, a n'importe quelle largeur d'ecran —
+         plus robuste qu'un seul point de rupture fixe qui doit deviner la
+         largeur exacte ou 4 colonnes cessent de tenir. */
+      .selecteurs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
       }
 
       .jour-ligne label {
@@ -213,11 +222,14 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dine
         font-size: 0.8rem;
         font-weight: 600;
         color: var(--couleur-texte-att);
+        flex: 1 1 13rem;
+        min-width: 0;
       }
 
       .select-avec-recette {
         display: flex;
         gap: 0.4rem;
+        min-width: 0;
       }
 
       .select-avec-recette select {
@@ -238,12 +250,6 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dine
         border: 1px solid var(--couleur-accent);
         padding: 0.3rem 0.6rem;
         font-size: 0.75rem;
-      }
-
-      @media (max-width: 40rem) {
-        .jour-ligne {
-          grid-template-columns: 1fr;
-        }
       }
 
       .valider {
