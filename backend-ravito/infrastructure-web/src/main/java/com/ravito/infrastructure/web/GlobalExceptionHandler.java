@@ -4,8 +4,10 @@ import com.ravito.domain.catalogue.CatalogueInsuffisantException;
 import com.ravito.domain.catalogue.GenerationRepasImpossibleException;
 import com.ravito.domain.catalogue.RepasIntrouvableException;
 import com.ravito.domain.planification.PlanSemaineInvalideException;
+import com.ravito.domain.planification.RepasGenereInvalideException;
 import com.ravito.domain.planification.RepasIncompatibleException;
 import com.ravito.domain.prix.EstimationImpossibleException;
+import com.ravito.infrastructure.web.planification.ChoixRepasInvalideException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -36,9 +38,14 @@ class GlobalExceptionHandler {
         return reponse(HttpStatus.CONFLICT, exception);
     }
 
-    @ExceptionHandler({RepasIncompatibleException.class, PlanSemaineInvalideException.class})
+    @ExceptionHandler({RepasIncompatibleException.class, PlanSemaineInvalideException.class, RepasGenereInvalideException.class})
     ResponseEntity<ErrorResponse> planInvalide(RuntimeException exception) {
         return reponse(HttpStatus.UNPROCESSABLE_ENTITY, exception);
+    }
+
+    @ExceptionHandler(ChoixRepasInvalideException.class)
+    ResponseEntity<ErrorResponse> choixRepasInvalide(ChoixRepasInvalideException exception) {
+        return reponse(HttpStatus.BAD_REQUEST, exception);
     }
 
     @ExceptionHandler(EstimationImpossibleException.class)

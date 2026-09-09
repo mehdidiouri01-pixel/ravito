@@ -78,6 +78,25 @@ class ComposerPlanSemaineControllerTest {
     }
 
     @Test
+    void renvoie_200_avec_un_diner_genere_transmis_en_entier() throws Exception {
+        when(composerPlanSemaineUseCase.composer(any(), any())).thenReturn(unPlanValide());
+        when(estimerCoutUseCase.estimer(any(), any())).thenReturn(new Prix(BigDecimal.valueOf(42.50)));
+
+        mockMvc.perform(post("/api/plans-semaine")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(uneRequeteAvecDinerGenere()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void renvoie_400_si_un_choix_de_repas_ne_fournit_ni_id_ni_genere() throws Exception {
+        mockMvc.perform(post("/api/plans-semaine")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(uneRequeteAvecChoixAmbigu()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void renvoie_422_si_un_repas_est_incompatible_avec_le_profil() throws Exception {
         Repas repasIncompatible = unRepas(TypeRepas.DEJEUNER, StyleAlimentaire.GOURMAND);
         when(composerPlanSemaineUseCase.composer(any(), any()))
@@ -96,7 +115,41 @@ class ComposerPlanSemaineControllerTest {
      */
     private static String uneRequeteValide() {
         UUID unId = UUID.randomUUID();
-        String choixJour = "{\"petitDejeunerId\":\"" + unId + "\",\"dejeunerId\":\"" + unId + "\",\"dinerId\":\"" + unId + "\"}";
+        String choixRepas = "{\"id\":\"" + unId + "\"}";
+        String choixJour = "{\"petitDejeuner\":" + choixRepas + ",\"dejeuner\":" + choixRepas + ",\"diner\":" + choixRepas + "}";
+        return "{\"profil\":{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\",\"nombreDePersonnes\":2},"
+                + "\"choix\":{"
+                + "\"LUNDI\":" + choixJour + ","
+                + "\"MARDI\":" + choixJour + ","
+                + "\"MERCREDI\":" + choixJour + ","
+                + "\"JEUDI\":" + choixJour + ","
+                + "\"VENDREDI\":" + choixJour
+                + "}}";
+    }
+
+    private static String uneRequeteAvecDinerGenere() {
+        UUID unId = UUID.randomUUID();
+        String choixParId = "{\"id\":\"" + unId + "\"}";
+        String dinerGenere = "{\"genere\":{\"nom\":\"Idee generee\",\"type\":\"DINER\",\"style\":\"NORMAL\","
+                + "\"niveauRequis\":\"DEBUTANT\",\"ingredients\":[{\"ingredient\":\"riz\",\"rayon\":\"EPICERIE\","
+                + "\"quantite\":150,\"unite\":\"GRAMME\"}]}}";
+        String choixJour = "{\"petitDejeuner\":" + choixParId + ",\"dejeuner\":" + choixParId + ",\"diner\":" + dinerGenere + "}";
+        return "{\"profil\":{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\",\"nombreDePersonnes\":2},"
+                + "\"choix\":{"
+                + "\"LUNDI\":" + choixJour + ","
+                + "\"MARDI\":" + choixJour + ","
+                + "\"MERCREDI\":" + choixJour + ","
+                + "\"JEUDI\":" + choixJour + ","
+                + "\"VENDREDI\":" + choixJour
+                + "}}";
+    }
+
+    private static String uneRequeteAvecChoixAmbigu() {
+        UUID unId = UUID.randomUUID();
+        // ni id ni genere fournis pour le petit-dejeuner : requete malformee.
+        String choixVide = "{}";
+        String choixParId = "{\"id\":\"" + unId + "\"}";
+        String choixJour = "{\"petitDejeuner\":" + choixVide + ",\"dejeuner\":" + choixParId + ",\"diner\":" + choixParId + "}";
         return "{\"profil\":{\"enseigne\":\"CARREFOUR\",\"style\":\"NORMAL\",\"niveau\":\"DEBUTANT\",\"nombreDePersonnes\":2},"
                 + "\"choix\":{"
                 + "\"LUNDI\":" + choixJour + ","

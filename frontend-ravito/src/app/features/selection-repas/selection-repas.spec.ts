@@ -1,15 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SelectionRepasComponent } from './selection-repas';
-import type { ChoixJourRequest, JourSemaine, RepasProposesResponse, TypeRepas } from '../../core/models';
+import type { ChoixJourRequest, JourSemaine, RepasProposesResponse, RepasResponse, TypeRepas } from '../../core/models';
 
-function unRepas(id: string, nom: string, type: TypeRepas = 'PETIT_DEJEUNER') {
+function unRepas(id: string, nom: string, type: TypeRepas = 'PETIT_DEJEUNER'): RepasResponse {
   return {
     id,
     nom,
     type,
-    style: 'NORMAL' as const,
-    niveauRequis: 'DEBUTANT' as const,
-    ingredients: [],
+    style: 'NORMAL',
+    niveauRequis: 'DEBUTANT',
+    ingredients: [{ ingredient: 'ingredient de test', rayon: 'EPICERIE', quantite: 1, unite: 'UNITE' }],
   };
 }
 
@@ -109,8 +109,8 @@ describe('SelectionRepasComponent', () => {
 
     (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.valider')?.click();
 
-    expect(emis?.['LUNDI']).toEqual({ petitDejeunerId: 'pd-1', dejeunerId: 'dj-1', dinerId: 'dn-1' });
-    expect(emis?.['VENDREDI']).toEqual({ petitDejeunerId: 'pd-1', dejeunerId: 'dj-1', dinerId: 'dn-1' });
+    expect(emis?.['LUNDI']).toEqual({ petitDejeuner: { id: 'pd-1' }, dejeuner: { id: 'dj-1' }, diner: { id: 'dn-1' } });
+    expect(emis?.['VENDREDI']).toEqual({ petitDejeuner: { id: 'pd-1' }, dejeuner: { id: 'dj-1' }, diner: { id: 'dn-1' } });
   });
 
   it('emet le type demande quand on clique sur un bouton "Générer une idée"', () => {
@@ -133,5 +133,50 @@ describe('SelectionRepasComponent', () => {
     const modale = (fixture.nativeElement as HTMLElement).querySelector('.modale');
     expect(modale?.textContent).toContain('Idée surprise');
     expect(modale?.textContent).toContain('générée');
+  });
+
+  it('propose le repas genere comme option dans la liste deroulante du bon type, et peut le selectionner', () => {
+    fixture.componentRef.setInput('repasGenere', unRepas('gen-1', 'Dîner surprise', 'DINER'));
+    fixture.detectChanges();
+
+    const optionsGenerees = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('option[value="GENERE"]'),
+    );
+    // 5 jours, uniquement sur le selecteur Diner :
+    expect(optionsGenerees.length).toBe(5);
+    expect(optionsGenerees[0].textContent).toContain('Dîner surprise');
+
+    const [, , lundiDiner] = selects();
+    choisir(lundiDiner, 'GENERE');
+
+    expect(lundiDiner.value).toBe('GENERE');
+  });
+
+  it('emet le repas genere en entier (pas un id) pour le jour ou il a ete choisi', () => {
+    fixture.componentRef.setInput('repasGenere', unRepas('gen-1', 'Dîner surprise', 'DINER'));
+    fixture.detectChanges();
+
+    let emis: Record<JourSemaine, ChoixJourRequest> | undefined;
+    fixture.componentInstance.selectionValidee.subscribe((valeur) => (emis = valeur));
+
+    const tousLesSelects = selects();
+    for (let i = 0; i < tousLesSelects.length; i += 3) {
+      choisir(tousLesSelects[i], 'pd-1');
+      choisir(tousLesSelects[i + 1], 'dj-1');
+      choisir(tousLesSelects[i + 2], i === 0 ? 'GENERE' : 'dn-1'); // seul lundi recoit le diner genere
+    }
+
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.valider')?.click();
+
+    expect(emis?.['LUNDI'].diner).toEqual({
+      genere: {
+        nom: 'Dîner surprise',
+        type: 'DINER',
+        style: 'NORMAL',
+        niveauRequis: 'DEBUTANT',
+        ingredients: [{ ingredient: 'ingredient de test', rayon: 'EPICERIE', quantite: 1, unite: 'UNITE' }],
+      },
+    });
+    expect(emis?.['MARDI'].diner).toEqual({ id: 'dn-1' });
   });
 });

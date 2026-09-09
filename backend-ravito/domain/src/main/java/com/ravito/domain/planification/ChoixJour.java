@@ -1,24 +1,22 @@
 package com.ravito.domain.planification;
 
-import com.ravito.domain.catalogue.RepasId;
-
 import java.util.Objects;
 
 /**
- * Choix de l'utilisateur pour une journee : les identifiants du
- * petit-dejeuner, du dejeuner et du diner selectionnes dans le catalogue
- * propose.
+ * Choix de l'utilisateur pour une journee : petit-dejeuner, dejeuner et
+ * diner, chacun soit reference par identifiant, soit genere (voir
+ * {@link ChoixRepas}).
  *
  * <p>Simple porteur de donnees a la frontiere de {@link ComposerPlanSemaineUseCase}
- * — la resolution de ces identifiants en {@code Repas} (via
- * {@code CatalogueRepasPort}) est de la responsabilite de l'implementation
- * du use case, pas du domaine lui-meme.
+ * — la resolution de chaque {@link ChoixRepas} en {@code Repas} reel (via
+ * {@code CatalogueRepasPort} ou revalidation directe) est de la
+ * responsabilite de l'implementation du use case, pas du domaine lui-meme.
  */
-public record ChoixJour(RepasId petitDejeunerId, RepasId dejeunerId, RepasId dinerId) {
+public record ChoixJour(ChoixRepas petitDejeuner, ChoixRepas dejeuner, ChoixRepas diner) {
 
     public ChoixJour {
-        Objects.requireNonNull(petitDejeunerId, "petitDejeunerId");
-        Objects.requireNonNull(dejeunerId, "dejeunerId");
-        Objects.requireNonNull(dinerId, "dinerId");
+        Objects.requireNonNull(petitDejeuner, "petitDejeuner");
+        Objects.requireNonNull(dejeuner, "dejeuner");
+        Objects.requireNonNull(diner, "diner");
     }
 }

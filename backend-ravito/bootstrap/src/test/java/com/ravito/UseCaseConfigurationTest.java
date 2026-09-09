@@ -1,6 +1,7 @@
 package com.ravito;
 
 import com.ravito.application.catalogue.GenererRepasApplicationService;
+import com.ravito.application.catalogue.PoolIngredientsCatalogue;
 import com.ravito.application.catalogue.ProposerRepasApplicationService;
 import com.ravito.application.planification.ComposerPlanSemaineApplicationService;
 import com.ravito.application.prix.EstimerCoutApplicationService;
@@ -21,6 +22,13 @@ class UseCaseConfigurationTest {
     private final UseCaseConfiguration configuration = new UseCaseConfiguration();
 
     @Test
+    void cable_poolIngredientsCatalogue_sur_le_catalogue() {
+        CatalogueRepasPort port = Mockito.mock(CatalogueRepasPort.class);
+
+        assertThat(configuration.poolIngredientsCatalogue(port)).isInstanceOf(PoolIngredientsCatalogue.class);
+    }
+
+    @Test
     void cable_proposerRepasUseCase_sur_le_catalogue() {
         CatalogueRepasPort port = Mockito.mock(CatalogueRepasPort.class);
 
@@ -31,8 +39,9 @@ class UseCaseConfigurationTest {
     @Test
     void cable_composerPlanSemaineUseCase_sur_le_catalogue() {
         CatalogueRepasPort port = Mockito.mock(CatalogueRepasPort.class);
+        PoolIngredientsCatalogue pool = new PoolIngredientsCatalogue(port);
 
-        assertThat(configuration.composerPlanSemaineUseCase(port))
+        assertThat(configuration.composerPlanSemaineUseCase(port, pool))
                 .isInstanceOf(ComposerPlanSemaineApplicationService.class);
     }
 
@@ -45,10 +54,10 @@ class UseCaseConfigurationTest {
     }
 
     @Test
-    void cable_genererRepasUseCase_sur_le_catalogue() {
+    void cable_genererRepasUseCase_sur_le_pool_d_ingredients() {
         CatalogueRepasPort port = Mockito.mock(CatalogueRepasPort.class);
+        PoolIngredientsCatalogue pool = new PoolIngredientsCatalogue(port);
 
-        assertThat(configuration.genererRepasUseCase(port))
-                .isInstanceOf(GenererRepasApplicationService.class);
+        assertThat(configuration.genererRepasUseCase(pool)).isInstanceOf(GenererRepasApplicationService.class);
     }
 }

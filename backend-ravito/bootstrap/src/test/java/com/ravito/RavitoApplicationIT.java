@@ -23,9 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test de bout en bout : demarre le contexte Spring complet (application +
  * infrastructure-persistence + infrastructure-web cables ensemble, comme en
- * production) contre un vrai PostgreSQL, et verifie les 3 fonctionnalites du
- * domaine en enchainant de vrais appels HTTP — c'est la premiere fois que
- * tout l'hexagone tourne assemble d'un bout a l'autre.
+ * production) contre un vrai PostgreSQL, et verifie les fonctionnalites du
+ * domaine en enchainant de vrais appels HTTP — proposer, composer un plan
+ * par id, generer un repas puis le composer en l'envoyant en entier — c'est
+ * la premiere fois que tout l'hexagone tourne assemble d'un bout a l'autre.
  *
  * <p>S'appuie sur les donnees de demo semees par Flyway
  * (V2__donnees_demo.sql et suivantes, module infrastructure-persistence) :
@@ -70,8 +71,14 @@ class RavitoApplicationIT {
         UUID dejeunerId = UUID.fromString(proposition.get("dejeuners").get(0).get("id").asText());
         UUID dinerId = UUID.fromString(proposition.get("diners").get(0).get("id").asText());
 
+        String choixPetitDejeunerParId = """
+                {"id":"%s"}
+                """.formatted(petitDejeunerId);
+        String choixDejeunerParId = """
+                {"id":"%s"}
+                """.formatted(dejeunerId);
         String choixJour = """
-                {"petitDejeunerId":"%s","dejeunerId":"%s","dinerId":"%s"}
+                {"petitDejeuner":{"id":"%s"},"dejeuner":{"id":"%s"},"diner":{"id":"%s"}}
                 """.formatted(petitDejeunerId, dejeunerId, dinerId);
         String requetePlan = """
                 {"profil":%s,"choix":{"LUNDI":%s,"MARDI":%s,"MERCREDI":%s,"JEUDI":%s,"VENDREDI":%s}}
@@ -88,6 +95,31 @@ class RavitoApplicationIT {
         // strictement positif.
         assertThat(plan.get("listeCourses").get("parRayon")).isNotEmpty();
         assertThat(plan.get("prixEstime").get("montant").decimalValue())
+                .isGreaterThan(java.math.BigDecimal.ZERO);
+
+        // 3. Un diner genere (voir GenererRepasUseCase) peut etre transmis en
+        // entier a la composition du plan, a la place d'un id — la fonctionnalite
+        // que ce test e2e existe justement pour verifier de bout en bout.
+        ResponseEntity<String> genereReponse = restTemplate.postForEntity("/api/repas/generation",
+                entiteJson("{\"profil\":%s,\"type\":\"DINER\"}".formatted(requeteProfil)), String.class);
+        assertThat(genereReponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        String dinerGenereJson = genereReponse.getBody();
+
+        String choixJourAvecDinerGenere = """
+                {"petitDejeuner":%s,"dejeuner":%s,"diner":{"genere":%s}}
+                """.formatted(choixPetitDejeunerParId, choixDejeunerParId, dinerGenereJson);
+        String requetePlanAvecDinerGenere = """
+                {"profil":%s,"choix":{"LUNDI":%s,"MARDI":%s,"MERCREDI":%s,"JEUDI":%s,"VENDREDI":%s}}
+                """.formatted(requeteProfil, choixJourAvecDinerGenere, choixJourAvecDinerGenere,
+                choixJourAvecDinerGenere, choixJourAvecDinerGenere, choixJourAvecDinerGenere);
+
+        ResponseEntity<String> planAvecDinerGenereReponse = restTemplate.postForEntity(
+                "/api/plans-semaine", entiteJson(requetePlanAvecDinerGenere), String.class);
+
+        assertThat(planAvecDinerGenereReponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode planAvecDinerGenere = objectMapper.readTree(planAvecDinerGenereReponse.getBody());
+        assertThat(planAvecDinerGenere.get("jours")).hasSize(5);
+        assertThat(planAvecDinerGenere.get("prixEstime").get("montant").decimalValue())
                 .isGreaterThan(java.math.BigDecimal.ZERO);
     }
 

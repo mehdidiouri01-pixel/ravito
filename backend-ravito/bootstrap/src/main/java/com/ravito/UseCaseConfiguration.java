@@ -1,6 +1,7 @@
 package com.ravito;
 
 import com.ravito.application.catalogue.GenererRepasApplicationService;
+import com.ravito.application.catalogue.PoolIngredientsCatalogue;
 import com.ravito.application.catalogue.ProposerRepasApplicationService;
 import com.ravito.application.planification.ComposerPlanSemaineApplicationService;
 import com.ravito.application.prix.EstimerCoutApplicationService;
@@ -30,13 +31,19 @@ import java.util.Random;
 class UseCaseConfiguration {
 
     @Bean
+    PoolIngredientsCatalogue poolIngredientsCatalogue(CatalogueRepasPort catalogueRepasPort) {
+        return new PoolIngredientsCatalogue(catalogueRepasPort);
+    }
+
+    @Bean
     ProposerRepasUseCase proposerRepasUseCase(CatalogueRepasPort catalogueRepasPort) {
         return new ProposerRepasApplicationService(catalogueRepasPort);
     }
 
     @Bean
-    ComposerPlanSemaineUseCase composerPlanSemaineUseCase(CatalogueRepasPort catalogueRepasPort) {
-        return new ComposerPlanSemaineApplicationService(catalogueRepasPort);
+    ComposerPlanSemaineUseCase composerPlanSemaineUseCase(
+            CatalogueRepasPort catalogueRepasPort, PoolIngredientsCatalogue poolIngredientsCatalogue) {
+        return new ComposerPlanSemaineApplicationService(catalogueRepasPort, poolIngredientsCatalogue);
     }
 
     @Bean
@@ -45,7 +52,7 @@ class UseCaseConfiguration {
     }
 
     @Bean
-    GenererRepasUseCase genererRepasUseCase(CatalogueRepasPort catalogueRepasPort) {
-        return new GenererRepasApplicationService(catalogueRepasPort, new Random());
+    GenererRepasUseCase genererRepasUseCase(PoolIngredientsCatalogue poolIngredientsCatalogue) {
+        return new GenererRepasApplicationService(poolIngredientsCatalogue, new Random());
     }
 }

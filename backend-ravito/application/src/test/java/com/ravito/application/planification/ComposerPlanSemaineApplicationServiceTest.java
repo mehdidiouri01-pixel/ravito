@@ -1,5 +1,6 @@
 package com.ravito.application.planification;
 
+import com.ravito.application.catalogue.PoolIngredientsCatalogue;
 import com.ravito.domain.catalogue.CatalogueRepasPort;
 import com.ravito.domain.catalogue.Repas;
 import com.ravito.domain.catalogue.RepasId;
@@ -11,8 +12,10 @@ import com.ravito.domain.courses.Quantite;
 import com.ravito.domain.courses.RayonMagasin;
 import com.ravito.domain.courses.UniteMesure;
 import com.ravito.domain.planification.ChoixJour;
+import com.ravito.domain.planification.ChoixRepas;
 import com.ravito.domain.planification.JourSemaine;
 import com.ravito.domain.planification.PlanSemaine;
+import com.ravito.domain.planification.RepasGenereInvalideException;
 import com.ravito.domain.planification.RepasIncompatibleException;
 import com.ravito.domain.profil.Enseigne;
 import com.ravito.domain.profil.NiveauCuisine;
@@ -49,11 +52,13 @@ class ComposerPlanSemaineApplicationServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ComposerPlanSemaineApplicationService(catalogueRepasPort);
+        // PoolIngredientsCatalogue est une classe reelle (pas mockee) : simple
+        // et deterministe, mieux vaut l'exercer vraiment que la doubler.
+        service = new ComposerPlanSemaineApplicationService(catalogueRepasPort, new PoolIngredientsCatalogue(catalogueRepasPort));
     }
 
     @Test
-    void compose_un_plan_valide_en_resolvant_chaque_choix_via_le_catalogue() {
+    void compose_un_plan_valide_en_resolvant_chaque_choix_par_id_via_le_catalogue() {
         Map<JourSemaine, ChoixJour> choix = new EnumMap<>(JourSemaine.class);
         for (JourSemaine jour : JourSemaine.values()) {
             Repas petitDejeuner = unRepas(TypeRepas.PETIT_DEJEUNER);
@@ -62,7 +67,7 @@ class ComposerPlanSemaineApplicationServiceTest {
             stubParId(petitDejeuner);
             stubParId(dejeuner);
             stubParId(diner);
-            choix.put(jour, new ChoixJour(petitDejeuner.id(), dejeuner.id(), diner.id()));
+            choix.put(jour, new ChoixJour(parId(petitDejeuner), parId(dejeuner), parId(diner)));
         }
 
         PlanSemaine plan = service.composer(PROFIL, choix);
@@ -80,7 +85,8 @@ class ComposerPlanSemaineApplicationServiceTest {
         stubParId(diner);
         when(catalogueRepasPort.parId(idInconnu)).thenReturn(Optional.empty());
 
-        Map<JourSemaine, ChoixJour> choix = planComplet(idInconnu, dejeuner.id(), diner.id());
+        Map<JourSemaine, ChoixJour> choix =
+                planComplet(new ChoixRepas.ParId(idInconnu), parId(dejeuner), parId(diner));
 
         assertThatExceptionOfType(RepasIntrouvableException.class)
                 .isThrownBy(() -> service.composer(PROFIL, choix));
@@ -98,24 +104,68 @@ class ComposerPlanSemaineApplicationServiceTest {
         stubParId(dejeuner);
         stubParId(diner);
 
-        Map<JourSemaine, ChoixJour> choix = planComplet(petitDejeunerIncompatible.id(), dejeuner.id(), diner.id());
+        Map<JourSemaine, ChoixJour> choix =
+                planComplet(parId(petitDejeunerIncompatible), parId(dejeuner), parId(diner));
 
         assertThatExceptionOfType(RepasIncompatibleException.class)
                 .isThrownBy(() -> service.composer(PROFIL, choix));
     }
 
+    @Test
+    void accepte_un_repas_genere_dont_les_ingredients_sont_connus_du_catalogue() {
+        Repas petitDejeuner = unRepas(TypeRepas.PETIT_DEJEUNER);
+        Repas dejeuner = unRepas(TypeRepas.DEJEUNER);
+        // le repas genere partage le meme couple ingredient/unite que celui deja catalogue pour DINER/NORMAL :
+        when(catalogueRepasPort.rechercherParTypeEtStyle(TypeRepas.DINER, StyleAlimentaire.NORMAL))
+                .thenReturn(List.of(unRepas(TypeRepas.DINER)));
+        Repas dinerGenere = new Repas(RepasId.nouveau(), "Idee generee", TypeRepas.DINER, StyleAlimentaire.NORMAL,
+                NiveauCuisine.DEBUTANT, uneListeDIngredients());
+        stubParId(petitDejeuner);
+        stubParId(dejeuner);
+
+        Map<JourSemaine, ChoixJour> choix =
+                planComplet(parId(petitDejeuner), parId(dejeuner), new ChoixRepas.Genere(dinerGenere));
+
+        PlanSemaine plan = service.composer(PROFIL, choix);
+
+        assertThat(plan.jours()).extracting(jour -> jour.diner().nom()).allMatch(nom -> nom.equals("Idee generee"));
+    }
+
+    @Test
+    void refuse_un_repas_genere_dont_un_ingredient_n_appartient_pas_au_catalogue_connu() {
+        Repas petitDejeuner = unRepas(TypeRepas.PETIT_DEJEUNER);
+        Repas dejeuner = unRepas(TypeRepas.DEJEUNER);
+        // catalogue DINER/NORMAL ne connait que "ingredient de test" — pas "caviar" :
+        when(catalogueRepasPort.rechercherParTypeEtStyle(TypeRepas.DINER, StyleAlimentaire.NORMAL))
+                .thenReturn(List.of(unRepas(TypeRepas.DINER)));
+        Repas dinerGenereTruque = new Repas(RepasId.nouveau(), "Idee suspecte", TypeRepas.DINER,
+                StyleAlimentaire.NORMAL, NiveauCuisine.DEBUTANT, List.of(new IngredientQuantite(
+                        new Ingredient("caviar", RayonMagasin.EPICERIE), new Quantite(BigDecimal.ONE, UniteMesure.UNITE))));
+        stubParId(petitDejeuner);
+        stubParId(dejeuner);
+
+        Map<JourSemaine, ChoixJour> choix =
+                planComplet(parId(petitDejeuner), parId(dejeuner), new ChoixRepas.Genere(dinerGenereTruque));
+
+        assertThatExceptionOfType(RepasGenereInvalideException.class)
+                .isThrownBy(() -> service.composer(PROFIL, choix));
+    }
+
     /**
      * Construit un choix complet sur les 5 jours, en reutilisant les memes
-     * identifiants de petit-dejeuner/dejeuner/diner sur chaque jour —
-     * suffisant pour les tests qui ne portent que sur un seul jour
-     * particulier.
+     * choix de petit-dejeuner/dejeuner/diner sur chaque jour — suffisant
+     * pour les tests qui ne portent que sur un seul jour particulier.
      */
-    private Map<JourSemaine, ChoixJour> planComplet(RepasId petitDejeunerId, RepasId dejeunerId, RepasId dinerId) {
+    private Map<JourSemaine, ChoixJour> planComplet(ChoixRepas petitDejeuner, ChoixRepas dejeuner, ChoixRepas diner) {
         Map<JourSemaine, ChoixJour> choix = new EnumMap<>(JourSemaine.class);
         for (JourSemaine jour : JourSemaine.values()) {
-            choix.put(jour, new ChoixJour(petitDejeunerId, dejeunerId, dinerId));
+            choix.put(jour, new ChoixJour(petitDejeuner, dejeuner, diner));
         }
         return choix;
+    }
+
+    private static ChoixRepas.ParId parId(Repas repas) {
+        return new ChoixRepas.ParId(repas.id());
     }
 
     private void stubParId(Repas repas) {

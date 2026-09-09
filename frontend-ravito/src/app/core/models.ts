@@ -60,10 +60,38 @@ export interface RepasProposesResponse {
   diners: RepasResponse[];
 }
 
+export interface IngredientQuantiteRequest {
+  ingredient: string;
+  rayon: RayonMagasin;
+  quantite: number;
+  unite: UniteMesure;
+}
+
+/**
+ * Un repas genere (voir GenererRepasRequest) transmis en entier : il
+ * n'existe dans aucune table, donc pas d'id a fournir — le backend en
+ * genere un nouveau et revalide chaque ingredient contre son catalogue
+ * connu (voir ChoixRepasRequest).
+ */
+export interface RepasGenereRequest {
+  nom: string;
+  type: TypeRepas;
+  style: StyleAlimentaire;
+  niveauRequis: NiveauCuisine;
+  ingredients: IngredientQuantiteRequest[];
+}
+
+/**
+ * Le choix pour un seul repas d'une journee : soit un id du catalogue, soit
+ * un repas genere transmis en entier — jamais les deux, jamais aucun des
+ * deux (voir ChoixRepasRequest cote backend, infrastructure-web).
+ */
+export type ChoixRepasRequest = { id: string; genere?: undefined } | { id?: undefined; genere: RepasGenereRequest };
+
 export interface ChoixJourRequest {
-  petitDejeunerId: string;
-  dejeunerId: string;
-  dinerId: string;
+  petitDejeuner: ChoixRepasRequest;
+  dejeuner: ChoixRepasRequest;
+  diner: ChoixRepasRequest;
 }
 
 export interface GenererRepasRequest {

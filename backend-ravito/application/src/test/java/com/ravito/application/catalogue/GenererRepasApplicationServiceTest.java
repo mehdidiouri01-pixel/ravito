@@ -43,7 +43,9 @@ class GenererRepasApplicationServiceTest {
     @BeforeEach
     void setUp() {
         // graine fixe : tirage et gabarit de nom deterministes pour les assertions.
-        service = new GenererRepasApplicationService(catalogueRepasPort, new Random(42));
+        // PoolIngredientsCatalogue est une classe reelle (pas mockee) : simple
+        // et deterministe, mieux vaut l'exercer vraiment que la doubler.
+        service = new GenererRepasApplicationService(new PoolIngredientsCatalogue(catalogueRepasPort), new Random(42));
     }
 
     @Test

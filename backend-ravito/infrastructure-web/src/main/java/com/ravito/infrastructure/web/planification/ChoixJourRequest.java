@@ -1,14 +1,15 @@
 package com.ravito.infrastructure.web.planification;
 
-import com.ravito.domain.catalogue.RepasId;
 import com.ravito.domain.planification.ChoixJour;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.UUID;
-
-public record ChoixJourRequest(@NotNull UUID petitDejeunerId, @NotNull UUID dejeunerId, @NotNull UUID dinerId) {
+public record ChoixJourRequest(
+        @NotNull @Valid ChoixRepasRequest petitDejeuner,
+        @NotNull @Valid ChoixRepasRequest dejeuner,
+        @NotNull @Valid ChoixRepasRequest diner) {
 
     public ChoixJour versDomaine() {
-        return new ChoixJour(new RepasId(petitDejeunerId), new RepasId(dejeunerId), new RepasId(dinerId));
+        return new ChoixJour(petitDejeuner.versDomaine(), dejeuner.versDomaine(), diner.versDomaine());
     }
 }

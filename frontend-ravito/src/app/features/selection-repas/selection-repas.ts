@@ -1,7 +1,48 @@
 import { Component, computed, effect, input, output, signal } from '@angular/core';
 import { JOURS, LIBELLES_JOUR } from '../../core/reference-data';
-import type { ChoixJourRequest, JourSemaine, RepasProposesResponse, RepasResponse, TypeRepas } from '../../core/models';
+import type {
+  ChoixJourRequest,
+  ChoixRepasRequest,
+  JourSemaine,
+  RepasProposesResponse,
+  RepasResponse,
+  TypeRepas,
+} from '../../core/models';
 import { RecetteModaleComponent } from '../../ui/recette-modale/recette-modale';
+
+type CleRepas = 'petitDejeuner' | 'dejeuner' | 'diner';
+
+const CHAMPS_REPAS: { cle: CleRepas; libelle: string; type: TypeRepas; catalogue: (p: RepasProposesResponse) => RepasResponse[] }[] = [
+  { cle: 'petitDejeuner', libelle: 'Petit-déjeuner', type: 'PETIT_DEJEUNER', catalogue: (p) => p.petitsDejeuners },
+  { cle: 'dejeuner', libelle: 'Déjeuner', type: 'DEJEUNER', catalogue: (p) => p.dejeuners },
+  { cle: 'diner', libelle: 'Dîner', type: 'DINER', catalogue: (p) => p.diners },
+];
+
+/** Valeur d'option réservée au repas généré du moment, distincte de tout id réel du catalogue. */
+const VALEUR_GENERE = 'GENERE';
+
+/**
+ * Le choix de l'utilisateur pour un seul repas d'une case : vide, un id du
+ * catalogue, ou un repas généré capturé tel quel au moment du choix (pas une
+ * référence vivante vers le signal `repasGenere` — si l'utilisateur génère
+ * une nouvelle idée après avoir choisi celle-ci, ce choix ne doit pas
+ * changer sous ses pieds).
+ */
+type ChoixRepasPartiel = { kind: 'vide' } | { kind: 'id'; id: string } | { kind: 'genere'; repas: RepasResponse };
+
+const CHOIX_VIDE_REPAS: ChoixRepasPartiel = { kind: 'vide' };
+
+interface ChoixJourPartiel {
+  petitDejeuner: ChoixRepasPartiel;
+  dejeuner: ChoixRepasPartiel;
+  diner: ChoixRepasPartiel;
+}
+
+const CHOIX_VIDE: ChoixJourPartiel = {
+  petitDejeuner: CHOIX_VIDE_REPAS,
+  dejeuner: CHOIX_VIDE_REPAS,
+  diner: CHOIX_VIDE_REPAS,
+};
 
 const TYPES_REPAS: { type: TypeRepas; libelle: string }[] = [
   { type: 'PETIT_DEJEUNER', libelle: 'Petit-déjeuner' },
@@ -9,16 +50,8 @@ const TYPES_REPAS: { type: TypeRepas; libelle: string }[] = [
   { type: 'DINER', libelle: 'Dîner' },
 ];
 
-interface ChoixJourPartiel {
-  petitDejeunerId: string;
-  dejeunerId: string;
-  dinerId: string;
-}
-
-const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dinerId: '' };
-
 /**
- * Une ligne par jour, chacune avec 2 listes deroulantes independantes.
+ * Une ligne par jour, chacune avec 3 listes deroulantes independantes.
  * Contrairement a l'ancienne version (cartes cliquables, "consommees" une
  * fois choisies), rien n'empeche ici de choisir le meme repas pour deux
  * jours differents, ni de remplir les jours dans un ordre quelconque —
@@ -38,8 +71,8 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dine
       <section class="inspiration">
         <h3>Besoin d'inspiration ?</h3>
         <p class="aide">
-          Génère une idée de repas au hasard, à partir des ingrédients déjà au catalogue — pour l'instant un simple
-          aperçu, pas encore sélectionnable dans votre semaine.
+          Génère une idée de repas au hasard, à partir des ingrédients déjà au catalogue — elle apparaît ensuite en
+          haut de la liste déroulante correspondante, prête à être choisie pour n'importe quel jour.
         </p>
         <div class="inspiration-boutons">
           @for (item of typesRepas; track item.type) {
@@ -54,71 +87,34 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dine
             <h3>{{ libellesJour[jour] }}</h3>
 
             <div class="selecteurs">
-              <label>
-                Petit-déjeuner
-                <div class="select-avec-recette">
-                  <select (change)="choisirPetitDejeuner(jour, $any($event.target).value)">
-                    <option value="" [selected]="choix()[jour].petitDejeunerId === ''">— Choisir —</option>
-                    @for (repas of proposition().petitsDejeuners; track repas.id) {
-                      <option [value]="repas.id" [selected]="repas.id === choix()[jour].petitDejeunerId">
-                        {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
-                      </option>
-                    }
-                  </select>
-                  <button
-                    type="button"
-                    class="voir-recette"
-                    [disabled]="choix()[jour].petitDejeunerId === ''"
-                    (click)="afficherRecette(jour, 'petitDejeunerId', proposition().petitsDejeuners)"
-                  >
-                    Recette
-                  </button>
-                </div>
-              </label>
-
-              <label>
-                Déjeuner
-                <div class="select-avec-recette">
-                  <select (change)="choisirDejeuner(jour, $any($event.target).value)">
-                    <option value="" [selected]="choix()[jour].dejeunerId === ''">— Choisir —</option>
-                    @for (repas of proposition().dejeuners; track repas.id) {
-                      <option [value]="repas.id" [selected]="repas.id === choix()[jour].dejeunerId">
-                        {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
-                      </option>
-                    }
-                  </select>
-                  <button
-                    type="button"
-                    class="voir-recette"
-                    [disabled]="choix()[jour].dejeunerId === ''"
-                    (click)="afficherRecette(jour, 'dejeunerId', proposition().dejeuners)"
-                  >
-                    Recette
-                  </button>
-                </div>
-              </label>
-
-              <label>
-                Dîner
-                <div class="select-avec-recette">
-                  <select (change)="choisirDiner(jour, $any($event.target).value)">
-                    <option value="" [selected]="choix()[jour].dinerId === ''">— Choisir —</option>
-                    @for (repas of proposition().diners; track repas.id) {
-                      <option [value]="repas.id" [selected]="repas.id === choix()[jour].dinerId">
-                        {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
-                      </option>
-                    }
-                  </select>
-                  <button
-                    type="button"
-                    class="voir-recette"
-                    [disabled]="choix()[jour].dinerId === ''"
-                    (click)="afficherRecette(jour, 'dinerId', proposition().diners)"
-                  >
-                    Recette
-                  </button>
-                </div>
-              </label>
+              @for (champ of champsRepas; track champ.cle) {
+                <label>
+                  {{ champ.libelle }}
+                  <div class="select-avec-recette">
+                    <select (change)="choisir(jour, champ.cle, $any($event.target).value)">
+                      <option value="" [selected]="estVide(choix()[jour][champ.cle])">— Choisir —</option>
+                      @if (repasGenerePour(champ.type); as genere) {
+                        <option value="GENERE" [selected]="estGenereSelectionne(choix()[jour][champ.cle])">
+                          ✨ {{ genere.nom }} (idée générée)
+                        </option>
+                      }
+                      @for (repas of champ.catalogue(proposition()); track repas.id) {
+                        <option [value]="repas.id" [selected]="estIdSelectionne(choix()[jour][champ.cle], repas.id)">
+                          {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
+                        </option>
+                      }
+                    </select>
+                    <button
+                      type="button"
+                      class="voir-recette"
+                      [disabled]="estVide(choix()[jour][champ.cle])"
+                      (click)="afficherRecette(jour, champ.cle)"
+                    >
+                      Recette
+                    </button>
+                  </div>
+                </label>
+              }
             </div>
           </article>
         }
@@ -260,7 +256,7 @@ const CHOIX_VIDE: ChoixJourPartiel = { petitDejeunerId: '', dejeunerId: '', dine
 })
 export class SelectionRepasComponent {
   readonly proposition = input.required<RepasProposesResponse>();
-  /** Dernier repas généré par le conteneur (voir PlanificateurComponent), à titre d'aperçu uniquement. */
+  /** Dernier repas généré par le conteneur (voir PlanificateurComponent), proposable dans les listes déroulantes. */
   readonly repasGenere = input<RepasResponse | null>(null);
   readonly selectionValidee = output<Record<JourSemaine, ChoixJourRequest>>();
   readonly genererIdee = output<TypeRepas>();
@@ -268,6 +264,7 @@ export class SelectionRepasComponent {
   protected readonly jours = JOURS;
   protected readonly libellesJour = LIBELLES_JOUR;
   protected readonly typesRepas = TYPES_REPAS;
+  protected readonly champsRepas = CHAMPS_REPAS;
 
   protected readonly choix = signal<Record<JourSemaine, ChoixJourPartiel>>(
     Object.fromEntries(JOURS.map((jour) => [jour, { ...CHOIX_VIDE }])) as Record<JourSemaine, ChoixJourPartiel>,
@@ -278,15 +275,14 @@ export class SelectionRepasComponent {
 
   constructor() {
     // Chaque nouvelle idee generee par le conteneur s'affiche automatiquement
-    // dans la pop-up de recette, avec une note qui la distingue d'un repas
-    // reellement choisi (voir la Javadoc de GenererRepasUseCase cote backend :
-    // ephemere, pas encore selectionnable).
+    // dans la pop-up de recette a titre d'apercu, et devient choisissable
+    // dans la liste deroulante correspondante (voir repasGenerePour).
     effect(() => {
       const genere = this.repasGenere();
       if (genere) {
         this.repasAffiche.set(genere);
         this.noteRepasAffiche.set(
-          "💡 Idée générée aléatoirement à partir du catalogue — pas encore ajoutée à votre semaine.",
+          '💡 Idée générée aléatoirement à partir du catalogue — choisissez-la dans la liste déroulante du repas concerné pour l\'ajouter à votre semaine.',
         );
       }
     });
@@ -298,16 +294,38 @@ export class SelectionRepasComponent {
 
   protected readonly selectionComplete = computed(() => this.joursComplets() === this.jours.length);
 
-  protected choisirPetitDejeuner(jour: JourSemaine, repasId: string): void {
-    this.choix.update((actuel) => ({ ...actuel, [jour]: { ...actuel[jour], petitDejeunerId: repasId } }));
+  /** Le repas genere du moment, seulement s'il correspond au type de ce champ (pas de proposition croisee). */
+  protected repasGenerePour(type: TypeRepas): RepasResponse | null {
+    const genere = this.repasGenere();
+    return genere && genere.type === type ? genere : null;
   }
 
-  protected choisirDejeuner(jour: JourSemaine, repasId: string): void {
-    this.choix.update((actuel) => ({ ...actuel, [jour]: { ...actuel[jour], dejeunerId: repasId } }));
+  protected estVide(choix: ChoixRepasPartiel): boolean {
+    return choix.kind === 'vide';
   }
 
-  protected choisirDiner(jour: JourSemaine, repasId: string): void {
-    this.choix.update((actuel) => ({ ...actuel, [jour]: { ...actuel[jour], dinerId: repasId } }));
+  protected estIdSelectionne(choix: ChoixRepasPartiel, id: string): boolean {
+    return choix.kind === 'id' && choix.id === id;
+  }
+
+  protected estGenereSelectionne(choix: ChoixRepasPartiel): boolean {
+    return choix.kind === 'genere';
+  }
+
+  protected choisir(jour: JourSemaine, cle: CleRepas, valeur: string): void {
+    let nouveauChoix: ChoixRepasPartiel;
+    if (valeur === '') {
+      nouveauChoix = { kind: 'vide' };
+    } else if (valeur === VALEUR_GENERE) {
+      const genere = this.repasGenere();
+      if (!genere) {
+        return; // l'option ✨ n'existe dans le DOM que si repasGenere() est defini : securite, ne devrait pas arriver.
+      }
+      nouveauChoix = { kind: 'genere', repas: genere };
+    } else {
+      nouveauChoix = { kind: 'id', id: valeur };
+    }
+    this.choix.update((actuel) => ({ ...actuel, [jour]: { ...actuel[jour], [cle]: nouveauChoix } }));
   }
 
   /**
@@ -315,12 +333,18 @@ export class SelectionRepasComponent {
    * type). Rien a afficher si la case est encore vide — le bouton est de
    * toute facon desactive dans ce cas (voir le template).
    */
-  protected afficherRecette(jour: JourSemaine, cle: keyof ChoixJourPartiel, catalogue: RepasResponse[]): void {
-    const id = this.choix()[jour][cle];
-    const repas = catalogue.find((r) => r.id === id);
-    if (repas) {
-      this.noteRepasAffiche.set(null);
-      this.repasAffiche.set(repas);
+  protected afficherRecette(jour: JourSemaine, cle: CleRepas): void {
+    const choix = this.choix()[jour][cle];
+    if (choix.kind === 'id') {
+      const champ = this.champsRepas.find((c) => c.cle === cle);
+      const repas = champ?.catalogue(this.proposition()).find((r) => r.id === choix.id);
+      if (repas) {
+        this.noteRepasAffiche.set(null);
+        this.repasAffiche.set(repas);
+      }
+    } else if (choix.kind === 'genere') {
+      this.noteRepasAffiche.set('💡 Idée générée aléatoirement — sélectionnée pour ce repas.');
+      this.repasAffiche.set(choix.repas);
     }
   }
 
@@ -333,10 +357,50 @@ export class SelectionRepasComponent {
     if (!this.selectionComplete()) {
       return;
     }
-    this.selectionValidee.emit(this.choix() as Record<JourSemaine, ChoixJourRequest>);
+    const requete = Object.fromEntries(
+      this.jours.map((jour) => [jour, this.versChoixJourRequest(this.choix()[jour])]),
+    ) as Record<JourSemaine, ChoixJourRequest>;
+    this.selectionValidee.emit(requete);
   }
 
   private estComplet(choixJour: ChoixJourPartiel): boolean {
-    return choixJour.petitDejeunerId !== '' && choixJour.dejeunerId !== '' && choixJour.dinerId !== '';
+    return (
+      choixJour.petitDejeuner.kind !== 'vide' &&
+      choixJour.dejeuner.kind !== 'vide' &&
+      choixJour.diner.kind !== 'vide'
+    );
+  }
+
+  private versChoixJourRequest(choixJour: ChoixJourPartiel): ChoixJourRequest {
+    return {
+      petitDejeuner: this.versChoixRepasRequest(choixJour.petitDejeuner),
+      dejeuner: this.versChoixRepasRequest(choixJour.dejeuner),
+      diner: this.versChoixRepasRequest(choixJour.diner),
+    };
+  }
+
+  /** @throws si choix est 'vide' — ne doit jamais arriver ici, selectionComplete() l'a deja garanti avant l'appel. */
+  private versChoixRepasRequest(choix: ChoixRepasPartiel): ChoixRepasRequest {
+    if (choix.kind === 'id') {
+      return { id: choix.id };
+    }
+    if (choix.kind === 'genere') {
+      const { nom, type, style, niveauRequis, ingredients } = choix.repas;
+      return {
+        genere: {
+          nom,
+          type,
+          style,
+          niveauRequis,
+          ingredients: ingredients.map((i) => ({
+            ingredient: i.ingredient,
+            rayon: i.rayon,
+            quantite: i.quantite,
+            unite: i.unite,
+          })),
+        },
+      };
+    }
+    throw new Error('Choix de repas incomplet — ne devrait jamais arriver apres selectionComplete()');
   }
 }
