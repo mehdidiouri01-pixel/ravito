@@ -7,6 +7,7 @@ import com.ravito.domain.courses.Quantite;
 import com.ravito.domain.courses.RayonMagasin;
 import com.ravito.domain.courses.UniteMesure;
 import com.ravito.domain.prix.EstimationImpossibleException;
+import com.ravito.domain.prix.LignePrixEstime;
 import com.ravito.domain.prix.Prix;
 import com.ravito.domain.profil.Enseigne;
 import com.ravito.infrastructure.persistence.TestApplication;
@@ -70,6 +71,30 @@ class JpaEstimationPrixAdapterIT {
         Prix prix = adapter.estimerCout(listeCourses, Enseigne.LIDL);
 
         assertThat(prix.montant()).isEqualByComparingTo("1.2325");
+    }
+
+    @Test
+    void detaille_le_prix_ligne_par_ligne_et_leur_somme_egale_le_total() {
+        prixMoyenRepository.save(new PrixMoyenIngredientEntity("ingredient-test-un", UniteMesure.GRAMME, BigDecimal.valueOf(0.0030)));
+        prixMoyenRepository.save(new PrixMoyenIngredientEntity("ingredient-test-deux", UniteMesure.MILLILITRE, BigDecimal.valueOf(0.0011)));
+
+        LigneListeCourses ligneUn = new LigneListeCourses(new Ingredient("ingredient-test-un", RayonMagasin.EPICERIE),
+                new Quantite(BigDecimal.valueOf(300), UniteMesure.GRAMME));
+        LigneListeCourses ligneDeux = new LigneListeCourses(new Ingredient("ingredient-test-deux", RayonMagasin.CREMERIE),
+                new Quantite(BigDecimal.valueOf(500), UniteMesure.MILLILITRE));
+        ListeCourses listeCourses = new ListeCourses(List.of(ligneUn, ligneDeux));
+
+        List<LignePrixEstime> detail = adapter.estimerCoutParLigne(listeCourses, Enseigne.LIDL);
+
+        assertThat(detail).hasSize(2);
+        assertThat(detail.get(0).ligne()).isEqualTo(ligneUn);
+        assertThat(detail.get(0).prix().montant()).isEqualByComparingTo("0.765"); // 300*0.0030*0.85
+        assertThat(detail.get(1).ligne()).isEqualTo(ligneDeux);
+        assertThat(detail.get(1).prix().montant()).isEqualByComparingTo("0.4675"); // 500*0.0011*0.85
+
+        Prix sommeDesLignes = detail.stream().map(LignePrixEstime::prix).reduce(Prix.ZERO, Prix::plus);
+        Prix total = adapter.estimerCout(listeCourses, Enseigne.LIDL);
+        assertThat(sommeDesLignes.montant()).isEqualByComparingTo(total.montant());
     }
 
     @Test

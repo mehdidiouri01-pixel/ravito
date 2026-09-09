@@ -3,6 +3,8 @@ package com.ravito.domain.prix;
 import com.ravito.domain.courses.ListeCourses;
 import com.ravito.domain.profil.Enseigne;
 
+import java.util.List;
+
 /**
  * Port de sortie : estime le cout d'une liste de courses pour une enseigne
  * donnee.
@@ -19,4 +21,10 @@ import com.ravito.domain.profil.Enseigne;
 public interface EstimationPrixPort {
 
     Prix estimerCout(ListeCourses listeCourses, Enseigne enseigne);
+
+    /**
+     * Meme estimation que {@link #estimerCout}, mais detaillee ligne par
+     * ligne plutot que sommee — voir {@link LignePrixEstime}.
+     */
+    List<LignePrixEstime> estimerCoutParLigne(ListeCourses listeCourses, Enseigne enseigne);
 }

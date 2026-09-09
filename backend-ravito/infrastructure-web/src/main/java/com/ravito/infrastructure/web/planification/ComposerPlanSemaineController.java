@@ -2,10 +2,12 @@ package com.ravito.infrastructure.web.planification;
 
 import com.ravito.domain.courses.ListeCourses;
 import com.ravito.domain.historique.HistoriserPlanUseCase;
+import com.ravito.domain.historique.PlanSemaineHistorise;
 import com.ravito.domain.nutrition.EstimerNutritionUseCase;
 import com.ravito.domain.planification.ComposerPlanSemaineUseCase;
 import com.ravito.domain.planification.PlanSemaine;
 import com.ravito.domain.prix.EstimerCoutUseCase;
+import com.ravito.domain.prix.LignePrixEstime;
 import com.ravito.domain.prix.Prix;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -53,8 +56,9 @@ class ComposerPlanSemaineController {
         PlanSemaine plan = composerPlanSemaineUseCase.composer(requete.profil().versDomaine(), requete.choixVersDomaine());
         ListeCourses listeCourses = plan.genererListeCourses();
         Prix prixEstime = estimerCoutUseCase.estimer(listeCourses, plan.profil().enseigne());
-        historiserPlanUseCase.historiser(plan, prixEstime);
+        List<LignePrixEstime> prixParLigne = estimerCoutUseCase.estimerParLigne(listeCourses, plan.profil().enseigne());
+        PlanSemaineHistorise historise = historiserPlanUseCase.historiser(plan, prixEstime);
 
-        return PlanSemaineResponse.depuis(plan, listeCourses, prixEstime, estimerNutritionUseCase);
+        return PlanSemaineResponse.depuis(historise.id(), plan, listeCourses, prixParLigne, prixEstime, estimerNutritionUseCase);
     }
 }

@@ -3,6 +3,7 @@ import { PdfExportService } from './pdf-export.service';
 import type { PlanSemaineResponse } from './models';
 
 const UN_PLAN: PlanSemaineResponse = {
+  id: 'plan-1',
   jours: [
     {
       jour: 'LUNDI',
@@ -38,7 +39,7 @@ const UN_PLAN: PlanSemaineResponse = {
       },
     },
   ],
-  listeCourses: { parRayon: { BOULANGERIE: [{ ingredient: 'pain', quantite: 100, unite: 'GRAMME' }] } },
+  listeCourses: { parRayon: { BOULANGERIE: [{ ingredient: 'pain', quantite: 100, unite: 'GRAMME', prixEstime: 0.8 }] } },
   prixEstime: { montant: 5.5 },
 };
 

@@ -126,6 +126,8 @@ export interface LigneListeCoursesResponse {
   ingredient: string;
   quantite: number;
   unite: UniteMesure;
+  /** Cout estime de cette seule ligne — permet d'ajuster le total affiché sans nouvel appel serveur. */
+  prixEstime: number;
 }
 
 export interface ListeCoursesResponse {
@@ -137,6 +139,8 @@ export interface PrixResponse {
 }
 
 export interface PlanSemaineResponse {
+  /** Id sous lequel ce plan vient d'être historisé — sert par ex. à mémoriser localement quels ingrédients sont déjà chez vous. */
+  id: string;
   jours: JourResponse[];
   listeCourses: ListeCoursesResponse;
   prixEstime: PrixResponse;

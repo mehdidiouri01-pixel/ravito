@@ -3,9 +3,11 @@ package com.ravito.application.prix;
 import com.ravito.domain.courses.ListeCourses;
 import com.ravito.domain.prix.EstimationPrixPort;
 import com.ravito.domain.prix.EstimerCoutUseCase;
+import com.ravito.domain.prix.LignePrixEstime;
 import com.ravito.domain.prix.Prix;
 import com.ravito.domain.profil.Enseigne;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -31,5 +33,13 @@ public class EstimerCoutApplicationService implements EstimerCoutUseCase {
         Objects.requireNonNull(enseigne, "enseigne");
 
         return estimationPrixPort.estimerCout(listeCourses, enseigne);
+    }
+
+    @Override
+    public List<LignePrixEstime> estimerParLigne(ListeCourses listeCourses, Enseigne enseigne) {
+        Objects.requireNonNull(listeCourses, "listeCourses");
+        Objects.requireNonNull(enseigne, "enseigne");
+
+        return estimationPrixPort.estimerCoutParLigne(listeCourses, enseigne);
     }
 }

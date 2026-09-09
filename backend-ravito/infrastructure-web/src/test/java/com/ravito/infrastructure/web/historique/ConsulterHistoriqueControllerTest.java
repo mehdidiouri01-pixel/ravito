@@ -6,6 +6,7 @@ import com.ravito.domain.catalogue.TypeRepas;
 import com.ravito.domain.courses.Ingredient;
 import com.ravito.domain.courses.IngredientQuantite;
 import com.ravito.domain.courses.Quantite;
+import com.ravito.domain.courses.ListeCourses;
 import com.ravito.domain.courses.RayonMagasin;
 import com.ravito.domain.courses.UniteMesure;
 import com.ravito.domain.historique.ConsulterHistoriqueUseCase;
@@ -22,6 +23,8 @@ import com.ravito.domain.profil.NiveauCuisine;
 import com.ravito.domain.profil.NombreDePersonnes;
 import com.ravito.domain.profil.ProfilUtilisateur;
 import com.ravito.domain.profil.StyleAlimentaire;
+import com.ravito.domain.prix.EstimerCoutUseCase;
+import com.ravito.domain.prix.LignePrixEstime;
 import com.ravito.domain.prix.Prix;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +58,9 @@ class ConsulterHistoriqueControllerTest {
     @MockBean
     private EstimerNutritionUseCase estimerNutritionUseCase;
 
+    @MockBean
+    private EstimerCoutUseCase estimerCoutUseCase;
+
     @Test
     void renvoie_200_avec_la_liste_des_plans_historises() throws Exception {
         when(consulterHistoriqueUseCase.lister()).thenReturn(List.of(unPlanHistorise()));
@@ -72,6 +78,12 @@ class ConsulterHistoriqueControllerTest {
         when(consulterHistoriqueUseCase.parId(historise.id())).thenReturn(Optional.of(historise));
         when(estimerNutritionUseCase.estimer(any())).thenReturn(new ValeursNutritionnelles(
                 BigDecimal.valueOf(250), BigDecimal.valueOf(12), BigDecimal.valueOf(30), BigDecimal.valueOf(8), BigDecimal.valueOf(4)));
+        when(estimerCoutUseCase.estimerParLigne(any(), any())).thenAnswer(invocation -> {
+            ListeCourses listeCourses = invocation.getArgument(0);
+            return listeCourses.lignes().stream()
+                    .map(ligne -> new LignePrixEstime(ligne, new Prix(BigDecimal.ONE)))
+                    .toList();
+        });
 
         mockMvc.perform(get("/api/plans-semaine/historique/" + historise.id().valeur()))
                 .andExpect(status().isOk())

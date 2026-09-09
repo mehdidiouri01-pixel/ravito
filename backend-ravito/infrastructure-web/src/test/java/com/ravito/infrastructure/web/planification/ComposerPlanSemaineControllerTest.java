@@ -7,9 +7,12 @@ import com.ravito.domain.catalogue.TypeRepas;
 import com.ravito.domain.courses.Ingredient;
 import com.ravito.domain.courses.IngredientQuantite;
 import com.ravito.domain.courses.Quantite;
+import com.ravito.domain.courses.ListeCourses;
 import com.ravito.domain.courses.RayonMagasin;
 import com.ravito.domain.courses.UniteMesure;
+import com.ravito.domain.historique.HistoriquePlanId;
 import com.ravito.domain.historique.HistoriserPlanUseCase;
+import com.ravito.domain.historique.PlanSemaineHistorise;
 import com.ravito.domain.nutrition.EstimerNutritionUseCase;
 import com.ravito.domain.nutrition.ValeursNutritionnelles;
 import com.ravito.domain.planification.ComposerPlanSemaineUseCase;
@@ -18,6 +21,7 @@ import com.ravito.domain.planification.JourSemaine;
 import com.ravito.domain.planification.PlanSemaine;
 import com.ravito.domain.planification.RepasIncompatibleException;
 import com.ravito.domain.prix.EstimerCoutUseCase;
+import com.ravito.domain.prix.LignePrixEstime;
 import com.ravito.domain.prix.Prix;
 import com.ravito.domain.profil.Enseigne;
 import com.ravito.domain.profil.NiveauCuisine;
@@ -32,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -65,8 +70,12 @@ class ComposerPlanSemaineControllerTest {
 
     @Test
     void renvoie_200_avec_le_plan_la_liste_de_courses_et_le_prix() throws Exception {
-        when(composerPlanSemaineUseCase.composer(any(), any())).thenReturn(unPlanValide());
-        when(estimerCoutUseCase.estimer(any(), any())).thenReturn(new Prix(BigDecimal.valueOf(42.50)));
+        PlanSemaine plan = unPlanValide();
+        Prix prix = new Prix(BigDecimal.valueOf(42.50));
+        when(composerPlanSemaineUseCase.composer(any(), any())).thenReturn(plan);
+        when(estimerCoutUseCase.estimer(any(), any())).thenReturn(prix);
+        stubberEstimerParLigne();
+        when(historiserPlanUseCase.historiser(any(), any())).thenReturn(unHistorise(plan, prix));
         when(estimerNutritionUseCase.estimer(any())).thenReturn(new ValeursNutritionnelles(
                 BigDecimal.valueOf(250), BigDecimal.valueOf(12), BigDecimal.valueOf(30), BigDecimal.valueOf(8), BigDecimal.valueOf(4)));
 
@@ -74,6 +83,7 @@ class ComposerPlanSemaineControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(uneRequeteValide()))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.jours", org.hamcrest.Matchers.hasSize(5)))
                 .andExpect(jsonPath("$.prixEstime.montant").value(42.50));
     }
@@ -84,6 +94,8 @@ class ComposerPlanSemaineControllerTest {
         Prix prix = new Prix(BigDecimal.valueOf(42.50));
         when(composerPlanSemaineUseCase.composer(any(), any())).thenReturn(plan);
         when(estimerCoutUseCase.estimer(any(), any())).thenReturn(prix);
+        stubberEstimerParLigne();
+        when(historiserPlanUseCase.historiser(any(), any())).thenReturn(unHistorise(plan, prix));
         when(estimerNutritionUseCase.estimer(any())).thenReturn(new ValeursNutritionnelles(
                 BigDecimal.valueOf(250), BigDecimal.valueOf(12), BigDecimal.valueOf(30), BigDecimal.valueOf(8), BigDecimal.valueOf(4)));
 
@@ -108,8 +120,12 @@ class ComposerPlanSemaineControllerTest {
 
     @Test
     void renvoie_200_avec_un_diner_genere_transmis_en_entier() throws Exception {
-        when(composerPlanSemaineUseCase.composer(any(), any())).thenReturn(unPlanValide());
-        when(estimerCoutUseCase.estimer(any(), any())).thenReturn(new Prix(BigDecimal.valueOf(42.50)));
+        PlanSemaine plan = unPlanValide();
+        Prix prix = new Prix(BigDecimal.valueOf(42.50));
+        when(composerPlanSemaineUseCase.composer(any(), any())).thenReturn(plan);
+        when(estimerCoutUseCase.estimer(any(), any())).thenReturn(prix);
+        stubberEstimerParLigne();
+        when(historiserPlanUseCase.historiser(any(), any())).thenReturn(unHistorise(plan, prix));
         when(estimerNutritionUseCase.estimer(any())).thenReturn(new ValeursNutritionnelles(
                 BigDecimal.valueOf(250), BigDecimal.valueOf(12), BigDecimal.valueOf(30), BigDecimal.valueOf(8), BigDecimal.valueOf(4)));
 
@@ -189,6 +205,26 @@ class ComposerPlanSemaineControllerTest {
                 + "\"JEUDI\":" + choixJour + ","
                 + "\"VENDREDI\":" + choixJour
                 + "}}";
+    }
+
+    /**
+     * Un prix de 1 par ligne, quelle que soit la {@code ListeCourses}
+     * effectivement passee au mock — suffit pour que
+     * {@code ListeCoursesResponse.depuis} trouve un prix pour chaque ligne
+     * reellement produite par {@code unPlanValide()}, sans avoir a deviner
+     * a l'avance le detail de sa consolidation.
+     */
+    private void stubberEstimerParLigne() {
+        when(estimerCoutUseCase.estimerParLigne(any(), any())).thenAnswer(invocation -> {
+            ListeCourses listeCourses = invocation.getArgument(0);
+            return listeCourses.lignes().stream()
+                    .map(ligne -> new LignePrixEstime(ligne, new Prix(BigDecimal.ONE)))
+                    .toList();
+        });
+    }
+
+    private static PlanSemaineHistorise unHistorise(PlanSemaine plan, Prix prix) {
+        return new PlanSemaineHistorise(HistoriquePlanId.nouveau(), Instant.now(), plan, prix);
     }
 
     private static PlanSemaine unPlanValide() {
