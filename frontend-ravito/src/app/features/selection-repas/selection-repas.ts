@@ -111,7 +111,7 @@ interface SlotEnEdition {
                     <button
                       type="button"
                       class="choix-repas-bouton"
-                      [class.vibrer]="auMoinsUnChoixFait() && estVide(choix()[jour][champ.cle])"
+                      [class.a-choisir]="auMoinsUnChoixFait() && estVide(choix()[jour][champ.cle])"
                       (click)="ouvrirChoix(jour, champ.cle)"
                     >
                       {{ libelleChoixCourant(jour, champ.cle) ?? '— Choisir —' }}
@@ -337,41 +337,30 @@ interface SlotEnEdition {
 
       /* Attire l'oeil sur les cases encore vides, mais seulement une fois
          que l'utilisateur a commencé à choisir — sinon les 15 cases
-         vibreraient dès l'arrivée sur la page, ce qui serait juste du bruit
-         visuel sans aider personne. Vibration périodique et douce (une
-         courte secousse répétée toutes les quelques secondes), jamais
-         continue, pour rester discrète. */
-      @keyframes vibrer-attente {
+         pulseraient dès l'arrivée sur la page, ce qui serait juste du bruit
+         visuel sans aider personne. Pulsation lumineuse continue (la
+         bordure "respire" en boucle) plutôt qu'une secousse : reste bien
+         visible en permanence sans donner l'impression que la page tremble. */
+      @keyframes pulsation-attente {
         0%,
-        92%,
         100% {
-          transform: translateX(0);
+          border-color: var(--couleur-bordure);
+          box-shadow: 0 0 0 0 color-mix(in srgb, var(--couleur-accent) 45%, transparent);
         }
-        93% {
-          transform: translateX(-3px);
-        }
-        94% {
-          transform: translateX(3px);
-        }
-        95% {
-          transform: translateX(-3px);
-        }
-        96% {
-          transform: translateX(3px);
-        }
-        97% {
-          transform: translateX(0);
+        50% {
+          border-color: var(--couleur-accent);
+          box-shadow: 0 0 0 4px color-mix(in srgb, var(--couleur-accent) 0%, transparent);
         }
       }
 
-      .choix-repas-bouton.vibrer {
-        animation: vibrer-attente 3.5s ease-in-out infinite;
-        border-color: var(--couleur-accent);
+      .choix-repas-bouton.a-choisir {
+        animation: pulsation-attente 1.8s ease-in-out infinite;
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .choix-repas-bouton.vibrer {
+        .choix-repas-bouton.a-choisir {
           animation: none;
+          border-color: var(--couleur-accent);
         }
       }
 

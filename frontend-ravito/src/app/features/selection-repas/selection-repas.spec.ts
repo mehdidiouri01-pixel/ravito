@@ -64,17 +64,17 @@ describe('SelectionRepasComponent', () => {
     expect(bouton?.disabled).toBeFalsy();
   });
 
-  it('ne fait pas vibrer les cases vides tant qu\'aucun choix n\'a ete fait', () => {
-    expect(boutonsChoix().some((b) => b.classList.contains('vibrer'))).toBeFalse();
+  it('ne fait pas pulser les cases vides tant qu\'aucun choix n\'a ete fait', () => {
+    expect(boutonsChoix().some((b) => b.classList.contains('a-choisir'))).toBeFalse();
   });
 
-  it('fait vibrer les cases encore vides des le premier choix effectue', () => {
+  it('fait pulser les cases encore vides des le premier choix effectue', () => {
     choisirParTuile(0, 'Tartines'); // lundi petit-dejeuner
 
     const boutons = boutonsChoix();
-    expect(boutons[0].classList.contains('vibrer')).toBeFalse(); // deja choisi
-    expect(boutons[1].classList.contains('vibrer')).toBeTrue(); // lundi dejeuner, encore vide
-    expect(boutons[14].classList.contains('vibrer')).toBeTrue(); // vendredi diner, encore vide
+    expect(boutons[0].classList.contains('a-choisir')).toBeFalse(); // deja choisi
+    expect(boutons[1].classList.contains('a-choisir')).toBeTrue(); // lundi dejeuner, encore vide
+    expect(boutons[14].classList.contains('a-choisir')).toBeTrue(); // vendredi diner, encore vide
   });
 
   it('ouvre une confirmation listant les jours/creneaux manquants au clic sur valider si la semaine est incomplete', () => {
