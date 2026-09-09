@@ -56,12 +56,23 @@ const TYPES_REPAS: { type: TypeRepas; libelle: string }[] = [
   { type: 'DINER', libelle: 'Dîner' },
 ];
 
+interface SlotEnEdition {
+  jour: JourSemaine;
+  cle: CleRepas;
+}
+
 /**
- * Une ligne par jour, chacune avec 3 listes deroulantes independantes.
- * Contrairement a l'ancienne version (cartes cliquables, "consommees" une
- * fois choisies), rien n'empeche ici de choisir le meme repas pour deux
- * jours differents, ni de remplir les jours dans un ordre quelconque —
- * chaque jour est une selection independante, pas une file d'attente.
+ * Une ligne par jour, chacune avec 3 cases de choix independantes. Rien
+ * n'empeche de choisir le meme repas pour deux jours differents, ni de
+ * remplir les jours dans un ordre quelconque — chaque jour est une
+ * selection independante, pas une file d'attente.
+ *
+ * <p>Le choix lui-meme se fait via une pop-up de tuiles cliquables (voir
+ * `slotOuvert`/`choix-modale` dans le template), pas une liste deroulante
+ * native : garder les 15 cases compactes sur la page (un simple bouton
+ * affichant la selection courante) tout en rendant le choix lui-meme
+ * visuel evite d'avoir a afficher d'un coup jusqu'a 15 x 15 tuiles en
+ * permanence, ce qui rendrait la page ingerable.
  */
 @Component({
   selector: 'app-selection-repas',
@@ -78,7 +89,7 @@ const TYPES_REPAS: { type: TypeRepas; libelle: string }[] = [
         <h3>Besoin d'inspiration ?</h3>
         <p class="aide">
           Génère une idée de repas au hasard, à partir des ingrédients déjà au catalogue — elle apparaît ensuite en
-          haut de la liste déroulante correspondante, prête à être choisie pour n'importe quel jour.
+          haut du choix correspondant, prête à être choisie pour n'importe quel jour.
         </p>
         <div class="inspiration-boutons">
           @for (item of typesRepas; track item.type) {
@@ -97,19 +108,9 @@ const TYPES_REPAS: { type: TypeRepas; libelle: string }[] = [
                 <label>
                   {{ champ.libelle }}
                   <div class="select-avec-recette">
-                    <select (change)="choisir(jour, champ.cle, $any($event.target).value)">
-                      <option value="" [selected]="estVide(choix()[jour][champ.cle])">— Choisir —</option>
-                      @for (genere of optionsGenerees(jour, champ.cle, champ.type); track genere.id) {
-                        <option [value]="genere.id" [selected]="estGenereSelectionne(choix()[jour][champ.cle], genere.id)">
-                          ✨ {{ genere.nom }} (idée générée)
-                        </option>
-                      }
-                      @for (repas of champ.catalogue(proposition()); track repas.id) {
-                        <option [value]="repas.id" [selected]="estIdSelectionne(choix()[jour][champ.cle], repas.id)">
-                          {{ repas.nom }} ({{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }})
-                        </option>
-                      }
-                    </select>
+                    <button type="button" class="choix-repas-bouton" (click)="ouvrirChoix(jour, champ.cle)">
+                      {{ libelleChoixCourant(jour, champ.cle) ?? '— Choisir —' }}
+                    </button>
                     <button
                       type="button"
                       class="voir-recette"
@@ -130,6 +131,47 @@ const TYPES_REPAS: { type: TypeRepas; libelle: string }[] = [
         Composer mon plan de la semaine
       </button>
     </section>
+
+    @if (slotOuvert(); as slot) {
+      <div class="choix-fond" (click)="fermerChoix()">
+        <div class="choix-modale" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+          <button type="button" class="fermer" (click)="fermerChoix()" aria-label="Fermer le choix">✕</button>
+          <h3>{{ libellesJour[slot.jour] }} · {{ libelleChamp(slot.cle) }}</h3>
+          <div class="choix-tuiles">
+            <button
+              type="button"
+              class="choix-tuile choix-tuile-vide"
+              [class.selectionnee]="estVide(choix()[slot.jour][slot.cle])"
+              (click)="choisirDepuisPicker(slot.jour, slot.cle, '')"
+            >
+              — Aucun —
+            </button>
+            @for (genere of optionsGenerees(slot.jour, slot.cle, champType(slot.cle)); track genere.id) {
+              <button
+                type="button"
+                class="choix-tuile choix-tuile-genere"
+                [class.selectionnee]="estGenereSelectionne(choix()[slot.jour][slot.cle], genere.id)"
+                (click)="choisirDepuisPicker(slot.jour, slot.cle, genere.id)"
+              >
+                <span>✨ {{ genere.nom }}</span>
+                <span class="niveau">Idée générée</span>
+              </button>
+            }
+            @for (repas of catalogueDuChamp(slot.cle); track repas.id) {
+              <button
+                type="button"
+                class="choix-tuile"
+                [class.selectionnee]="estIdSelectionne(choix()[slot.jour][slot.cle], repas.id)"
+                (click)="choisirDepuisPicker(slot.jour, slot.cle, repas.id)"
+              >
+                <span>{{ repas.nom }}</span>
+                <span class="niveau">{{ repas.niveauRequis === 'CONFIRME' ? 'Confirmé' : 'Débutant' }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    }
 
     <app-recette-modale [repas]="repasAffiche()" [note]="noteRepasAffiche()" (fermer)="fermerRecette()" />
   `,
@@ -234,15 +276,24 @@ const TYPES_REPAS: { type: TypeRepas; libelle: string }[] = [
         min-width: 0;
       }
 
-      .select-avec-recette select {
+      .choix-repas-bouton {
         flex: 1;
         min-width: 0;
+        text-align: left;
         font: inherit;
         padding: 0.5rem 0.6rem;
         border-radius: 0.5rem;
         border: 1px solid var(--couleur-bordure);
         background: var(--couleur-fond);
         color: var(--couleur-texte);
+        cursor: pointer;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .choix-repas-bouton:hover {
+        border-color: var(--couleur-accent);
       }
 
       .voir-recette {
@@ -257,12 +308,119 @@ const TYPES_REPAS: { type: TypeRepas; libelle: string }[] = [
       .valider {
         margin-top: 0.5rem;
       }
+
+      .choix-fond {
+        position: fixed;
+        inset: 0;
+        background: rgba(31, 36, 33, 0.5);
+        backdrop-filter: blur(3px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        z-index: 10;
+        animation: choix-voile-entree 0.2s ease both;
+      }
+
+      .choix-modale {
+        position: relative;
+        background: var(--couleur-surface);
+        border-radius: var(--rayon);
+        padding: 1.75rem;
+        max-width: 34rem;
+        width: 100%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: var(--ombre-carte-hover);
+        animation: choix-modale-entree 0.25s ease both;
+      }
+
+      @keyframes choix-voile-entree {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes choix-modale-entree {
+        from {
+          opacity: 0;
+          transform: translateY(0.75rem) scale(0.97);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .choix-modale h3 {
+        margin: 0 0 1rem;
+        padding-right: 2rem;
+      }
+
+      .choix-tuiles {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+        gap: 0.5rem;
+      }
+
+      .choix-tuile {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        padding: 0.6rem 0.5rem;
+        border-radius: 0.5rem;
+        border: 2px solid var(--couleur-bordure);
+        background: var(--couleur-fond);
+        color: var(--couleur-texte);
+        font-family: inherit;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-align: left;
+        cursor: pointer;
+        transition:
+          transform 0.12s ease,
+          box-shadow 0.12s ease,
+          border-color 0.12s ease;
+      }
+
+      .choix-tuile:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--ombre-carte-hover);
+      }
+
+      .choix-tuile.selectionnee {
+        border-color: var(--couleur-accent);
+        background: var(--couleur-surface-transparente);
+      }
+
+      .choix-tuile .niveau {
+        font-weight: 400;
+        font-size: 0.7rem;
+        color: var(--couleur-texte-att);
+      }
+
+      .choix-tuile-vide {
+        font-style: italic;
+        color: var(--couleur-texte-att);
+      }
+
+      .fermer {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: transparent;
+        color: var(--couleur-texte-att);
+        padding: 0.2rem 0.5rem;
+      }
     `,
   ],
 })
 export class SelectionRepasComponent {
   readonly proposition = input.required<RepasProposesResponse>();
-  /** Dernier repas généré par le conteneur (voir PlanificateurComponent), proposable dans les listes déroulantes. */
+  /** Dernier repas généré par le conteneur (voir PlanificateurComponent), proposable dans le choix. */
   readonly repasGenere = input<RepasResponse | null>(null);
   readonly selectionValidee = output<Record<JourSemaine, ChoixJourRequest>>();
   readonly genererIdee = output<TypeRepas>();
@@ -279,16 +437,19 @@ export class SelectionRepasComponent {
   protected readonly repasAffiche = signal<RepasResponse | null>(null);
   protected readonly noteRepasAffiche = signal<string | null>(null);
 
+  /** La case (jour, repas) dont la pop-up de choix par tuiles est actuellement ouverte, ou aucune. */
+  protected readonly slotOuvert = signal<SlotEnEdition | null>(null);
+
   constructor() {
     // Chaque nouvelle idee generee par le conteneur s'affiche automatiquement
     // dans la pop-up de recette a titre d'apercu, et devient choisissable
-    // dans la liste deroulante correspondante (voir repasGenerePour).
+    // dans le choix correspondant (voir repasGenerePour).
     effect(() => {
       const genere = this.repasGenere();
       if (genere) {
         this.repasAffiche.set(genere);
         this.noteRepasAffiche.set(
-          '💡 Idée générée aléatoirement à partir du catalogue — choisissez-la dans la liste déroulante du repas concerné pour l\'ajouter à votre semaine.',
+          '💡 Idée générée aléatoirement à partir du catalogue — choisissez-la dans le choix du repas concerné pour l\'ajouter à votre semaine.',
         );
       }
     });
@@ -307,10 +468,10 @@ export class SelectionRepasComponent {
   }
 
   /**
-   * Les idees generees a proposer dans la liste deroulante d'une case
-   * precise : celle deja choisie pour cette case (pour que l'option reste
-   * presente et selectionnee meme apres qu'une idee plus recente a ete
-   * generee ailleurs), et celle du moment si elle est nouvelle — deux idees
+   * Les idees generees a proposer pour une case precise : celle deja
+   * choisie pour cette case (pour que l'option reste presente et
+   * selectionnee meme apres qu'une idee plus recente a ete generee
+   * ailleurs), et celle du moment si elle est nouvelle — deux idees
    * distinctes si l'utilisateur en a genere plusieurs sans toutes les
    * choisir, dedupliquees par id sinon.
    */
@@ -339,6 +500,44 @@ export class SelectionRepasComponent {
     return choix.kind === 'genere' && choix.repas.id === id;
   }
 
+  protected champType(cle: CleRepas): TypeRepas {
+    return this.champsRepas.find((c) => c.cle === cle)!.type;
+  }
+
+  protected libelleChamp(cle: CleRepas): string {
+    return this.champsRepas.find((c) => c.cle === cle)!.libelle;
+  }
+
+  protected catalogueDuChamp(cle: CleRepas): RepasResponse[] {
+    const champ = this.champsRepas.find((c) => c.cle === cle)!;
+    return champ.catalogue(this.proposition());
+  }
+
+  /** Le nom a afficher sur le bouton de la case, ou null si rien n'est encore choisi. */
+  protected libelleChoixCourant(jour: JourSemaine, cle: CleRepas): string | null {
+    const choix = this.choix()[jour][cle];
+    if (choix.kind === 'vide') {
+      return null;
+    }
+    if (choix.kind === 'genere') {
+      return `✨ ${choix.repas.nom}`;
+    }
+    return this.catalogueDuChamp(cle).find((r) => r.id === choix.id)?.nom ?? null;
+  }
+
+  protected ouvrirChoix(jour: JourSemaine, cle: CleRepas): void {
+    this.slotOuvert.set({ jour, cle });
+  }
+
+  protected fermerChoix(): void {
+    this.slotOuvert.set(null);
+  }
+
+  protected choisirDepuisPicker(jour: JourSemaine, cle: CleRepas, valeur: string): void {
+    this.choisir(jour, cle, valeur);
+    this.slotOuvert.set(null);
+  }
+
   protected choisir(jour: JourSemaine, cle: CleRepas, valeur: string): void {
     let nouveauChoix: ChoixRepasPartiel;
     if (valeur === '') {
@@ -362,8 +561,7 @@ export class SelectionRepasComponent {
   protected afficherRecette(jour: JourSemaine, cle: CleRepas): void {
     const choix = this.choix()[jour][cle];
     if (choix.kind === 'id') {
-      const champ = this.champsRepas.find((c) => c.cle === cle);
-      const repas = champ?.catalogue(this.proposition()).find((r) => r.id === choix.id);
+      const repas = this.catalogueDuChamp(cle).find((r) => r.id === choix.id);
       if (repas) {
         this.noteRepasAffiche.set(null);
         this.repasAffiche.set(repas);

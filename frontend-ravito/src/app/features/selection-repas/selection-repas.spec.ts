@@ -34,21 +34,29 @@ describe('SelectionRepasComponent', () => {
     fixture.detectChanges();
   });
 
-  function selects(): HTMLSelectElement[] {
-    return Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('select'));
+  function boutonsChoix(): HTMLButtonElement[] {
+    return Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.choix-repas-bouton'));
   }
 
-  /** Simule le choix d'une option, comme le ferait un utilisateur reel. */
-  function choisir(select: HTMLSelectElement, valeur: string): void {
-    select.value = valeur;
-    select.dispatchEvent(new Event('change'));
+  function tuilesChoix(): HTMLButtonElement[] {
+    return Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.choix-tuile'));
+  }
+
+  /** Ouvre la pop-up de choix de la case (index dans boutonsChoix()) et clique la tuile dont le texte contient `nom`. */
+  function choisirParTuile(indexBouton: number, nom: string): void {
+    boutonsChoix()[indexBouton].click();
+    fixture.detectChanges();
+
+    const tuile = tuilesChoix().find((t) => t.textContent?.includes(nom));
+    expect(tuile).withContext(`tuile "${nom}" introuvable`).toBeDefined();
+    tuile!.click();
     fixture.detectChanges();
   }
 
-  it('affiche une ligne par jour, avec 3 listes deroulantes chacune', () => {
+  it('affiche une ligne par jour, avec 3 cases de choix chacune', () => {
     const lignes = (fixture.nativeElement as HTMLElement).querySelectorAll('.jour-ligne');
     expect(lignes.length).toBe(5);
-    expect(selects().length).toBe(15);
+    expect(boutonsChoix().length).toBe(15);
   });
 
   it('desactive la validation tant que les 5 jours ne sont pas complets', () => {
@@ -57,23 +65,19 @@ describe('SelectionRepasComponent', () => {
   });
 
   it('accepte le meme repas pour deux jours differents (doublon autorise)', () => {
-    // selects() : [lundi-petitDej, lundi-dej, lundi-diner, mardi-petitDej, ...]
-    const [lundiPetitDej, , , mardiPetitDej] = selects();
+    // boutonsChoix() : [lundi-petitDej, lundi-dej, lundi-diner, mardi-petitDej, ...]
+    choisirParTuile(0, 'Tartines'); // lundi petit-dejeuner
+    choisirParTuile(3, 'Tartines'); // mardi petit-dejeuner, meme repas que lundi, sans erreur
 
-    choisir(lundiPetitDej, 'pd-1');
-    choisir(mardiPetitDej, 'pd-1'); // meme petit-dejeuner que lundi, sans erreur
-
-    expect(lundiPetitDej.value).toBe('pd-1');
-    expect(mardiPetitDej.value).toBe('pd-1');
+    expect(boutonsChoix()[0].textContent).toContain('Tartines');
+    expect(boutonsChoix()[3].textContent).toContain('Tartines');
   });
 
   it('permet de ne remplir que certains jours, dans le desordre', () => {
     // lundi(0-2), mardi(3-5), mercredi(6-8), jeudi(9-11) : 3*3 = 9
-    const [, , , , , , , , , jeudiPetitDej, jeudiDejeuner, jeudiDiner] = selects();
-
-    choisir(jeudiPetitDej, 'pd-1');
-    choisir(jeudiDejeuner, 'dj-1');
-    choisir(jeudiDiner, 'dn-1');
+    choisirParTuile(9, 'Tartines'); // jeudi petit-dejeuner
+    choisirParTuile(10, 'Pâtes'); // jeudi dejeuner
+    choisirParTuile(11, 'Soupe'); // jeudi diner
 
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('1/5');
   });
@@ -86,9 +90,20 @@ describe('SelectionRepasComponent', () => {
     expect(boutonsRecette()[0].disabled).toBeTrue(); // lundi petit-dejeuner
   });
 
+  it('ferme la pop-up de choix sans rien selectionner au clic sur "— Aucun —" ou en dehors', () => {
+    boutonsChoix()[0].click();
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('.choix-modale')).not.toBeNull();
+
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.fermer')?.click();
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('.choix-modale')).toBeNull();
+    expect(boutonsChoix()[0].textContent).toContain('— Choisir —');
+  });
+
   it('affiche la recette du repas choisi, pas celle d\'un autre jour', () => {
-    const [lundiPetitDej] = selects();
-    choisir(lundiPetitDej, 'pd-1'); // "Tartines"
+    choisirParTuile(0, 'Tartines'); // lundi petit-dejeuner
 
     boutonsRecette()[0].click();
     fixture.detectChanges();
@@ -102,11 +117,10 @@ describe('SelectionRepasComponent', () => {
     fixture.componentInstance.selectionValidee.subscribe((valeur) => (emis = valeur));
 
     // Remplit chaque jour : colonnes 0=petit-dejeuner, 1=dejeuner, 2=diner.
-    const tousLesSelects = selects();
-    for (let i = 0; i < tousLesSelects.length; i += 3) {
-      choisir(tousLesSelects[i], 'pd-1');
-      choisir(tousLesSelects[i + 1], 'dj-1');
-      choisir(tousLesSelects[i + 2], 'dn-1');
+    for (let i = 0; i < 15; i += 3) {
+      choisirParTuile(i, 'Tartines');
+      choisirParTuile(i + 1, 'Pâtes');
+      choisirParTuile(i + 2, 'Soupe');
     }
 
     (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.valider')?.click();
@@ -137,21 +151,27 @@ describe('SelectionRepasComponent', () => {
     expect(modale?.textContent).toContain('générée');
   });
 
-  it('propose le repas genere comme option dans la liste deroulante du bon type, et peut le selectionner', () => {
+  it('propose le repas genere comme tuile dans le choix du bon type, et peut le selectionner', () => {
     fixture.componentRef.setInput('repasGenere', unRepas('gen-1', 'Dîner surprise', 'DINER'));
     fixture.detectChanges();
 
-    const optionsGenerees = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll('option[value="gen-1"]'),
-    );
-    // 5 jours, uniquement sur le selecteur Diner :
-    expect(optionsGenerees.length).toBe(5);
-    expect(optionsGenerees[0].textContent).toContain('Dîner surprise');
+    // Present dans le choix Diner de lundi (index 2) :
+    boutonsChoix()[2].click();
+    fixture.detectChanges();
+    expect(tuilesChoix().some((t) => t.textContent?.includes('Dîner surprise'))).toBeTrue();
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.fermer')?.click();
+    fixture.detectChanges();
 
-    const [, , lundiDiner] = selects();
-    choisir(lundiDiner, 'gen-1');
+    // Present aussi dans le choix Diner de mercredi (index 8), pas seulement lundi :
+    boutonsChoix()[8].click();
+    fixture.detectChanges();
+    expect(tuilesChoix().some((t) => t.textContent?.includes('Dîner surprise'))).toBeTrue();
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.fermer')?.click();
+    fixture.detectChanges();
 
-    expect(lundiDiner.value).toBe('gen-1');
+    choisirParTuile(2, 'Dîner surprise'); // lundi diner
+
+    expect(boutonsChoix()[2].textContent).toContain('Dîner surprise');
   });
 
   it('ne perd pas (ni ne fait taire) le choix d\'une idee generee quand une nouvelle idee est generee ailleurs', () => {
@@ -162,17 +182,15 @@ describe('SelectionRepasComponent', () => {
     fixture.componentRef.setInput('repasGenere', unRepas('gen-1', 'Dîner A', 'DINER'));
     fixture.detectChanges();
 
-    const [, , lundiDiner] = selects();
-    choisir(lundiDiner, 'gen-1');
-    expect(lundiDiner.value).toBe('gen-1');
+    choisirParTuile(2, 'Dîner A'); // lundi diner
+    expect(boutonsChoix()[2].textContent).toContain('Dîner A');
 
     // On genere une idee differente (meme type) sans la choisir nulle part :
     fixture.componentRef.setInput('repasGenere', unRepas('gen-2', 'Dîner B', 'DINER'));
     fixture.detectChanges();
 
     // Lundi reste sur l'idee A qu'il avait choisie, pas sur la B toute fraiche :
-    expect(lundiDiner.value).toBe('gen-1');
-    expect(Array.from(lundiDiner.options).find((o) => o.value === 'gen-1')?.selected).toBeTrue();
+    expect(boutonsChoix()[2].textContent).toContain('Dîner A');
   });
 
   it('emet le repas genere en entier (pas un id) pour le jour ou il a ete choisi', () => {
@@ -182,11 +200,10 @@ describe('SelectionRepasComponent', () => {
     let emis: Record<JourSemaine, ChoixJourRequest> | undefined;
     fixture.componentInstance.selectionValidee.subscribe((valeur) => (emis = valeur));
 
-    const tousLesSelects = selects();
-    for (let i = 0; i < tousLesSelects.length; i += 3) {
-      choisir(tousLesSelects[i], 'pd-1');
-      choisir(tousLesSelects[i + 1], 'dj-1');
-      choisir(tousLesSelects[i + 2], i === 0 ? 'gen-1' : 'dn-1'); // seul lundi recoit le diner genere
+    for (let i = 0; i < 15; i += 3) {
+      choisirParTuile(i, 'Tartines');
+      choisirParTuile(i + 1, 'Pâtes');
+      choisirParTuile(i + 2, i === 0 ? 'Dîner surprise' : 'Soupe'); // seul lundi recoit le diner genere
     }
 
     (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.valider')?.click();

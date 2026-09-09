@@ -15,13 +15,13 @@ import type { Enseigne, NiveauCuisine, ProfilRequest, StyleAlimentaire } from '.
     <form class="profil-form" (submit)="valider($event)">
       <h2>1. Vos préférences</h2>
 
-      <div class="champ-enseigne">
+      <div class="champ">
         <span class="etiquette-champ">Enseigne</span>
-        <div class="enseignes-grille" role="radiogroup" aria-label="Enseigne">
+        <div class="grille-tuiles" role="radiogroup" aria-label="Enseigne">
           @for (option of enseignes; track option.valeur) {
             <button
               type="button"
-              class="enseigne-tuile"
+              class="tuile-choix tuile-marque"
               [class.selectionnee]="option.valeur === enseigne()"
               [class.texte-fonce]="option.texteFonce"
               [style.background]="option.couleur"
@@ -35,23 +35,43 @@ import type { Enseigne, NiveauCuisine, ProfilRequest, StyleAlimentaire } from '.
         </div>
       </div>
 
-      <label>
-        Style alimentaire
-        <select (change)="style.set($any($event.target).value)">
+      <div class="champ">
+        <span class="etiquette-champ">Style alimentaire</span>
+        <div class="grille-tuiles" role="radiogroup" aria-label="Style alimentaire">
           @for (option of stylesAlimentaires; track option.valeur) {
-            <option [value]="option.valeur" [selected]="option.valeur === style()">{{ option.libelle }}</option>
+            <button
+              type="button"
+              class="tuile-choix tuile-neutre"
+              [class.selectionnee]="option.valeur === style()"
+              role="radio"
+              [attr.aria-checked]="option.valeur === style()"
+              (click)="style.set(option.valeur)"
+            >
+              <span class="tuile-icone">{{ option.icone }}</span>
+              {{ option.libelle }}
+            </button>
           }
-        </select>
-      </label>
+        </div>
+      </div>
 
-      <label>
-        Niveau en cuisine
-        <select (change)="niveau.set($any($event.target).value)">
+      <div class="champ">
+        <span class="etiquette-champ">Niveau en cuisine</span>
+        <div class="grille-tuiles" role="radiogroup" aria-label="Niveau en cuisine">
           @for (option of niveauxCuisine; track option.valeur) {
-            <option [value]="option.valeur" [selected]="option.valeur === niveau()">{{ option.libelle }}</option>
+            <button
+              type="button"
+              class="tuile-choix tuile-neutre"
+              [class.selectionnee]="option.valeur === niveau()"
+              role="radio"
+              [attr.aria-checked]="option.valeur === niveau()"
+              (click)="niveau.set(option.valeur)"
+            >
+              <span class="tuile-icone">{{ option.icone }}</span>
+              {{ option.libelle }}
+            </button>
           }
-        </select>
-      </label>
+        </div>
+      </div>
 
       <label>
         Nombre de personnes
@@ -84,7 +104,7 @@ import type { Enseigne, NiveauCuisine, ProfilRequest, StyleAlimentaire } from '.
       }
 
       label,
-      .champ-enseigne {
+      .champ {
         display: flex;
         flex-direction: column;
         gap: 0.4rem;
@@ -97,17 +117,16 @@ import type { Enseigne, NiveauCuisine, ProfilRequest, StyleAlimentaire } from '.
         color: var(--couleur-texte-att);
       }
 
-      .enseignes-grille {
+      .grille-tuiles {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
         gap: 0.5rem;
       }
 
-      .enseigne-tuile {
+      .tuile-choix {
         padding: 0.6rem 0.4rem;
         border-radius: 0.5rem;
         border: 2px solid transparent;
-        color: #fff;
         font-family: inherit;
         font-weight: 700;
         font-size: 0.8rem;
@@ -121,21 +140,45 @@ import type { Enseigne, NiveauCuisine, ProfilRequest, StyleAlimentaire } from '.
           border-color 0.12s ease;
       }
 
-      .enseigne-tuile.texte-fonce {
-        color: #1f2421;
-      }
-
-      .enseigne-tuile:hover {
+      .tuile-choix:hover {
         transform: translateY(-2px);
         box-shadow: var(--ombre-carte-hover);
       }
 
-      .enseigne-tuile.selectionnee {
+      .tuile-icone {
+        display: block;
+        font-size: 1.1rem;
+        margin-bottom: 0.15rem;
+      }
+
+      /* Tuiles d'enseigne : couleur de marque en fond (voir ENSEIGNES), texte
+         blanc par defaut, bascule en sombre pour les couleurs claires. */
+      .tuile-marque {
+        color: #fff;
+      }
+
+      .tuile-marque.texte-fonce {
+        color: #1f2421;
+      }
+
+      .tuile-marque.selectionnee {
         border-color: var(--couleur-texte);
         box-shadow: var(--ombre-carte-hover);
       }
 
-      select,
+      /* Tuiles neutres (style alimentaire, niveau) : pas de marque a evoquer,
+         simple fond de l'appli avec mise en evidence a la selection. */
+      .tuile-neutre {
+        background: var(--couleur-fond);
+        color: var(--couleur-texte);
+        border-color: var(--couleur-bordure);
+      }
+
+      .tuile-neutre.selectionnee {
+        border-color: var(--couleur-accent);
+        background: var(--couleur-surface-transparente);
+      }
+
       input[type='number'] {
         font: inherit;
         padding: 0.6rem 0.75rem;
@@ -151,7 +194,7 @@ import type { Enseigne, NiveauCuisine, ProfilRequest, StyleAlimentaire } from '.
         color: var(--couleur-texte-att);
       }
 
-      button {
+      button[type='submit'] {
         align-self: flex-start;
       }
     `,
