@@ -26,3 +26,9 @@ ravito:
       LECLERC: 0.95
       LIDL: 0.85
       AUCHAN: 0.98
+      INTERMARCHE: 0.93
+      SYSTEME_U: 0.96
+      CASINO: 1.05
+      CORA: 0.97
+      ALDI: 0.83
+      MONOPRIX: 1.15

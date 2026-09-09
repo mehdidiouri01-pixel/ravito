@@ -5,7 +5,17 @@
  * contrairement au backend (voir la Javadoc de PlanSemaine, RepasProposes, etc.).
  */
 
-export type Enseigne = 'CARREFOUR' | 'LECLERC' | 'LIDL' | 'AUCHAN';
+export type Enseigne =
+  | 'CARREFOUR'
+  | 'LECLERC'
+  | 'LIDL'
+  | 'AUCHAN'
+  | 'INTERMARCHE'
+  | 'SYSTEME_U'
+  | 'CASINO'
+  | 'CORA'
+  | 'ALDI'
+  | 'MONOPRIX';
 export type StyleAlimentaire = 'HEALTHY' | 'NORMAL' | 'GOURMAND';
 export type NiveauCuisine = 'DEBUTANT' | 'CONFIRME';
 export type TypeRepas = 'PETIT_DEJEUNER' | 'DEJEUNER' | 'DINER';

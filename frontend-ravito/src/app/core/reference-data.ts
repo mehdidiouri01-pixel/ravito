@@ -3,11 +3,25 @@ import type { Enseigne, JourSemaine, NiveauCuisine, RayonMagasin, StyleAlimentai
 /** Les 5 jours couverts par un plan, dans l'ordre — miroir de JourSemaine (domaine). */
 export const JOURS: JourSemaine[] = ['LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI'];
 
-export const ENSEIGNES: { valeur: Enseigne; libelle: string }[] = [
-  { valeur: 'CARREFOUR', libelle: 'Carrefour' },
-  { valeur: 'LECLERC', libelle: 'Leclerc' },
-  { valeur: 'LIDL', libelle: 'Lidl' },
-  { valeur: 'AUCHAN', libelle: 'Auchan' },
+/**
+ * Les 10 principales enseignes de la grande distribution alimentaire en
+ * France. `couleur` sert a colorer la tuile de selection (etape 1) — une
+ * teinte evocatrice de chaque marque, pas son logo officiel : reproduire
+ * les vrais logos (droits d'auteur/marque deposee) n'a pas sa place dans
+ * ce depot de code. `texteFonce` bascule le texte de la tuile en sombre
+ * pour les couleurs de fond claires (sinon illisible en blanc sur blanc).
+ */
+export const ENSEIGNES: { valeur: Enseigne; libelle: string; couleur: string; texteFonce?: boolean }[] = [
+  { valeur: 'CARREFOUR', libelle: 'Carrefour', couleur: '#004E9F' },
+  { valeur: 'LECLERC', libelle: 'E.Leclerc', couleur: '#0033A0' },
+  { valeur: 'LIDL', libelle: 'Lidl', couleur: '#0050AA' },
+  { valeur: 'AUCHAN', libelle: 'Auchan', couleur: '#E2001A' },
+  { valeur: 'INTERMARCHE', libelle: 'Intermarché', couleur: '#ED1C24' },
+  { valeur: 'SYSTEME_U', libelle: 'Système U', couleur: '#E4032E' },
+  { valeur: 'CASINO', libelle: 'Géant Casino', couleur: '#E4007C' },
+  { valeur: 'CORA', libelle: 'Cora', couleur: '#FFCC00', texteFonce: true },
+  { valeur: 'ALDI', libelle: 'Aldi', couleur: '#00447C' },
+  { valeur: 'MONOPRIX', libelle: 'Monoprix', couleur: '#7A1150' },
 ];
 
 /**

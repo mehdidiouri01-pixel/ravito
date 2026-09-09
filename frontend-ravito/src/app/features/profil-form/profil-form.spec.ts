@@ -50,4 +50,29 @@ describe('ProfilFormComponent', () => {
     saisir('99');
     expect(soumettre()?.nombreDePersonnes).toBe(12);
   });
+
+  function tuilesEnseigne(): HTMLButtonElement[] {
+    return Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.enseigne-tuile'));
+  }
+
+  it('propose Carrefour par defaut, tuile mise en evidence', () => {
+    const tuiles = tuilesEnseigne();
+    expect(tuiles.length).toBe(10);
+
+    const tuileCarrefour = tuiles.find((tuile) => tuile.textContent?.trim() === 'Carrefour');
+    expect(tuileCarrefour?.classList.contains('selectionnee')).toBeTrue();
+    expect(soumettre()?.enseigne).toBe('CARREFOUR');
+  });
+
+  it('selectionne une enseigne au clic sur sa tuile, et deplace la mise en evidence', () => {
+    const tuiles = tuilesEnseigne();
+    const tuileLidl = tuiles.find((tuile) => tuile.textContent?.trim() === 'Lidl')!;
+
+    tuileLidl.click();
+    fixture.detectChanges();
+
+    expect(tuileLidl.classList.contains('selectionnee')).toBeTrue();
+    expect(tuiles.find((tuile) => tuile.textContent?.trim() === 'Carrefour')?.classList.contains('selectionnee')).toBeFalse();
+    expect(soumettre()?.enseigne).toBe('LIDL');
+  });
 });

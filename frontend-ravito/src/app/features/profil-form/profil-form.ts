@@ -15,14 +15,25 @@ import type { Enseigne, NiveauCuisine, ProfilRequest, StyleAlimentaire } from '.
     <form class="profil-form" (submit)="valider($event)">
       <h2>1. Vos préférences</h2>
 
-      <label>
-        Enseigne
-        <select (change)="enseigne.set($any($event.target).value)">
+      <div class="champ-enseigne">
+        <span class="etiquette-champ">Enseigne</span>
+        <div class="enseignes-grille" role="radiogroup" aria-label="Enseigne">
           @for (option of enseignes; track option.valeur) {
-            <option [value]="option.valeur" [selected]="option.valeur === enseigne()">{{ option.libelle }}</option>
+            <button
+              type="button"
+              class="enseigne-tuile"
+              [class.selectionnee]="option.valeur === enseigne()"
+              [class.texte-fonce]="option.texteFonce"
+              [style.background]="option.couleur"
+              role="radio"
+              [attr.aria-checked]="option.valeur === enseigne()"
+              (click)="enseigne.set(option.valeur)"
+            >
+              {{ option.libelle }}
+            </button>
           }
-        </select>
-      </label>
+        </div>
+      </div>
 
       <label>
         Style alimentaire
@@ -72,12 +83,56 @@ import type { Enseigne, NiveauCuisine, ProfilRequest, StyleAlimentaire } from '.
         box-shadow: var(--ombre-carte);
       }
 
-      label {
+      label,
+      .champ-enseigne {
         display: flex;
         flex-direction: column;
         gap: 0.4rem;
         font-weight: 600;
         color: var(--couleur-texte-att);
+      }
+
+      .etiquette-champ {
+        font-weight: 600;
+        color: var(--couleur-texte-att);
+      }
+
+      .enseignes-grille {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+        gap: 0.5rem;
+      }
+
+      .enseigne-tuile {
+        padding: 0.6rem 0.4rem;
+        border-radius: 0.5rem;
+        border: 2px solid transparent;
+        color: #fff;
+        font-family: inherit;
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-align: center;
+        line-height: 1.2;
+        cursor: pointer;
+        box-shadow: var(--ombre-carte);
+        transition:
+          transform 0.12s ease,
+          box-shadow 0.12s ease,
+          border-color 0.12s ease;
+      }
+
+      .enseigne-tuile.texte-fonce {
+        color: #1f2421;
+      }
+
+      .enseigne-tuile:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--ombre-carte-hover);
+      }
+
+      .enseigne-tuile.selectionnee {
+        border-color: var(--couleur-texte);
+        box-shadow: var(--ombre-carte-hover);
       }
 
       select,
