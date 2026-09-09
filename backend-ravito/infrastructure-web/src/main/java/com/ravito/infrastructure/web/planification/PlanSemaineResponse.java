@@ -1,6 +1,7 @@
 package com.ravito.infrastructure.web.planification;
 
 import com.ravito.domain.courses.ListeCourses;
+import com.ravito.domain.nutrition.EstimerNutritionUseCase;
 import com.ravito.domain.planification.PlanSemaine;
 import com.ravito.domain.prix.Prix;
 
@@ -15,9 +16,10 @@ import java.util.List;
  */
 public record PlanSemaineResponse(List<JourResponse> jours, ListeCoursesResponse listeCourses, PrixResponse prixEstime) {
 
-    public static PlanSemaineResponse depuis(PlanSemaine plan, ListeCourses listeCourses, Prix prixEstime) {
+    public static PlanSemaineResponse depuis(
+            PlanSemaine plan, ListeCourses listeCourses, Prix prixEstime, EstimerNutritionUseCase estimerNutritionUseCase) {
         return new PlanSemaineResponse(
-                plan.jours().stream().map(JourResponse::depuis).toList(),
+                plan.jours().stream().map(jour -> JourResponse.depuis(jour, estimerNutritionUseCase)).toList(),
                 ListeCoursesResponse.depuis(listeCourses),
                 PrixResponse.depuis(prixEstime));
     }

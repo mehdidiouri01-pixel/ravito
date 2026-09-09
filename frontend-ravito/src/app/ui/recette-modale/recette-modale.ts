@@ -37,6 +37,29 @@ import type { RepasResponse } from '../../core/models';
               <li>{{ etape }}</li>
             }
           </ol>
+          <h4>Valeurs nutritionnelles</h4>
+          <div class="modale-nutrition">
+            <div class="stat">
+              <span class="valeur">{{ r.valeursNutritionnelles.calories.toFixed(0) }}</span>
+              <span class="libelle">kcal</span>
+            </div>
+            <div class="stat">
+              <span class="valeur">{{ r.valeursNutritionnelles.proteines.toFixed(1) }} g</span>
+              <span class="libelle">Protéines</span>
+            </div>
+            <div class="stat">
+              <span class="valeur">{{ r.valeursNutritionnelles.glucides.toFixed(1) }} g</span>
+              <span class="libelle">Glucides</span>
+            </div>
+            <div class="stat">
+              <span class="valeur">{{ r.valeursNutritionnelles.lipides.toFixed(1) }} g</span>
+              <span class="libelle">Lipides</span>
+            </div>
+            <div class="stat">
+              <span class="valeur">{{ r.valeursNutritionnelles.fibres.toFixed(1) }} g</span>
+              <span class="libelle">Fibres</span>
+            </div>
+          </div>
         </div>
       </div>
     }
@@ -118,6 +141,31 @@ import type { RepasResponse } from '../../core/models';
 
       .modale ol li + li {
         margin-top: 0.4rem;
+      }
+
+      .modale-nutrition {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(4.25rem, 1fr));
+        gap: 0.5rem;
+        margin: 0;
+      }
+
+      .modale-nutrition .stat {
+        text-align: center;
+        background: var(--couleur-fond);
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.25rem;
+      }
+
+      .modale-nutrition .valeur {
+        display: block;
+        font-weight: 600;
+      }
+
+      .modale-nutrition .libelle {
+        display: block;
+        font-size: 0.7rem;
+        color: var(--couleur-texte-att);
       }
 
       .fermer {

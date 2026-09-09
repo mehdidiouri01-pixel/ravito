@@ -5,10 +5,12 @@ import com.ravito.application.catalogue.PoolIngredientsCatalogue;
 import com.ravito.application.catalogue.ProposerRepasApplicationService;
 import com.ravito.application.historique.ConsulterHistoriqueApplicationService;
 import com.ravito.application.historique.HistoriserPlanApplicationService;
+import com.ravito.application.nutrition.EstimerNutritionApplicationService;
 import com.ravito.application.planification.ComposerPlanSemaineApplicationService;
 import com.ravito.application.prix.EstimerCoutApplicationService;
 import com.ravito.domain.catalogue.CatalogueRepasPort;
 import com.ravito.domain.historique.HistoriquePlansPort;
+import com.ravito.domain.nutrition.EstimationNutritionPort;
 import com.ravito.domain.prix.EstimationPrixPort;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -76,5 +78,12 @@ class UseCaseConfigurationTest {
         HistoriquePlansPort port = Mockito.mock(HistoriquePlansPort.class);
 
         assertThat(configuration.consulterHistoriqueUseCase(port)).isInstanceOf(ConsulterHistoriqueApplicationService.class);
+    }
+
+    @Test
+    void cable_estimerNutritionUseCase_sur_l_estimation_de_nutrition() {
+        EstimationNutritionPort port = Mockito.mock(EstimationNutritionPort.class);
+
+        assertThat(configuration.estimerNutritionUseCase(port)).isInstanceOf(EstimerNutritionApplicationService.class);
     }
 }

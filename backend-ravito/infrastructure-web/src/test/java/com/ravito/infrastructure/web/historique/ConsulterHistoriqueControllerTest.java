@@ -12,6 +12,8 @@ import com.ravito.domain.historique.ConsulterHistoriqueUseCase;
 import com.ravito.domain.historique.HistoriquePlanId;
 import com.ravito.domain.historique.HistoriquePlanIntrouvableException;
 import com.ravito.domain.historique.PlanSemaineHistorise;
+import com.ravito.domain.nutrition.EstimerNutritionUseCase;
+import com.ravito.domain.nutrition.ValeursNutritionnelles;
 import com.ravito.domain.planification.Jour;
 import com.ravito.domain.planification.JourSemaine;
 import com.ravito.domain.planification.PlanSemaine;
@@ -50,6 +52,9 @@ class ConsulterHistoriqueControllerTest {
     @MockBean
     private ConsulterHistoriqueUseCase consulterHistoriqueUseCase;
 
+    @MockBean
+    private EstimerNutritionUseCase estimerNutritionUseCase;
+
     @Test
     void renvoie_200_avec_la_liste_des_plans_historises() throws Exception {
         when(consulterHistoriqueUseCase.lister()).thenReturn(List.of(unPlanHistorise()));
@@ -65,6 +70,8 @@ class ConsulterHistoriqueControllerTest {
     void renvoie_200_avec_le_detail_d_un_plan_historise() throws Exception {
         PlanSemaineHistorise historise = unPlanHistorise();
         when(consulterHistoriqueUseCase.parId(historise.id())).thenReturn(Optional.of(historise));
+        when(estimerNutritionUseCase.estimer(any())).thenReturn(new ValeursNutritionnelles(
+                BigDecimal.valueOf(250), BigDecimal.valueOf(12), BigDecimal.valueOf(30), BigDecimal.valueOf(8), BigDecimal.valueOf(4)));
 
         mockMvc.perform(get("/api/plans-semaine/historique/" + historise.id().valeur()))
                 .andExpect(status().isOk())

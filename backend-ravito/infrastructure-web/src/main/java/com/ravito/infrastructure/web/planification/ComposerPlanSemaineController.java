@@ -2,6 +2,7 @@ package com.ravito.infrastructure.web.planification;
 
 import com.ravito.domain.courses.ListeCourses;
 import com.ravito.domain.historique.HistoriserPlanUseCase;
+import com.ravito.domain.nutrition.EstimerNutritionUseCase;
 import com.ravito.domain.planification.ComposerPlanSemaineUseCase;
 import com.ravito.domain.planification.PlanSemaine;
 import com.ravito.domain.prix.EstimerCoutUseCase;
@@ -35,13 +36,16 @@ class ComposerPlanSemaineController {
     private final ComposerPlanSemaineUseCase composerPlanSemaineUseCase;
     private final EstimerCoutUseCase estimerCoutUseCase;
     private final HistoriserPlanUseCase historiserPlanUseCase;
+    private final EstimerNutritionUseCase estimerNutritionUseCase;
 
     ComposerPlanSemaineController(ComposerPlanSemaineUseCase composerPlanSemaineUseCase,
                                    EstimerCoutUseCase estimerCoutUseCase,
-                                   HistoriserPlanUseCase historiserPlanUseCase) {
+                                   HistoriserPlanUseCase historiserPlanUseCase,
+                                   EstimerNutritionUseCase estimerNutritionUseCase) {
         this.composerPlanSemaineUseCase = Objects.requireNonNull(composerPlanSemaineUseCase, "composerPlanSemaineUseCase");
         this.estimerCoutUseCase = Objects.requireNonNull(estimerCoutUseCase, "estimerCoutUseCase");
         this.historiserPlanUseCase = Objects.requireNonNull(historiserPlanUseCase, "historiserPlanUseCase");
+        this.estimerNutritionUseCase = Objects.requireNonNull(estimerNutritionUseCase, "estimerNutritionUseCase");
     }
 
     @PostMapping
@@ -51,6 +55,6 @@ class ComposerPlanSemaineController {
         Prix prixEstime = estimerCoutUseCase.estimer(listeCourses, plan.profil().enseigne());
         historiserPlanUseCase.historiser(plan, prixEstime);
 
-        return PlanSemaineResponse.depuis(plan, listeCourses, prixEstime);
+        return PlanSemaineResponse.depuis(plan, listeCourses, prixEstime, estimerNutritionUseCase);
     }
 }

@@ -1,6 +1,7 @@
 package com.ravito.infrastructure.web.historique;
 
 import com.ravito.domain.historique.PlanSemaineHistorise;
+import com.ravito.domain.nutrition.EstimerNutritionUseCase;
 import com.ravito.infrastructure.web.planification.JourResponse;
 import com.ravito.infrastructure.web.planification.ListeCoursesResponse;
 import com.ravito.infrastructure.web.planification.PrixResponse;
@@ -23,11 +24,11 @@ public record HistoriquePlanDetailResponse(
         ListeCoursesResponse listeCourses,
         PrixResponse prixEstime) {
 
-    public static HistoriquePlanDetailResponse depuis(PlanSemaineHistorise historise) {
+    public static HistoriquePlanDetailResponse depuis(PlanSemaineHistorise historise, EstimerNutritionUseCase estimerNutritionUseCase) {
         return new HistoriquePlanDetailResponse(
                 historise.id().valeur(),
                 historise.dateComposition(),
-                historise.plan().jours().stream().map(JourResponse::depuis).toList(),
+                historise.plan().jours().stream().map(jour -> JourResponse.depuis(jour, estimerNutritionUseCase)).toList(),
                 ListeCoursesResponse.depuis(historise.plan().genererListeCourses()),
                 PrixResponse.depuis(historise.prixEstime()));
     }

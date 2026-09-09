@@ -11,6 +11,7 @@ function unRepas(id: string, nom: string, type: TypeRepas = 'PETIT_DEJEUNER'): R
     niveauRequis: 'DEBUTANT',
     ingredients: [{ ingredient: 'ingredient de test', rayon: 'EPICERIE', quantite: 1, unite: 'UNITE' }],
     etapesPreparation: ['Etape de test'],
+    valeursNutritionnelles: { calories: 250, proteines: 12, glucides: 30, lipides: 8, fibres: 4 },
   };
 }
 

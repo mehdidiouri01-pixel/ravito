@@ -14,6 +14,7 @@ const UN_PLAN: PlanSemaineResponse = {
         niveauRequis: 'DEBUTANT',
         ingredients: [{ ingredient: 'pain', rayon: 'BOULANGERIE', quantite: 100, unite: 'GRAMME' }],
         etapesPreparation: ['Etape de test'],
+        valeursNutritionnelles: { calories: 250, proteines: 12, glucides: 30, lipides: 8, fibres: 4 },
       },
       dejeuner: {
         id: 'dj-1',
@@ -23,6 +24,7 @@ const UN_PLAN: PlanSemaineResponse = {
         niveauRequis: 'DEBUTANT',
         ingredients: [{ ingredient: 'pates', rayon: 'EPICERIE', quantite: 150, unite: 'GRAMME' }],
         etapesPreparation: ['Etape de test'],
+        valeursNutritionnelles: { calories: 250, proteines: 12, glucides: 30, lipides: 8, fibres: 4 },
       },
       diner: {
         id: 'dn-1',
@@ -32,6 +34,7 @@ const UN_PLAN: PlanSemaineResponse = {
         niveauRequis: 'DEBUTANT',
         ingredients: [{ ingredient: 'soupe', rayon: 'EPICERIE', quantite: 400, unite: 'MILLILITRE' }],
         etapesPreparation: ['Etape de test'],
+        valeursNutritionnelles: { calories: 250, proteines: 12, glucides: 30, lipides: 8, fibres: 4 },
       },
     },
   ],

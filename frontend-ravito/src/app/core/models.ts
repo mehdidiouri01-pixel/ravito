@@ -45,6 +45,14 @@ export interface IngredientQuantiteResponse {
   unite: UniteMesure;
 }
 
+export interface ValeursNutritionnellesResponse {
+  calories: number;
+  proteines: number;
+  glucides: number;
+  lipides: number;
+  fibres: number;
+}
+
 export interface RepasResponse {
   id: string;
   nom: string;
@@ -53,6 +61,7 @@ export interface RepasResponse {
   niveauRequis: NiveauCuisine;
   ingredients: IngredientQuantiteResponse[];
   etapesPreparation: string[];
+  valeursNutritionnelles: ValeursNutritionnellesResponse;
 }
 
 export interface RepasProposesResponse {

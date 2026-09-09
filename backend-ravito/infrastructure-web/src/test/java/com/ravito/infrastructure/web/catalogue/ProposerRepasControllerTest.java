@@ -11,6 +11,8 @@ import com.ravito.domain.courses.IngredientQuantite;
 import com.ravito.domain.courses.Quantite;
 import com.ravito.domain.courses.RayonMagasin;
 import com.ravito.domain.courses.UniteMesure;
+import com.ravito.domain.nutrition.EstimerNutritionUseCase;
+import com.ravito.domain.nutrition.ValeursNutritionnelles;
 import com.ravito.domain.profil.NiveauCuisine;
 import com.ravito.domain.profil.StyleAlimentaire;
 import org.junit.jupiter.api.Test;
@@ -40,11 +42,16 @@ class ProposerRepasControllerTest {
     @MockBean
     private ProposerRepasUseCase proposerRepasUseCase;
 
+    @MockBean
+    private EstimerNutritionUseCase estimerNutritionUseCase;
+
     @Test
     void renvoie_200_avec_la_proposition_de_repas() throws Exception {
         RepasProposes proposition = new RepasProposes(
                 cinqRepas(TypeRepas.PETIT_DEJEUNER), cinqRepas(TypeRepas.DEJEUNER), cinqRepas(TypeRepas.DINER));
         when(proposerRepasUseCase.proposer(any())).thenReturn(proposition);
+        when(estimerNutritionUseCase.estimer(any())).thenReturn(new ValeursNutritionnelles(
+                BigDecimal.valueOf(250), BigDecimal.valueOf(12), BigDecimal.valueOf(30), BigDecimal.valueOf(8), BigDecimal.valueOf(4)));
 
         mockMvc.perform(post("/api/repas/propositions")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -1,6 +1,7 @@
 package com.ravito.infrastructure.web.catalogue;
 
 import com.ravito.domain.catalogue.ProposerRepasUseCase;
+import com.ravito.domain.nutrition.EstimerNutritionUseCase;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,13 +23,15 @@ import java.util.Objects;
 class ProposerRepasController {
 
     private final ProposerRepasUseCase proposerRepasUseCase;
+    private final EstimerNutritionUseCase estimerNutritionUseCase;
 
-    ProposerRepasController(ProposerRepasUseCase proposerRepasUseCase) {
+    ProposerRepasController(ProposerRepasUseCase proposerRepasUseCase, EstimerNutritionUseCase estimerNutritionUseCase) {
         this.proposerRepasUseCase = Objects.requireNonNull(proposerRepasUseCase, "proposerRepasUseCase");
+        this.estimerNutritionUseCase = Objects.requireNonNull(estimerNutritionUseCase, "estimerNutritionUseCase");
     }
 
     @PostMapping("/propositions")
     RepasProposesResponse proposer(@Valid @RequestBody ProfilRequest requete) {
-        return RepasProposesResponse.depuis(proposerRepasUseCase.proposer(requete.versDomaine()));
+        return RepasProposesResponse.depuis(proposerRepasUseCase.proposer(requete.versDomaine()), estimerNutritionUseCase);
     }
 }

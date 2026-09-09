@@ -14,6 +14,7 @@ const UN_PLAN: PlanSemaineResponse = {
         niveauRequis: 'DEBUTANT',
         ingredients: [],
         etapesPreparation: [],
+        valeursNutritionnelles: { calories: 0, proteines: 0, glucides: 0, lipides: 0, fibres: 0 },
       },
       dejeuner: {
         id: 'dj-1',
@@ -23,6 +24,7 @@ const UN_PLAN: PlanSemaineResponse = {
         niveauRequis: 'DEBUTANT',
         ingredients: [],
         etapesPreparation: [],
+        valeursNutritionnelles: { calories: 0, proteines: 0, glucides: 0, lipides: 0, fibres: 0 },
       },
       diner: {
         id: 'dn-1',
@@ -32,6 +34,7 @@ const UN_PLAN: PlanSemaineResponse = {
         niveauRequis: 'DEBUTANT',
         ingredients: [],
         etapesPreparation: [],
+        valeursNutritionnelles: { calories: 0, proteines: 0, glucides: 0, lipides: 0, fibres: 0 },
       },
     },
   ],

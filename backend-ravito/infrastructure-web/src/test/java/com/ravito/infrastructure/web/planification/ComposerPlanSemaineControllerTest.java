@@ -10,6 +10,8 @@ import com.ravito.domain.courses.Quantite;
 import com.ravito.domain.courses.RayonMagasin;
 import com.ravito.domain.courses.UniteMesure;
 import com.ravito.domain.historique.HistoriserPlanUseCase;
+import com.ravito.domain.nutrition.EstimerNutritionUseCase;
+import com.ravito.domain.nutrition.ValeursNutritionnelles;
 import com.ravito.domain.planification.ComposerPlanSemaineUseCase;
 import com.ravito.domain.planification.Jour;
 import com.ravito.domain.planification.JourSemaine;
@@ -58,10 +60,15 @@ class ComposerPlanSemaineControllerTest {
     @MockBean
     private HistoriserPlanUseCase historiserPlanUseCase;
 
+    @MockBean
+    private EstimerNutritionUseCase estimerNutritionUseCase;
+
     @Test
     void renvoie_200_avec_le_plan_la_liste_de_courses_et_le_prix() throws Exception {
         when(composerPlanSemaineUseCase.composer(any(), any())).thenReturn(unPlanValide());
         when(estimerCoutUseCase.estimer(any(), any())).thenReturn(new Prix(BigDecimal.valueOf(42.50)));
+        when(estimerNutritionUseCase.estimer(any())).thenReturn(new ValeursNutritionnelles(
+                BigDecimal.valueOf(250), BigDecimal.valueOf(12), BigDecimal.valueOf(30), BigDecimal.valueOf(8), BigDecimal.valueOf(4)));
 
         mockMvc.perform(post("/api/plans-semaine")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -77,6 +84,8 @@ class ComposerPlanSemaineControllerTest {
         Prix prix = new Prix(BigDecimal.valueOf(42.50));
         when(composerPlanSemaineUseCase.composer(any(), any())).thenReturn(plan);
         when(estimerCoutUseCase.estimer(any(), any())).thenReturn(prix);
+        when(estimerNutritionUseCase.estimer(any())).thenReturn(new ValeursNutritionnelles(
+                BigDecimal.valueOf(250), BigDecimal.valueOf(12), BigDecimal.valueOf(30), BigDecimal.valueOf(8), BigDecimal.valueOf(4)));
 
         mockMvc.perform(post("/api/plans-semaine")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -101,6 +110,8 @@ class ComposerPlanSemaineControllerTest {
     void renvoie_200_avec_un_diner_genere_transmis_en_entier() throws Exception {
         when(composerPlanSemaineUseCase.composer(any(), any())).thenReturn(unPlanValide());
         when(estimerCoutUseCase.estimer(any(), any())).thenReturn(new Prix(BigDecimal.valueOf(42.50)));
+        when(estimerNutritionUseCase.estimer(any())).thenReturn(new ValeursNutritionnelles(
+                BigDecimal.valueOf(250), BigDecimal.valueOf(12), BigDecimal.valueOf(30), BigDecimal.valueOf(8), BigDecimal.valueOf(4)));
 
         mockMvc.perform(post("/api/plans-semaine")
                         .contentType(MediaType.APPLICATION_JSON)

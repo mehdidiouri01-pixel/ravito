@@ -5,6 +5,7 @@ import com.ravito.application.catalogue.PoolIngredientsCatalogue;
 import com.ravito.application.catalogue.ProposerRepasApplicationService;
 import com.ravito.application.historique.ConsulterHistoriqueApplicationService;
 import com.ravito.application.historique.HistoriserPlanApplicationService;
+import com.ravito.application.nutrition.EstimerNutritionApplicationService;
 import com.ravito.application.planification.ComposerPlanSemaineApplicationService;
 import com.ravito.application.prix.EstimerCoutApplicationService;
 import com.ravito.domain.catalogue.CatalogueRepasPort;
@@ -13,6 +14,8 @@ import com.ravito.domain.catalogue.ProposerRepasUseCase;
 import com.ravito.domain.historique.ConsulterHistoriqueUseCase;
 import com.ravito.domain.historique.HistoriquePlansPort;
 import com.ravito.domain.historique.HistoriserPlanUseCase;
+import com.ravito.domain.nutrition.EstimationNutritionPort;
+import com.ravito.domain.nutrition.EstimerNutritionUseCase;
 import com.ravito.domain.planification.ComposerPlanSemaineUseCase;
 import com.ravito.domain.prix.EstimationPrixPort;
 import com.ravito.domain.prix.EstimerCoutUseCase;
@@ -27,7 +30,8 @@ import java.util.Random;
  * <p>Le module {@code application} n'a volontairement aucune annotation
  * Spring (@Service, @Component...) — c'est ici, et seulement ici, qu'on
  * decide quelle implementation sert chaque use case. Les ports de sortie
- * ({@link CatalogueRepasPort}, {@link EstimationPrixPort}, {@link HistoriquePlansPort})
+ * ({@link CatalogueRepasPort}, {@link EstimationPrixPort}, {@link HistoriquePlansPort},
+ * {@link EstimationNutritionPort})
  * sont eux injectes automatiquement : leurs implementations JPA, dans
  * {@code infrastructure-persistence}, portent @Component et sont trouvees
  * par le component scan de {@link RavitoApplication}.
@@ -69,5 +73,10 @@ class UseCaseConfiguration {
     @Bean
     ConsulterHistoriqueUseCase consulterHistoriqueUseCase(HistoriquePlansPort historiquePlansPort) {
         return new ConsulterHistoriqueApplicationService(historiquePlansPort);
+    }
+
+    @Bean
+    EstimerNutritionUseCase estimerNutritionUseCase(EstimationNutritionPort estimationNutritionPort) {
+        return new EstimerNutritionApplicationService(estimationNutritionPort);
     }
 }
