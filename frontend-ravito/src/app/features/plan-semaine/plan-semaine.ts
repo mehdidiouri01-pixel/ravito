@@ -53,7 +53,10 @@ const PREFIXE_STOCKAGE = 'ravito.dejaChezVous.';
       <div class="rayons">
         @for (rayon of rayons(); track rayon) {
           <div class="rayon">
-            <h4>{{ libellesRayon[rayon] }}</h4>
+            <h4>
+              {{ libellesRayon[rayon] }}
+              <span class="rayon-prix">{{ totalRayon(rayon) | number: '1.2-2' }} €</span>
+            </h4>
             <ul>
               @for (ligne of plan().listeCourses.parRayon[rayon]; track ligne.ingredient + ligne.unite) {
                 <li [class.deja-chez-vous]="estDejaChezVous(ligne)">
@@ -164,6 +167,17 @@ const PREFIXE_STOCKAGE = 'ravito.dejaChezVous.';
       .rayon h4 {
         margin: 0 0 0.4rem;
         color: var(--couleur-accent);
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.5rem;
+      }
+
+      .rayon-prix {
+        font-size: 0.8rem;
+        font-weight: 400;
+        color: var(--couleur-texte-att);
+        white-space: nowrap;
       }
 
       .rayon ul {
@@ -269,17 +283,25 @@ export class PlanSemaineComponent {
   protected economieRealisee(): number {
     let economie = 0;
     for (const rayon of this.rayons()) {
-      for (const ligne of this.plan().listeCourses.parRayon[rayon] ?? []) {
-        if (this.estDejaChezVous(ligne)) {
-          economie += ligne.prixEstime;
-        }
-      }
+      economie += this.economieRayon(rayon);
     }
     return economie;
   }
 
   protected prixAjuste(): number {
     return Math.max(0, this.plan().prixEstime.montant - this.economieRealisee());
+  }
+
+  /** Sous-total d'un rayon (ex : Boucherie, Crémerie), ajusté des ingrédients déjà cochés comme possédés. */
+  protected totalRayon(rayon: RayonMagasin): number {
+    const total = (this.plan().listeCourses.parRayon[rayon] ?? []).reduce((somme, ligne) => somme + ligne.prixEstime, 0);
+    return Math.max(0, total - this.economieRayon(rayon));
+  }
+
+  private economieRayon(rayon: RayonMagasin): number {
+    return (this.plan().listeCourses.parRayon[rayon] ?? [])
+      .filter((ligne) => this.estDejaChezVous(ligne))
+      .reduce((somme, ligne) => somme + ligne.prixEstime, 0);
   }
 
   private cleLigne(ligne: LigneListeCoursesResponse): string {

@@ -134,6 +134,27 @@ describe('PlanSemaineComponent', () => {
     expect(element.querySelector('.prix')?.textContent).toContain('5.50');
   });
 
+  it('affiche le sous-total de chaque rayon', () => {
+    const element = fixture.nativeElement as HTMLElement;
+    const titres = element.querySelectorAll('.rayon h4');
+
+    expect(titres[0].textContent).toContain('0.80');
+    expect(titres[1].textContent).toContain('1.20');
+  });
+
+  it('ajuste le sous-total du rayon coche sans toucher aux autres rayons', () => {
+    const element = fixture.nativeElement as HTMLElement;
+    const caseBoulangerie = element.querySelectorAll('.rayon')[0].querySelector<HTMLInputElement>('input[type="checkbox"]');
+
+    caseBoulangerie!.checked = true;
+    caseBoulangerie?.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+
+    const titres = element.querySelectorAll('.rayon h4');
+    expect(titres[0].textContent).toContain('0.00');
+    expect(titres[1].textContent).toContain('1.20');
+  });
+
   it('memorise la case cochee dans le navigateur et la retrouve apres un rechargement', () => {
     const element = fixture.nativeElement as HTMLElement;
     const caseAcocher = element.querySelector<HTMLInputElement>('.rayon li input[type="checkbox"]');
