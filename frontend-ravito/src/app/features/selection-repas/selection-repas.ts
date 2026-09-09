@@ -18,15 +18,21 @@ const CHAMPS_REPAS: { cle: CleRepas; libelle: string; type: TypeRepas; catalogue
   { cle: 'diner', libelle: 'Dîner', type: 'DINER', catalogue: (p) => p.diners },
 ];
 
-/** Valeur d'option réservée au repas généré du moment, distincte de tout id réel du catalogue. */
-const VALEUR_GENERE = 'GENERE';
-
 /**
  * Le choix de l'utilisateur pour un seul repas d'une case : vide, un id du
  * catalogue, ou un repas généré capturé tel quel au moment du choix (pas une
  * référence vivante vers le signal `repasGenere` — si l'utilisateur génère
  * une nouvelle idée après avoir choisi celle-ci, ce choix ne doit pas
  * changer sous ses pieds).
+ *
+ * <p>L'option d'un repas généré utilise son propre id (déjà unique, généré
+ * côté serveur) comme valeur — jamais un sentinel générique du style
+ * "GENERE" : un sentinel désigne "le repas généré du moment", une notion
+ * qui change dès qu'on génère une nouvelle idée. Si la case A avait choisi
+ * l'idée précédente pendant qu'on en génère une nouvelle pour la case B,
+ * un sentinel ferait soit disparaître le choix de A (aucune option ne
+ * correspond plus), soit pire, le ferait basculer silencieusement vers la
+ * nouvelle idée sans que l'utilisateur l'ait demandé.
  */
 type ChoixRepasPartiel = { kind: 'vide' } | { kind: 'id'; id: string } | { kind: 'genere'; repas: RepasResponse };
 
@@ -93,8 +99,8 @@ const TYPES_REPAS: { type: TypeRepas; libelle: string }[] = [
                   <div class="select-avec-recette">
                     <select (change)="choisir(jour, champ.cle, $any($event.target).value)">
                       <option value="" [selected]="estVide(choix()[jour][champ.cle])">— Choisir —</option>
-                      @if (repasGenerePour(champ.type); as genere) {
-                        <option value="GENERE" [selected]="estGenereSelectionne(choix()[jour][champ.cle])">
+                      @for (genere of optionsGenerees(jour, champ.cle, champ.type); track genere.id) {
+                        <option [value]="genere.id" [selected]="estGenereSelectionne(choix()[jour][champ.cle], genere.id)">
                           ✨ {{ genere.nom }} (idée générée)
                         </option>
                       }
@@ -300,6 +306,27 @@ export class SelectionRepasComponent {
     return genere && genere.type === type ? genere : null;
   }
 
+  /**
+   * Les idees generees a proposer dans la liste deroulante d'une case
+   * precise : celle deja choisie pour cette case (pour que l'option reste
+   * presente et selectionnee meme apres qu'une idee plus recente a ete
+   * generee ailleurs), et celle du moment si elle est nouvelle — deux idees
+   * distinctes si l'utilisateur en a genere plusieurs sans toutes les
+   * choisir, dedupliquees par id sinon.
+   */
+  protected optionsGenerees(jour: JourSemaine, cle: CleRepas, type: TypeRepas): RepasResponse[] {
+    const options: RepasResponse[] = [];
+    const choixActuel = this.choix()[jour][cle];
+    if (choixActuel.kind === 'genere') {
+      options.push(choixActuel.repas);
+    }
+    const genereDuMoment = this.repasGenerePour(type);
+    if (genereDuMoment && !options.some((r) => r.id === genereDuMoment.id)) {
+      options.push(genereDuMoment);
+    }
+    return options;
+  }
+
   protected estVide(choix: ChoixRepasPartiel): boolean {
     return choix.kind === 'vide';
   }
@@ -308,22 +335,21 @@ export class SelectionRepasComponent {
     return choix.kind === 'id' && choix.id === id;
   }
 
-  protected estGenereSelectionne(choix: ChoixRepasPartiel): boolean {
-    return choix.kind === 'genere';
+  protected estGenereSelectionne(choix: ChoixRepasPartiel, id: string): boolean {
+    return choix.kind === 'genere' && choix.repas.id === id;
   }
 
   protected choisir(jour: JourSemaine, cle: CleRepas, valeur: string): void {
     let nouveauChoix: ChoixRepasPartiel;
     if (valeur === '') {
       nouveauChoix = { kind: 'vide' };
-    } else if (valeur === VALEUR_GENERE) {
-      const genere = this.repasGenere();
-      if (!genere) {
-        return; // l'option ✨ n'existe dans le DOM que si repasGenere() est defini : securite, ne devrait pas arriver.
-      }
-      nouveauChoix = { kind: 'genere', repas: genere };
     } else {
-      nouveauChoix = { kind: 'id', id: valeur };
+      // La valeur correspond-elle a une idee generee proposee pour cette case
+      // (celle du moment, ou celle deja choisie qu'on reselectionne) ? Sinon
+      // c'est forcement un id du catalogue.
+      const champ = this.champsRepas.find((c) => c.cle === cle)!;
+      const genere = this.optionsGenerees(jour, cle, champ.type).find((r) => r.id === valeur);
+      nouveauChoix = genere ? { kind: 'genere', repas: genere } : { kind: 'id', id: valeur };
     }
     this.choix.update((actuel) => ({ ...actuel, [jour]: { ...actuel[jour], [cle]: nouveauChoix } }));
   }

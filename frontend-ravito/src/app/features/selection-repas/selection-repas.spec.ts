@@ -140,16 +140,37 @@ describe('SelectionRepasComponent', () => {
     fixture.detectChanges();
 
     const optionsGenerees = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll('option[value="GENERE"]'),
+      (fixture.nativeElement as HTMLElement).querySelectorAll('option[value="gen-1"]'),
     );
     // 5 jours, uniquement sur le selecteur Diner :
     expect(optionsGenerees.length).toBe(5);
     expect(optionsGenerees[0].textContent).toContain('Dîner surprise');
 
     const [, , lundiDiner] = selects();
-    choisir(lundiDiner, 'GENERE');
+    choisir(lundiDiner, 'gen-1');
 
-    expect(lundiDiner.value).toBe('GENERE');
+    expect(lundiDiner.value).toBe('gen-1');
+  });
+
+  it('ne perd pas (ni ne fait taire) le choix d\'une idee generee quand une nouvelle idee est generee ailleurs', () => {
+    // Regression : l'option d'une idee generee utilisait auparavant une
+    // valeur sentinel generique ('GENERE'), partagee par toutes les cases —
+    // generer une nouvelle idee la faisait disparaitre (ou pire, basculer
+    // silencieusement) pour les jours qui avaient deja choisi la precedente.
+    fixture.componentRef.setInput('repasGenere', unRepas('gen-1', 'Dîner A', 'DINER'));
+    fixture.detectChanges();
+
+    const [, , lundiDiner] = selects();
+    choisir(lundiDiner, 'gen-1');
+    expect(lundiDiner.value).toBe('gen-1');
+
+    // On genere une idee differente (meme type) sans la choisir nulle part :
+    fixture.componentRef.setInput('repasGenere', unRepas('gen-2', 'Dîner B', 'DINER'));
+    fixture.detectChanges();
+
+    // Lundi reste sur l'idee A qu'il avait choisie, pas sur la B toute fraiche :
+    expect(lundiDiner.value).toBe('gen-1');
+    expect(Array.from(lundiDiner.options).find((o) => o.value === 'gen-1')?.selected).toBeTrue();
   });
 
   it('emet le repas genere en entier (pas un id) pour le jour ou il a ete choisi', () => {
@@ -163,7 +184,7 @@ describe('SelectionRepasComponent', () => {
     for (let i = 0; i < tousLesSelects.length; i += 3) {
       choisir(tousLesSelects[i], 'pd-1');
       choisir(tousLesSelects[i + 1], 'dj-1');
-      choisir(tousLesSelects[i + 2], i === 0 ? 'GENERE' : 'dn-1'); // seul lundi recoit le diner genere
+      choisir(tousLesSelects[i + 2], i === 0 ? 'gen-1' : 'dn-1'); // seul lundi recoit le diner genere
     }
 
     (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.valider')?.click();
